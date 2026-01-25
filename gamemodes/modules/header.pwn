@@ -41,6 +41,9 @@
 #define DB_NAME             "bps_server.db"
 #define DISCORD_LINK        "https://discord.gg/Czq6DWDvcB"
 
+#define LOGIN_MUSIC_URL     "https://files.catbox.moe/gqya30.mp3"
+#define LOGIN_MUSIC_MS      (203000)
+
     /*          COLORS          */
 #define COLOR_THEME_BPS     0x0DF205FF
 #define COLOR_LIGHT_GREEN   0x88FF88FF
@@ -55,8 +58,7 @@
 #define FCOLOR_WARNING       "{FFFF33}"  
 
 /*          FOWARDS          */
-forward KickDelay(playerid, const msg[]);
-forward Float:Player::LoadFloatData(playerid, const field[]);
+forward Float:Database::LoadDataFloat(const table[], const uid_field[], const uid[], const field[]);
 
 /*          VARIABLES          */
 new DB:db_handle;

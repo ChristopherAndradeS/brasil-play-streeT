@@ -8,10 +8,8 @@ hook OnPlayerLogin(playerid)
 {
     new time_left = Player[playerid][pyr::payday_tleft];
 
-    printf("time_left %d", time_left);
-
     pdy::Player[playerid][pdy::timerid] = SetTimerEx("OnPayDayReach", time_left, false, "i", playerid);
-
+    
     return 1;
 }
 
@@ -50,11 +48,15 @@ public OnPayDayReach(playerid)
     PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
 
     Player[playerid][pyr::money] += total;
-    Player::SaveFloatData(playerid, "money", total);
+
+    new name[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, name);
+
+    Database::SaveDataFloat("players", "name", name, "money", total);
 
     KillTimer(pdy::Player[playerid][pdy::timerid]);
     pdy::Player[playerid][pdy::timerid] = SetTimerEx("OnPayDayReach", 60 * 60 * 1000, false, "i", playerid);
-
+    
     Player[playerid][pyr::payday_tleft] = 60 * 60 * 1000;
 
     return 1; 

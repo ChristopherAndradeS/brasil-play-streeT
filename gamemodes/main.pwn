@@ -2,7 +2,7 @@
 #include <sscanf2>
 #include <streamer>
 #include <timestamp>
-#include <YSI\YSI_Coding\y_timers>
+#include <YSI\YSI_Data\y_iterate>
 #include <YSI\YSI_Coding\y_va>
 #include <YSI\YSI_Coding\y_inline>
 #include <YSI\YSI_Visual\y_dialog> 
@@ -50,6 +50,12 @@ public OnGameModeExit()
     	db_handle = DB:0;
     
     printf("[ DATABASE ] Conexão com o banco de dados %s encerrada com suceso!\n", DB_NAME);
+
+    foreach (new i : Player)
+    {
+        Kick(i);
+        printf("kikadlo");
+    }
 
     return 1;
 }

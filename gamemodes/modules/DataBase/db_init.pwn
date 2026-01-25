@@ -20,7 +20,7 @@ hook OnGameModeInit()
     return 1;
 }
 
-stock Database::GetRowCount(const table[], const uid_field[], const uid[], &DBResult:db_result)
+stock Database::GetRowCount(const table[], const uid_field[], const uid[], &DBResult:db_result = DBResult:0)
 {
     new query[128];
 
@@ -28,14 +28,10 @@ stock Database::GetRowCount(const table[], const uid_field[], const uid[], &DBRe
 
     db_result = DB_ExecuteQuery(db_handle, query);
 
-    new rows = DB_GetRowCount(db_result);
-    
-    DB_FreeResultSet(db_result);
-
-    return rows;
+    return  DB_GetRowCount(db_result);
 }
 
-stock Database::SaveDataInt(const table[], const field[], data, const uid_field[], const uid[])
+stock Database::SaveDataInt(const table[], const uid_field[], const uid[], const field[], data)
 {
     new query[128], DBResult:db_result;
 
@@ -53,12 +49,12 @@ stock Database::SaveDataInt(const table[], const field[], data, const uid_field[
 
     DB_FreeResultSet(db_result);
 
-    print("[ DB (ERRO) ] Falha ao salvar valor int na table `%s` > %s, pois não existia\n", table, name);
+    printf("[ DB (ERRO) ] Falha ao salvar valor int na table `%s` > %s, pois não existia\n", table, uid);
 
     return 0;
 }
 
-stock Database::SaveDataFloat(const table[], const field[], Float:data, const uid_field[], const uid[])
+stock Database::SaveDataFloat(const table[], const uid_field[], const uid[], const field[], Float:data)
 {
     new query[256], DBResult:db_result;
 
@@ -76,12 +72,12 @@ stock Database::SaveDataFloat(const table[], const field[], Float:data, const ui
 
     DB_FreeResultSet(db_result);
 
-    print("[ DB (ERRO) ] Falha ao salvar valor float na table `%s` > %s, pois não existia\n", table, name);
+    printf("[ DB (ERRO) ] Falha ao salvar valor float na table `%s` > %s, pois não existia\n", table, uid);
 
     return 0;
 }
 
-stock Database::SaveDataString(const table[], const field[], const data[], const uid_field[], const uid[])
+stock Database::SaveDataString(const table[], const uid_field[], const uid[], const field[], const data[])
 {
     new query[256], DBResult:db_result;
 
@@ -99,7 +95,7 @@ stock Database::SaveDataString(const table[], const field[], const data[], const
 
     DB_FreeResultSet(db_result);
 
-    print("[ DB (ERRO) ] Falha ao salvar string na table `%s` > %s, pois não existia\n", table, name);
+    printf("[ DB (ERRO) ] Falha ao salvar string na table `%s` > %s, pois não existia\n", table, uid);
 
     return 0;
 }
@@ -111,7 +107,7 @@ stock Database::LoadDataInt(const table[], const uid_field[], const uid[], const
     if(!Database::GetRowCount(table, uid_field, uid, db_result))
     {
         DB_FreeResultSet(db_result);
-        print("[ DB (ERRO) ] Falha ao tentar carregar um valor int na table `%s` > %s, pois não existia\n", table, name);
+        printf("[ DB (ERRO) ] Falha ao tentar carregar um valor int na table `%s` > %s, pois não existia\n", table, uid);
         return 0;
     }
 
@@ -129,7 +125,7 @@ stock Float:Database::LoadDataFloat(const table[], const uid_field[], const uid[
     if(!Database::GetRowCount(table, uid_field, uid, db_result))
     {
         DB_FreeResultSet(db_result);
-        print("[ DB (ERRO) ] Falha ao tentar carregar um valor float na table `%s` > %s, pois não existia\n", table, name);
+        printf("[ DB (ERRO) ] Falha ao tentar carregar um valor float na table `%s` > %s, pois não existia\n", table, uid);
         return 0;
     }
 
@@ -147,7 +143,7 @@ stock Database::LoadDataString(const table[], const uid_field[], const uid[], co
     if(!Database::GetRowCount(table, uid_field, uid, db_result))
     {
         DB_FreeResultSet(db_result);
-        print("[ DB (ERRO) ] Falha ao tentar carregar string na table `%s` > %s, pois não existia\n", table, name);
+        printf("[ DB (ERRO) ] Falha ao tentar carregar string na table `%s` > %s, pois não existia\n", table, uid);
         return 0;
     }
 

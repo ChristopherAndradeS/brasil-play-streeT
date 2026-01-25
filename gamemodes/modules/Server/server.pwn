@@ -51,7 +51,7 @@ stock Server::UpdatePlayerTime(hour, minute)
             new lsec  = floatround((left_time % 60000) / 1000);
 
             Baseboard::UpdateTDForPlayer(i, PTD_BASEBOARD_PAYDAY, 
-            "~b~~h~~h~PAYDAY~n~~w~%02d~b~~h~~h~:~w~%02d", lmin, lsec);
+            "~b~~h~~h~PAYDAY~w~ %02d~b~~h~~h~:~w~%02d", lmin, lsec);
         }
     }
 }

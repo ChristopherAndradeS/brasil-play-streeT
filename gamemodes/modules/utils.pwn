@@ -1,17 +1,5 @@
 #include <YSI\YSI_Coding\y_hooks>
 
-public KickDelay(playerid, const msg[], GLOBAL_TAG_TYPES:...) 
-{
-    inline const KickPlayer(pid)
-    {
-        Kick(pid);
-    }
-
-    SendClientMessage(playerid, -1 , FCOLOR_ERRO "[ KICK ] {ffffff}%s", msg, ___(2));
-    new timerid = Timer_CreateCallback(using inline KickPlayer<i>, 750, 1);
-    Timer_KillCallback(timerid);
-}
-
 stock ClearChat(playerid, cells = 15)
 {
     for(new i = 0; i < cells; i++)

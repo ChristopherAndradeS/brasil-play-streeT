@@ -1,6 +1,6 @@
 #include <YSI\YSI_Coding\y_hooks>
 
-new const gNameIssue[][32 char] =
+new const gNameIssue[][32] =
 {
     {"NO_PROBLEM"},
     {"contém caractér ilegal"},
@@ -16,19 +16,17 @@ hook OnPlayerConnect(playerid)
 
     if(!IsValidPlayerName(name, issue))
     {
-        KickDelay(playerid, "Seu nome de usuário é inválido: {ff3333}%s", gNameIssue[issue]);
+        SendClientMessage(playerid, -1 , FCOLOR_ERRO "[ KICK ] {ffffff}Seu nome de usuário é \
+        inválido: {ff3333}%s", gNameIssue[issue]);
+
+        Kick(playerid);
+
         return -1; 
     }
 
     if(Database::GetRowCount("player_punisheds", "name", name, _))
     {
         new left_time;
-
-        Database::LoadDataString("player_punisheds", "name", name, "ip", ip);
-        Database::LoadDataString("player_punisheds", "name", name, "reason", reason);
-        Database::LoadDataString("player_punisheds", "name", name, "punished_by", admin_name);
-        level = Database::LoadDataInt("player_punisheds", "name", name, "level");
-        left_time = Database::LoadDataInt("player_punisheds", "name", name, "left_tstamp");
 
         if(gettime() > left_time)
         {
@@ -70,7 +68,10 @@ hook OnPlayerConnect(playerid)
 
         Dialog_ShowCallback(playerid, using inline dialog, DIALOG_STYLE_MSGBOX, "{ffffff}BPS {ff3333}| {ffffff}Punições", str, "Fechar", "");
         
-        KickDelay(playerid, "Você está {ff3333}banido!");
+        SendClientMessage(playerid, -1 , FCOLOR_ERRO "[ KICK ] {ffffff}Você está {ff3333}banido!");
+
+        Kick(playerid);
+
         return -1;
     }
 

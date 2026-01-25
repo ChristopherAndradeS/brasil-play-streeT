@@ -13,6 +13,13 @@ enum (<<= 1)
     MASK_PLAYER_IN_ORG
 }
 
+enum _:E_PLAYER_TIMERS
+{
+    pyr::TIMER_LOGIN_KICK,
+}
+
+new pyr::Timer[MAX_PLAYERS][E_PLAYER_TIMERS];
+
 enum E_PLAYER 
 {
     pyr::pass[16],
@@ -64,6 +71,21 @@ enum E_PLAYER_VEHICLE
 
 new acs::Player[MAX_PLAYERS][MAX_ACESSORYS][E_PLAYER_ACESSORY];
 new veh::Player[MAX_PLAYERS][MAX_PLAYER_VEHICLES][E_PLAYER_VEHICLE];
+
+forward Player::Kick(playerid, timerid, const msg[], GLOBAL_TAG_TYPES:...);
+
+public Player::Kick(playerid, timerid, const msg[]) 
+{    
+    KillTimer(pyr::Timer[playerid][timerid]);
+    
+    if(IsPlayerConnected(playerid))
+    {
+        StopAudioStreamForPlayer(playerid);
+        SendClientMessage(playerid, -1 , FCOLOR_ERRO "[ KICK ] {ffffff}%s", msg);
+        Kick(playerid);
+    }
+    return 1; 
+}
 
 stock IsValidPlayer(playerid)
     return (IsPlayerConnected(playerid) && Player::IsFlagSet(playerid, MASK_PLAYER_LOGGED));
@@ -128,7 +150,7 @@ stock Player::IsValidName(name[], &issue)
 
 stock Player::SetToSpawn(playerid)
 {
-    new name[MAX_PLAYER_NAME char];
+    new name[MAX_PLAYER_NAME];
 
     GetPlayerName(playerid, name);
 
@@ -140,16 +162,16 @@ stock Player::SetToSpawn(playerid)
     }
 
     SetSpawnInfo(playerid, 0, 
-    Player::LoadIntData(playerid, "skinid"), 
-    Player::LoadFloatData(playerid, "pX"),
-    Player::LoadFloatData(playerid, "pY"),
-    Player::LoadFloatData(playerid, "pZ"),
-    Player::LoadFloatData(playerid, "pA"),  WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0);
+    Database::LoadDataInt("players", "name", name, "skinid"), 
+    Database::LoadDataFloat("players", "name", name, "pX"),
+    Database::LoadDataFloat("players", "name", name, "pY"),
+    Database::LoadDataFloat("players", "name", name, "pZ"),
+    Database::LoadDataFloat("players", "name", name, "pA"),  WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0);
     
     Player::SetFlag(playerid, MASK_PLAYER_LOGGED);
 
-    KillTimer(lgn::Player[playerid][lgn::timerid]);
-    lgn::Player[playerid][lgn::timerid] = INVALID_TIMER;
+    KillTimer(pyr::Timer[playerid][pyr::TIMER_LOGIN_KICK]);
+    pyr::Timer[playerid][pyr::TIMER_LOGIN_KICK] = INVALID_TIMER;
 
     TogglePlayerSpectating(playerid, false);
     TogglePlayerClock(playerid, true);

@@ -9,24 +9,15 @@ new gLoginIssue[][64] =
 
 hook OnPlayerConnect(playerid)
 {
-    inline const KickPlayer(pid, const pmsg[])
-    {
-        KickDelay(playerid, msg[]);
-    }
-
     TogglePlayerSpectating(playerid, true);
 
-    PlayAudioStreamForPlayer(playerid, "https://files.catbox.moe/gqya30.mp3");
+    PlayAudioStreamForPlayer(playerid, LOGIN_MUSIC_URL);
 
     ClearChat(playerid, 25);
 
     Player::ClearAllData(playerid);
-
-    lgn::Player[playerid][lgn::timerid] = SetTimerEx("KickDelay", 2 * 60000, false, "is", playerid, "Demorou muito para fazer login!");
-
-    SendClientMessage(playerid, -1 , FCOLOR_ERRO "[ KICK ] {ffffff}%s", msg, ___(2));
-    new timerid = Timer_CreateCallback(using inline KickPlayer<is>, 750, 1);
-    Timer_KillCallback(timerid);
+ 
+    pyr::Timer[playerid][pyr::TIMER_LOGIN_KICK] = SetTimerEx("PYR_Kick", LOGIN_MUSIC_MS, false, "iis", playerid,  pyr::TIMER_LOGIN_KICK, "Demorou muito para fazer login!");
 
     if(!Player::LoadAllData(playerid))
     {
@@ -65,7 +56,7 @@ hook OnPlayerSpawn(playerid)
 
 hook OnPlayerClickTextDraw(playerid, Text:clickedid)
 {
-    if(clickedid == Login::PublicTD[TD_LOGIN_SEL_PASS])
+    if(clickedid == Login::PublicTD[TD_LOGIN_SEL])
     {
         /* OnDialogResponce */
         inline dialog(spid, sdialogid, sresponse, slistitem, string:stext[])

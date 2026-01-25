@@ -5,21 +5,21 @@ hook OnPlayerDisconnect(playerid, reason)
     if(!Player::IsFlagSet(playerid, MASK_PLAYER_LOGGED))
         return 1;
         
-    new Float:pX, Float:pY, Float:pZ, Float:pA;
+    new Float:pX, Float:pY, Float:pZ, Float:pA, name[MAX_PLAYER_NAME];
+
+    GetPlayerName(playerid, name);
     GetPlayerPos(playerid, pX, pY, pZ);
     GetPlayerFacingAngle(playerid, pA);
-
-    Player::SaveFloatData(playerid, "pX", pX);
-    Player::SaveFloatData(playerid, "pY", pY);
-    Player::SaveFloatData(playerid, "pZ", pZ);
-    Player::SaveFloatData(playerid, "pA", pA);
+    Database::SaveDataFloat("players", "name", name, "pX", pX);
+    Database::SaveDataFloat("players", "name", name, "pY", pY);
+    Database::SaveDataFloat("players", "name", name, "pZ", pZ);
+    Database::SaveDataFloat("players", "name", name, "pA", pA);
 
     if(IsValidTimer(pdy::Player[playerid][pdy::timerid]))
     {
         new left_time = GetTimerRemaining(pdy::Player[playerid][pdy::timerid]);
-        printf("tempo que falta: %d", left_time);
-
-        Player::SaveIntData(playerid, "payday_tleft", left_time);
+    
+        Database::SaveDataInt("players", "name", name, "payday_tleft", left_time);
     
         KillTimer(pdy::Player[playerid][pdy::timerid]);
     }

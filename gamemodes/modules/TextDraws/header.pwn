@@ -2,28 +2,30 @@
 
 #define Baseboard::    bboard_
 
-new Text:Login::PublicTD[14];
+new Text:Login::PublicTD[7];
 new PlayerText:Login::PlayerTD[MAX_PLAYERS][3];
 
-new Text:Baseboard::PublicTD[6];
+new Text:Baseboard::PublicTD[13];
 new PlayerText:Baseboard::PlayerTD[MAX_PLAYERS][5];
 
+/*  LOGIN  */
 enum _:E_TD_LOGIN
 {
-    Text:TD_LOGIN_SEL_PASS     = 11,
-    Text:TD_LOGIN_CONFIRM      = 12,
+    Text:TD_LOGIN_SEL = 5,
 }
 
 enum _:E_PTD_LOGIN
 {
     PlayerText:PTD_LOGIN_TITLE,
-    PlayerText:PTD_LOGIN_PASS,
     PlayerText:PTD_LOGIN_NAME,
+    PlayerText:PTD_LOGIN_PASS,
 }
+
+/*  BaseBoard  */
 
 enum _:E_TD_BASEBOARD
 {
-    Text:TD_BASEBOARD_CLOCK     = 2,
+    Text:TD_BASEBOARD_CLOCK     = 4,
 }
 
 enum _:E_PTD_BASEBOARD

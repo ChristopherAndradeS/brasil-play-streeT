@@ -6,7 +6,7 @@ stock Player::InsertData(playerid, GLOBAL_TAG_TYPES:...)
 
     GetPlayerName(playerid, name);
 
-    if(!Database::GetRowCountByName(name, db_result))
+    if(!Database::GetRowCount("players", "name", name, db_result))
     {
         DB_FreeResultSet(db_result);
 
@@ -32,15 +32,15 @@ stock Player::LoadAllData(playerid)
 
     GetPlayerName(playerid, name);
 
-    if(!Database::GetRowCountByName(name, db_result))
+    if(!Database::GetRowCount("players", "name", name, db_result))
     {
         DB_FreeResultSet(db_result);
-        print("[ DB (ERRO) ] Falha ao tentar carregar dados na table `players` > %s, pois não existia\n", name);
+        //print("[ DB (ERRO) ] Falha ao tentar carregar dados na table `players` > %s, pois não existia\n", name);
         return 0;
     }
 
     DB_GetFieldStringByName(db_result, "pass", Player[playerid][pyr::pass]); 
-    Player[playerid][pyr::payday_tleft]    = DB_GetFieldIntByName(db_result, "payday_tleft"); 
+    Player[playerid][pyr::payday_tleft]     = DB_GetFieldIntByName(db_result, "payday_tleft"); 
     Player[playerid][pyr::bitcoin]          = DB_GetFieldIntByName(db_result, "bitcoin"); 
     Player[playerid][pyr::money]            = DB_GetFieldFloatByName(db_result, "money");  
     Player[playerid][pyr::score]            = DB_GetFieldIntByName(db_result, "score"); 
