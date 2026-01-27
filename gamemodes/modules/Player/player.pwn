@@ -52,9 +52,15 @@ enum E_PLAYER_PAYDAY
 
 new pdy::Player[MAX_PLAYERS][E_PLAYER_PAYDAY];
 
+enum (<<= 1)
+{    
+    MASK_EDITING_ACS = 1, 
+
+}
+
 enum E_PLAYER_ACESSORY
 {
-    acs:vehicleid,
+    acs::flags,
     acs::modelid,
     acs::boneid,
     Float:acs::pX, Float:acs::pY, Float:acs::pZ,
@@ -90,17 +96,17 @@ public Player::Kick(playerid, timerid, const msg[])
 stock IsValidPlayer(playerid)
     return (IsPlayerConnected(playerid) && Player::IsFlagSet(playerid, MASK_PLAYER_LOGGED));
 
-stock Player::SetFlag(playerid, tag_binary) 
-    Player[playerid][pyr::flags] |= tag_binary;
+stock Player::SetFlag(playerid, &flag, tag_binary) 
+    flag |= tag_binary;
 
-stock Player::ResetFlag(playerid, tag_binary) 
-    Player[playerid][pyr::flags] &= ~tag_binary;
+stock Player::ResetFlag(playerid, &flag, tag_binary) 
+    flag &= ~tag_binary;
 
-stock Player::IsFlagSet(playerid, tag_binary) 
-    return (Player[playerid][pyr::flags] & tag_binary);
+stock Player::IsFlagSet(playerid, flag, tag_binary) 
+    return (flag & tag_binary);
 
-stock Player::ClearAllFlags(playerid) 
-    return (Player[playerid][pyr::flags] = 0x00000000);
+stock Player::ClearAllFlags(playerid, &flag) 
+    return (flag = 0x00000000);
 
 stock Player::ClearAllData(playerid)
 {
