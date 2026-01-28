@@ -1,0 +1,5 @@
+log.txt
+npcmodes/
+scriptfiles/bps_server.db
+.vscode/
+*.amx
