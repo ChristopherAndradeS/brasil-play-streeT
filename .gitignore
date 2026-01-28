@@ -1,5 +1,13 @@
+# LOGS
+*.log
+logs/
 log.txt
-npcmodes/
-scriptfiles/bps_server.db
+
+# AMX
+.amx
 .vscode/
-*.amx
+
+# PASTAS
+scriptfiles/bps_Server.db
+npcmodes/
+models/
