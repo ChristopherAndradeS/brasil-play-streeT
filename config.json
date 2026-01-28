@@ -111,7 +111,7 @@
     "rcon": {
         "allow_teleport": true,
         "enable": true,
-        "password": "andrade"
+        "password": "street2026"
     },
     "sleep": 5.0,
     "use_dyn_ticks": true,
