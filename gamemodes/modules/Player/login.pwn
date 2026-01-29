@@ -1,12 +1,5 @@
 #include <YSI\YSI_Coding\y_hooks>
 
-new gLoginIssue[][64] = 
-{
-    {"sem problemas"},
-    {"pequena demais"},
-    {"grande demais"}
-};
-
 hook OnPlayerConnect(playerid)
 {
     TogglePlayerSpectating(playerid, true);
@@ -17,19 +10,19 @@ hook OnPlayerConnect(playerid)
 
     Player::ClearAllData(playerid);
  
-    pyr::Timer[playerid][pyr::TIMER_LOGIN_KICK] = SetTimerEx("PYR_Kick", LOGIN_MUSIC_MS, false, "iis", playerid,  pyr::TIMER_LOGIN_KICK, "Demorou muito para fazer login!");
+    pyr::Timer[playerid][pyr::TIMER_LOGIN_KICK] = SetTimerEx("PYR_Kick", LOGIN_MUSIC_MS, false, "iis", playerid, pyr::TIMER_LOGIN_KICK, "Demorou muito para fazer login!");
 
     if(!Player::LoadAllData(playerid))
     {
         SendClientMessage(playerid, COLOR_THEME_BPS, "[ BPS ] {ffffff}Parece que você é {33ff33}novo aqui!{ffffff}, faça o registro para poder jogar!");
-        Player::SetFlag(playerid, MASK_PLAYER_IN_REGISTER);
+        Player::SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_IN_REGISTER);
         Login::ShowTDForPlayer(playerid, false);
     }
 
     else
     {
         SendClientMessage(playerid, COLOR_THEME_BPS, "[ BPS ] {ffffff}Seja bem-vindo novamente, faça o {33ff33}login {ffffff}para poder jogar!");
-        Player::SetFlag(playerid, MASK_PLAYER_IN_LOGIN);
+        Player::SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_IN_LOGIN);
         Login::ShowTDForPlayer(playerid, true);
     }
 
@@ -38,7 +31,7 @@ hook OnPlayerConnect(playerid)
 
 hook OnPlayerSpawn(playerid)
 {
-    if(!Player::IsFlagSet(playerid, MASK_PLAYER_LOGGED))
+    if(!Player::IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED))
         return 1;
 
     Spawn::RemoveGTAObjects(playerid);
@@ -64,7 +57,7 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
             #pragma unused slistitem, sdialogid, sresponse
 
             /* QUANDO REGISTRO FOR RESPONDIDO */
-            if(Player::IsFlagSet(spid, MASK_PLAYER_IN_REGISTER))
+            if(Player::IsFlagSet(Player[spid][pyr::flags], MASK_PLAYER_IN_REGISTER))
             {
                 if(!sresponse)
                 {
@@ -86,7 +79,7 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
                 format(Player[playerid][pyr::pass], 16, stext);
 
                 Login::RegisterPlayer(playerid);
-                Player::ResetFlag(playerid, MASK_PLAYER_IN_REGISTER);
+                Player::ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_IN_REGISTER);
 
                 Player::SetToSpawn(playerid);
 
@@ -96,7 +89,7 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
             }
 
             /* QUANDO LOGIN FOR RESPONDIDO */
-            else if(Player::IsFlagSet(spid, MASK_PLAYER_IN_LOGIN))
+            else if(Player::IsFlagSet(Player[spid][pyr::flags], MASK_PLAYER_IN_LOGIN))
             {
                 if(!sresponse)
                 {
@@ -112,7 +105,7 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
                     return 1;
                 }
 
-                Player::ResetFlag(playerid, MASK_PLAYER_IN_LOGIN);
+                Player::ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_IN_LOGIN);
             
                 Player::SetToSpawn(playerid);
                 Login::HideTDForPlayer(playerid);
@@ -126,12 +119,12 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
 
         new str[512];
 
-        if(Player::IsFlagSet(playerid, MASK_PLAYER_IN_REGISTER))
+        if(Player::IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_REGISTER))
             format(str, 512, "{33ff33}>> {ffffff}Digite uma {33ff33}senha:\n\n\
             {ffff33}[ i ] {ffffff}Sua senha deve conter de {ffff33}5 {ffffff}a {ffff33}16 {ffffff}caracteres \
             Estes sendo: {ffff33}números{ffffff}, {ffff33}letras {ffffff} ou {ffff33}símbolos\n\n");
                 
-        else if(Player::IsFlagSet(playerid, MASK_PLAYER_IN_LOGIN))
+        else if(Player::IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_LOGIN))
             format(str, 512, "{33ff33}>> {ffffff}Digite sua {33ff33}senha:\n\n");
         
         Dialog_ShowCallback(playerid, using inline dialog, DIALOG_STYLE_PASSWORD, "{ffffff}BPS {33ff33}| {ffffff}Log-in", str, "Inserir", "Fechar");

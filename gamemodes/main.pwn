@@ -9,15 +9,17 @@
 #include <YSI\YSI_Visual\y_commands>
 #include <YSI\YSI_Coding\y_hooks>
 
-/*                  HEADERS                  */
+/*                  MASTER HEADERS                  */
 #include "../gamemodes/modules/header.pwn"
 #include "../gamemodes/modules/utils.pwn"
+#include "../gamemodes/modules/Player/punish.pwn"
+/*                  HEADERS                  */
 #include "../gamemodes/modules/TextDraws/header.pwn"
-#include "../gamemodes/modules/Player/player.pwn"
-#include "../gamemodes/modules/Server/server.pwn" 
-#include "../gamemodes/modules/DataBase/db_init.pwn"
-// /*                  MAPAS                  */
+#include "../gamemodes/modules/Player/header.pwn"
+#include "../gamemodes/modules/Server/header.pwn" 
+#include "../gamemodes/modules/DataBase/header.pwn"
 #include "../gamemodes/modules/Maps/header.pwn"
+/*                  MAPAS                  */
 #include "../gamemodes/modules/Maps/banks.pwn"
 #include "../gamemodes/modules/Maps/dealership.pwn"
 #include "../gamemodes/modules/Maps/garages.pwn"
@@ -28,13 +30,18 @@
 #include "../gamemodes/modules/Maps/store.pwn"
 /*                  TEXTDRAWS                  */
 #include "../gamemodes/modules/TextDraws/gui/login.pwn"
+#include "../gamemodes/modules/TextDraws/gui/acs_editor.pwn"
 #include "../gamemodes/modules/TextDraws/hud/baseboard.pwn"
-/*                  DATABASE                  */
-#include "../gamemodes/modules/DataBase/db_player.pwn"
+/*                  DATABASE - ENTITYS                  */
+#include "../gamemodes/modules/DataBase/entitys/db_player.pwn"
+#include "../gamemodes/modules/DataBase/entitys/db_punish.pwn"
+#include "../gamemodes/modules/DataBase/entitys/db_acessory.pwn"
+/*                  DATABASE - STOCKS                  */
+#include "../gamemodes/modules/DataBase/stocks/stk_acessory.pwn"
 /*                  PLAYER                  */
-#include "../gamemodes/modules/Player/punish.pwn"
 #include "../gamemodes/modules/Player/login.pwn"
 #include "../gamemodes/modules/Player/payday.pwn"
+//#include "../gamemodes/modules/Player/acessory.pwn"
 #include "../gamemodes/modules/Player/logout.pwn"
 
 main(){}
@@ -46,16 +53,15 @@ public OnGameModeInit()
 
 public OnGameModeExit()
 {
-	if(DB_Close(db_handle))
-    	db_handle = DB:0;
-    
-    printf("[ DATABASE ] Conexão com o banco de dados %s encerrada com suceso!\n", DB_NAME);
+	if(DB_Close(db_entity))
+    	db_entity = DB:0;
 
-    foreach (new i : Player)
-    {
-        Kick(i);
-        printf("kikadlo");
-    }
+    printf("[ DATABASE ] Conexão com o banco de dados de ENTIDADES encerrada com suceso!\n");
+
+    if(DB_Close(db_stock))
+    	db_stock = DB:0;
+
+    printf("[ DATABASE ] Conexão com o banco de dados de ESTOQUES encerrada com suceso!\n");
 
     return 1;
 }

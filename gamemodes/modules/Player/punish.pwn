@@ -1,12 +1,5 @@
 #include <YSI\YSI_Coding\y_hooks>
 
-new const gNameIssue[][32] =
-{
-    {"NO_PROBLEM"},
-    {"contém caractér ilegal"},
-    {"tem tamanho inválido"}
-};
-
 hook OnPlayerConnect(playerid)
 {
     ClearChat(playerid, 20);
@@ -24,22 +17,23 @@ hook OnPlayerConnect(playerid)
         return -1; 
     }
 
-    if(Database::GetRowCount("player_punisheds", "name", name, _))
+    if(DB::GetRowCount(db_entity, "player_punisheds", "name", name, _))
     {
         new left_time;
 
         if(gettime() > left_time)
         {
-            SendClientMessage(playerid, COLOR_THEME_BPS, "[ BPS ] {ffffff}Você foi {33ff33}perdoado {ffffff}do seu banimento. Esperamos {33ff33}bom {ffffff}comportamento de agora em diante!");
+            SendClientMessage(playerid, COLOR_THEME_BPS, "[ BPS ] {ffffff}Você foi {33ff33}perdoado \
+            {ffffff}do seu banimento. Esperamos {33ff33}bom {ffffff}comportamento de agora em diante!");
             return 1;
         }
 
         new ip[16], reason[64], admin_name[MAX_PLAYER_NAME], level;
 
-        Database::LoadDataString("player_punisheds", "name", name, "ip", ip);
-        Database::LoadDataString("player_punisheds", "name", name, "reason", reason);
-        Database::LoadDataString("player_punisheds", "name", name, "punished_by", admin_name);
-        level = Database::LoadDataInt("player_punisheds", "name", name, "level");
+        DB::LoadDataString(db_entity, "player_punisheds", "name", name, "ip", ip);
+        DB::LoadDataString(db_entity, "player_punisheds", "name", name, "reason", reason);
+        DB::LoadDataString(db_entity, "player_punisheds", "name", name, "punished_by", admin_name);
+        level = DB::LoadDataInt(db_entity, "player_punisheds", "name", name, "level");
 
         new str[512], time_str[64];
         

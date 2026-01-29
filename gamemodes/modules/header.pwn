@@ -3,7 +3,7 @@
 /*          NAMESPACES          */
 
 #define Player::            PYR_
-#define pyr::               pyr_
+#define pyr::               pyr_ 
 #define Punish::            PNH_
 #define pnh::               pnh_
 #define Acessory::          ACS_
@@ -34,34 +34,33 @@
 #define Spawn::             SPW_  
 #define Square::            SQR_
 #define Store::             SRR_
-#define Database::          DTB_
+#define DB::                DTB_
 #define Baseboard::         bboard_
 
 /*          DEFINES          */
-#define DB_NAME             "bps_server.db"
 #define DISCORD_LINK        "https://discord.gg/Czq6DWDvcB"
-
 #define LOGIN_MUSIC_URL     "https://files.catbox.moe/gqya30.mp3"
 #define LOGIN_MUSIC_MS      (203000)
 
     /*          COLORS          */
-#define COLOR_THEME_BPS     0x0DF205FF
-#define COLOR_LIGHT_GREEN   0x88FF88FF
-#define COLOR_SUCESS        0x33FF33FF
-#define COLOR_ERRO          0xFF3333FF
-#define COLOR_WARNING       0xFFFF33FF  
+#define COLOR_THEME_BPS         0x0DF205FF
+#define COLOR_LIGHT_GREEN       0x88FF88FF
+#define COLOR_SUCESS            0x33FF33FF
+#define COLOR_ERRO              0xFF3333FF
+#define COLOR_WARNING           0xFFFF33FF  
 
-#define FCOLOR_THEME_BPS     "{0df205}"
-#define FCOLOR_LIGHT_GREEN   "{88FF88}"
-#define FCOLOR_SUCESS        "{33FF33}"
-#define FCOLOR_ERRO          "{FF3333}"
-#define FCOLOR_WARNING       "{FFFF33}"  
+#define FCOLOR_THEME_BPS        "{0df205}"
+#define FCOLOR_LIGHT_GREEN      "{88FF88}"
+#define FCOLOR_SUCESS           "{33FF33}"
+#define FCOLOR_ERRO             "{FF3333}"
+#define FCOLOR_WARNING          "{FFFF33}"  
 
 /*          FOWARDS          */
-forward Float:Database::LoadDataFloat(const table[], const uid_field[], const uid[], const field[]);
+forward Float:DB::LoadDataFloat(DB:db, const table[], const uid_field[], const uid[], const field[]);
 
 /*          VARIABLES          */
-new DB:db_handle;
+new DB:db_entity;
+new DB:db_stock;
 
 new const gMonths[][16] = 
 {   
@@ -70,3 +69,40 @@ new const gMonths[][16] =
     "Julho", "Agosto", "Setembro", 
     "Outubro", "Novembro", "Dezembro" 
 };
+
+new const gNameIssue[][32] =
+{
+    {"NO_PROBLEM"},
+    {"contÃ©m caractÃ©r ilegal"},
+    {"tem tamanho invÃ¡lido"}
+};
+
+new gLoginIssue[][64] = 
+{
+    {"sem problemas"},
+    {"pequena demais"},
+    {"grande demais"}
+};
+
+// new gBoneName[][16] = 
+// {
+//     {"INVALID_BONE"},
+//     {"Coluna"},
+//     {"Cabeça"},
+//     {"Braço esquerdo"},
+//     {"Braço direito"},
+//     {"Mão esquerda"},
+//     {"Mão direita"},
+//     {"Coxa esquerda"},
+//     {"Coxa direita"},
+//     {"Pé esquerdo"},
+//     {"Pé direito"},
+//     {"Panturrilha direita"},
+//     {"Panturrilha esquerda"},
+//     {"Antebraço esquerdo"},
+//     {"Antebraço direito"},
+//     {"Ombro esquerdo"},
+//     {"Ombro direito"},
+//     {"Pescoço"},
+//     {"Maxilar"}
+// };

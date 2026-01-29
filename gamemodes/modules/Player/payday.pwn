@@ -6,9 +6,9 @@ forward OnPayDayReach(playerid);
 
 hook OnPlayerLogin(playerid)
 {
-    new time_left = Player[playerid][pyr::payday_tleft];
+    new time_left = pdy::Player[playerid][pdy::time_left];
 
-    pdy::Player[playerid][pdy::timerid] = SetTimerEx("OnPayDayReach", time_left, false, "i", playerid);
+    pyr::Timer[playerid][pyr::TIMER_PAYDAY] = SetTimerEx("OnPayDayReach", time_left, false, "i", playerid);
     
     return 1;
 }
@@ -17,9 +17,9 @@ stock Payday::GetPlayerBonus(playerid, &Float:bonus)
 {
     bonus = 0;
 
-    if(Player::IsFlagSet(playerid, MASK_PLAYER_IN_ORG))
+    if(Player::IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_ORG))
         bonus += 1200.0;
-    if(Player::IsFlagSet(playerid, MASK_PLAYER_IS_ADM))
+    if(Player::IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IS_ADM))
         bonus += 500.0;
 
     return 1;
@@ -28,11 +28,8 @@ stock Payday::GetPlayerBonus(playerid, &Float:bonus)
 public OnPayDayReach(playerid)
 {
     if(!IsValidPlayer(playerid))
-    {
-        printf("INVALIDO");
         return 1;
-    }
-
+    
     new Float:payment = PAYMENT_BASE, Float:bonus, Float:total;
 
     Payday::GetPlayerBonus(playerid, bonus);
@@ -52,12 +49,15 @@ public OnPayDayReach(playerid)
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 
-    Database::SaveDataFloat("players", "name", name, "money", total);
+    DB::SaveDataFloat(db_entity, "players", "name", name, "money", total);
 
-    KillTimer(pdy::Player[playerid][pdy::timerid]);
-    pdy::Player[playerid][pdy::timerid] = SetTimerEx("OnPayDayReach", 60 * 60 * 1000, false, "i", playerid);
+    new timerid = pyr::Timer[playerid][pyr::TIMER_PAYDAY];
     
-    Player[playerid][pyr::payday_tleft] = 60 * 60 * 1000;
+    if(GetTimerInterval(timerid) == 3600000 && IsRepeatingTimer(timerid))
+        return 1;
 
+    KillTimer(timerid);
+    pyr::Timer[playerid][pyr::TIMER_PAYDAY] = SetTimerEx("OnPayDayReach", 3600000, true, "i", playerid);
+    
     return 1; 
 }

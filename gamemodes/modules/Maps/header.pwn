@@ -34,9 +34,9 @@ hook OnGameModeInit()
     Officine::LoadMap(MAP_MEC_LS);
     print("[ MAPA ] Mapa da Mecânica LS carregado com sucesso\n");
     Officine::LoadMap(MAP_MEC_AIRPORT);
-    print("[ MAPA ] Mapa dA Mecânia Aeroporto carregado com sucesso\n");
+    print("[ MAPA ] Mapa da Mecânia Aeroporto carregado com sucesso\n");
     Officine::LoadMap(MAP_MEC_DROP);
-    print("[ MAPA ] Mapa dA Mecânia Drop carregado com sucesso\n");
+    print("[ MAPA ] Mapa da Mecânia Drop carregado com sucesso\n");
 
     return 1;
 }
