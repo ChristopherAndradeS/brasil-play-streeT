@@ -6,8 +6,8 @@ new PlayerText:Login::PlayerTD[MAX_PLAYERS][3];
 new Text:Baseboard::PublicTD[13];
 new PlayerText:Baseboard::PlayerTD[MAX_PLAYERS][5];
 
-new Text:Acessory::PublicTD[27];
-new PlayerText:Acessory::PlayerTD[MAX_PLAYERS][8];
+new Text:Acessory::PublicTD[21];
+new PlayerText:Acessory::PlayerTD[MAX_PLAYERS][14];
 
 /*  LOGIN  */
 enum _:E_TD_LOGIN
@@ -66,6 +66,12 @@ enum _:E_PTD_ACESSORY
     PlayerText:PTD_ACS_OFFSET_POS,
     PlayerText:PTD_ACS_OFFSET_ANG,
     PlayerText:PTD_ACS_OFFSET_SCL,
+    PlayerText:PTD_ACS_POS_AXIS_BTN,
+    PlayerText:PTD_ACS_ANG_AXIS_BTN,
+    PlayerText:PTD_ACS_SCL_AXIS_BTN,
+    PlayerText:PTD_ACS_POS_AXIS,
+    PlayerText:PTD_ACS_ANG_AXIS,
+    PlayerText:PTD_ACS_SCL_AXIS,
 }
 
 hook OnGameModeInit()
@@ -78,14 +84,6 @@ hook OnGameModeInit()
 
     Acessory::CreatePublicTD();
     printf("[ TEXTDRAW ] TextDraw: Editor de acessórios carregada\n");
-    return 1;
-}
-
-hook OnPlayerConnect(playerid)
-{
-    Login::CreatePlayerTD(playerid);
-    
-    Baseboard::CreatePlayerTD(playerid);
     return 1;
 }
 

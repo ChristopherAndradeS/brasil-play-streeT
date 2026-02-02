@@ -122,8 +122,9 @@ public OnPlayerUpdate(playerid)
 			}
 		}
 		noclipdata[playerid][udold] = ud; noclipdata[playerid][lrold] = lr; // Store current keys pressed for comparison next update
-		return 0;
+		return 1;
 	}
+	
 	return 1;
 }
 
@@ -180,6 +181,12 @@ public MovePlayerCamFly(playerid, Float:X, Float:Y, Float:Z)
 {
 	SetPlayerObjectPos(playerid, noclipdata[playerid][flyobject], X, Y, Z);
 	return 1;
+}
+
+forward GetPlayerCamFly(playerid);
+public GetPlayerCamFly(playerid)
+{
+	return noclipdata[playerid][flyobject];
 }
 
 //--------------------------------------------------

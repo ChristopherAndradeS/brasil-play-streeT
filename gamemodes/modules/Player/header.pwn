@@ -1,6 +1,7 @@
 #include <YSI\YSI_Coding\y_hooks>
 
 #define MAX_ACESSORYS           (3)
+#define MAX_STOCK_ACESSORYS     (8)
 #define MAX_PLAYER_VEHICLES     (5)
 
 /*                  PLAYER                  */
@@ -57,13 +58,22 @@ enum E_PLAYER_PAYDAY
 new pdy::Player[MAX_PLAYERS][E_PLAYER_PAYDAY];
 
 /*                  PLAYER ACESSORYS                 */
+
+enum _:AXIS_TYPE
+{
+    AXIS_TYPE_NONE,
+    AXIS_TYPE_X,
+    AXIS_TYPE_Y,
+    AXIS_TYPE_Z,
+}
+
 enum E_PLAYER_ACESSORY
 {
     acs::flags,
     acs::slotid,
-    Float:acs::pOffset,
-    Float:acs::aOfsset,
-    Float:acs::sOffset,
+    acs::camid,
+    Float:acs::pOffset, Float:acs::aOffset, Float:acs::sOffset,
+    acs::pAxis, acs::aAxis, acs::sAxis,
     acs::modelid,
     acs::boneid,
     Float:acs::pX, Float:acs::pY, Float:acs::pZ,
@@ -78,22 +88,13 @@ enum (<<= 1)
 
 new acs::Player[MAX_PLAYERS][E_PLAYER_ACESSORY];
 
-/*                  PLAYER VEHICLES                 */
-
-// enum E_PLAYER_VEHICLE
-// {
-//     veh::modelid,
-//     Float:veh::pX, Float:veh::pY, Float:veh::pZ, Float:veh::pA, 
-//     veh::color1, veh::color2
-// }
-//new veh::Player[MAX_PLAYERS][MAX_PLAYER_VEHICLES][E_PLAYER_VEHICLE];
-
 /*                  PLAYER FORWARDS                 */
 forward Player::Kick(playerid, timerid, const msg[], GLOBAL_TAG_TYPES:...);
 
+/*                  PLAYER PUBLICS                 */
 public Player::Kick(playerid, timerid, const msg[]) 
 {    
-    KillTimer(pyr::Timer[playerid][timerid]);
+    Player::KillTimer(playerid, timerid);
     
     if(IsPlayerConnected(playerid))
     {
@@ -101,23 +102,13 @@ public Player::Kick(playerid, timerid, const msg[])
         SendClientMessage(playerid, -1 , FCOLOR_ERRO "[ KICK ] {ffffff}%s", msg);
         Kick(playerid);
     }
+    
     return 1; 
 }
 
+/*                  PLAYER FUNCS                 */
 stock IsValidPlayer(playerid)
-    return (IsPlayerConnected(playerid) && Player::IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED));
-
-stock Player::SetFlag(&flag, tag_binary) 
-    flag |= tag_binary;
-
-stock Player::ResetFlag(&flag, tag_binary) 
-    flag &= ~tag_binary;
-
-stock Player::IsFlagSet(flag, tag_binary) 
-    return (flag & tag_binary);
-
-stock Player::ClearAllFlags(&flag) 
-    return (flag = 0x00000000);
+    return (IsPlayerConnected(playerid) && IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED));
 
 stock Player::ClearAllData(playerid)
 {
@@ -148,35 +139,89 @@ stock pdy::ClearData(playerid)
     pdy::Player[playerid][pdy::time_left]   = 0;
 }
 
-stock Acessory::ClearData(playerid)
-{
-    acs::Player[playerid][acs::modelid] = INVALID_OBJECT_ID;
-    acs::Player[playerid][acs::boneid] = 0;
-    acs::Player[playerid][acs::pX] = 0.0;
-    acs::Player[playerid][acs::pY] = 0.0;
-    acs::Player[playerid][acs::pZ] = 0.0;
-    acs::Player[playerid][acs::rX] = 0.0;
-    acs::Player[playerid][acs::rY] = 0.0;
-    acs::Player[playerid][acs::rZ] = 0.0;
-    acs::Player[playerid][acs::sX] = 0.0;
-    acs::Player[playerid][acs::sY] = 0.0;
-    acs::Player[playerid][acs::sZ] = 0.0;
-}
-
 stock acs::ClearData(playerid)
 {
     acs::Player[playerid][acs::flags]   = 0x00000000;
     acs::Player[playerid][acs::modelid] = INVALID_OBJECT_ID;
     acs::Player[playerid][acs::boneid]  = 0;
-    acs::Player[playerid][acs::pX] = 0.0;
-    acs::Player[playerid][acs::pY] = 0.0;
-    acs::Player[playerid][acs::pZ] = 0.0;
-    acs::Player[playerid][acs::rX] = 0.0;
-    acs::Player[playerid][acs::rY] = 0.0;
-    acs::Player[playerid][acs::rZ] = 0.0;
-    acs::Player[playerid][acs::sX] = 0.0;
-    acs::Player[playerid][acs::sY] = 0.0;
-    acs::Player[playerid][acs::sZ] = 0.0;
+    acs::Player[playerid][acs::pOffset] = 0.0;
+    acs::Player[playerid][acs::aOffset] = 0.0;
+    acs::Player[playerid][acs::sOffset] = 0.0;
+    acs::Player[playerid][acs::pAxis]   = AXIS_TYPE_NONE;
+    acs::Player[playerid][acs::aAxis]   = AXIS_TYPE_NONE;
+    acs::Player[playerid][acs::sAxis]   = AXIS_TYPE_NONE;
+    acs::Player[playerid][acs::pX]      = 0.0;
+    acs::Player[playerid][acs::pY]      = 0.0;
+    acs::Player[playerid][acs::pZ]      = 0.0;
+    acs::Player[playerid][acs::rX]      = 0.0;
+    acs::Player[playerid][acs::rY]      = 0.0;
+    acs::Player[playerid][acs::rZ]      = 0.0;
+    acs::Player[playerid][acs::sX]      = 0.0;
+    acs::Player[playerid][acs::sY]      = 0.0;
+    acs::Player[playerid][acs::sZ]      = 0.0;
+}
+
+stock Player::LoadData(playerid)
+{
+    new name[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, name);
+    
+    DB::GetDataInt(db_entity, "players", "bitcoin", Player[playerid][pyr::bitcoin], "name = '%s'", name);
+    DB::GetDataFloat(db_entity, "players", "money", Player[playerid][pyr::money], "name = '%s'", name);
+    DB::GetDataInt(db_entity, "players", "score", Player[playerid][pyr::score], "name = '%s'", name);
+    DB::GetDataInt(db_entity, "players", "orgid", Player[playerid][pyr::orgid], "name = '%s'", name);
+    DB::GetDataInt(db_entity, "players", "payday_tleft", pdy::Player[playerid][pdy::time_left], "name = '%s'", name);
+
+    return 1;
+}
+
+stock Player::CreateTimer(playerid, timerid, const callback[] = "", time, bool:repeate, const specifiers[] = "", OPEN_MP_TAGS:...)
+{
+    pyr::Timer[playerid][timerid] = SetTimerEx(callback, time, repeate, specifiers, ___(6));
+    printf("[ TIMER Player ] Timer #%d (%s [PID : %d]) %d foi criado\n", timerid, callback, playerid, time);
+}
+
+stock Player::KillTimer(playerid, timerid)
+{
+    KillTimer(pyr::Timer[playerid][timerid]);
+    pyr::Timer[playerid][timerid] = INVALID_TIMER;
+    printf("[ TIMER Player ] Timer #%d ([PID : %d]) foi morto\n", timerid, playerid);
+}
+
+stock Player::RemoveMoney(playerid, Float:price, bool:takeout = true)
+{
+    if(floatcmp(Player[playerid][pyr::money], price))
+    {
+        Player[playerid][pyr::money] = takeout ? Player[playerid][pyr::money] - price : Player[playerid][pyr::money];
+        
+        new name[MAX_PLAYER_NAME];
+        GetPlayerName(playerid, name);
+
+        DB::SetDataFloat(db_entity, "players", "money", Player[playerid][pyr::money], "name = '%s'", name);
+
+        Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_MONEY, "~g~~h~~h~R$: %2.f", Player[playerid][pyr::money]);
+
+        return 1;
+    }
+
+    return 0;
+}
+
+stock Player::GiveMoney(playerid, Float:price)
+{
+    new name[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, name);
+    
+    Player[playerid][pyr::money] += price;
+    
+    DB::SetDataFloat(db_entity, "players", "money", Player[playerid][pyr::money], "name = '%s'", name);
+    
+    Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_MONEY, "~g~~h~~h~R$: %2.f", Player[playerid][pyr::money]);
+    PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
+
+    printf("[ BALANCE ] O jogador %s recebeu %.2f R$\n", name, price);
+    
+    return 1;   
 }
 
 stock Player::IsValidName(name[], &issue)
@@ -207,56 +252,6 @@ stock Player::IsValidName(name[], &issue)
 
     return 1;
 } 
-
-stock Player::SetToSpawn(playerid)
-{
-    new name[MAX_PLAYER_NAME];
-
-    GetPlayerName(playerid, name);
-
-    // Adicionar kick player
-    if(!DB::GetRowCount(db_entity, "players", "name", name, _))
-    {
-        printf("[ DB (ERRO) ] Erro ao tentar carregar posições de spawn do jogador!");
-        return 0;
-    }
-
-    SetSpawnInfo(playerid, 0, 
-    DB::LoadDataInt(db_entity, "players", "name", name, "skinid"), 
-    DB::LoadDataFloat(db_entity, "players", "name", name, "pX"),
-    DB::LoadDataFloat(db_entity, "players", "name", name, "pY"),
-    DB::LoadDataFloat(db_entity, "players", "name", name, "pZ"),
-    DB::LoadDataFloat(db_entity, "players", "name", name, "pA"),  WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0);
-    
-    Player::SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED);
-    
-    KillTimer(pyr::Timer[playerid][pyr::TIMER_LOGIN_KICK]);
-    pyr::Timer[playerid][pyr::TIMER_LOGIN_KICK] = INVALID_TIMER;
-
-    TogglePlayerSpectating(playerid, false);
-    TogglePlayerClock(playerid, true);
-    
-    SpawnPlayer(playerid);
-
-    new str[64];
-    format(str, 64, "{33ff33}CPF: {ffffff}[ {33ff33}%d {ffffff}]", playerid);
-
-    new Text3D:label = CreateDynamic3DTextLabel(str, -1, 0.0, 0.0, 0.0, 25.0, playerid, INVALID_VEHICLE_ID, 1);
-
-    Attach3DTextLabelToPlayer(label, playerid, 0.0, 0.0, 0.4);
-
-    Player[playerid][pyr::cpf_tag] = label;
-
-    Baseboard::ShowTDForPlayer(playerid);
-    Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_CPF, "CPF: %d", playerid);
-    Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_MONEY, "~g~~h~~h~R$: %2.f", Player[playerid][pyr::money]);
-    Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_LVL, "L: %d", Player[playerid][pyr::score]);
-    Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_BITCOIN, "~y~B$: %d", Player[playerid][pyr::bitcoin]);
-
-    CallLocalFunction("OnPlayerLogin", "i", playerid);
-
-    return 1;
-}
 
 stock Login::IsValidPassword(const text[], &issue)
 {

@@ -3,6 +3,7 @@
 stock Baseboard::UpdateTDForPlayer(playerid, textid, const text[], GLOBAL_TAG_TYPES:...)
 {
 	PlayerTextDrawSetString(playerid, Baseboard::PlayerTD[playerid][textid], text, ___(3));
+	PlayerTextDrawShow(playerid, Baseboard::PlayerTD[playerid][textid]);
 }
 
 stock Baseboard::ShowTDForPlayer(playerid)
@@ -11,6 +12,11 @@ stock Baseboard::ShowTDForPlayer(playerid)
         TextDrawShowForPlayer(playerid, Baseboard::PublicTD[j]);
     for(new i = 0; i < 5; i++)
         PlayerTextDrawShow(playerid, Baseboard::PlayerTD[playerid][i]);  
+	
+	Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_CPF, "CPF: %d", playerid);
+    Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_MONEY, "~g~~h~~h~R$: %2.f", Player[playerid][pyr::money]);
+    Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_LVL, "L: %d", Player[playerid][pyr::score]);
+    Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_BITCOIN, "~y~B$: %d", Player[playerid][pyr::bitcoin]);
 }
 
 stock Baseboard::HideTDForPlayer(playerid)

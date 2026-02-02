@@ -7,20 +7,7 @@ forward OnPayDayReach(playerid);
 hook OnPlayerLogin(playerid)
 {
     new time_left = pdy::Player[playerid][pdy::time_left];
-
-    pyr::Timer[playerid][pyr::TIMER_PAYDAY] = SetTimerEx("OnPayDayReach", time_left, false, "i", playerid);
-    
-    return 1;
-}
-
-stock Payday::GetPlayerBonus(playerid, &Float:bonus)
-{
-    bonus = 0;
-
-    if(Player::IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_ORG))
-        bonus += 1200.0;
-    if(Player::IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IS_ADM))
-        bonus += 500.0;
+    Player::CreateTimer(playerid, pyr::TIMER_PAYDAY, "OnPayDayReach", time_left, false, "i", playerid);
 
     return 1;
 }
@@ -44,20 +31,27 @@ public OnPayDayReach(playerid)
             
     PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
 
-    Player[playerid][pyr::money] += total;
-
-    new name[MAX_PLAYER_NAME];
-    GetPlayerName(playerid, name);
-
-    DB::SaveDataFloat(db_entity, "players", "name", name, "money", total);
+    Player::GiveMoney(playerid, total);
 
     new timerid = pyr::Timer[playerid][pyr::TIMER_PAYDAY];
-    
+
     if(GetTimerInterval(timerid) == 3600000 && IsRepeatingTimer(timerid))
         return 1;
 
-    KillTimer(timerid);
-    pyr::Timer[playerid][pyr::TIMER_PAYDAY] = SetTimerEx("OnPayDayReach", 3600000, true, "i", playerid);
+    Player::KillTimer(playerid, pyr::TIMER_PAYDAY);
+    Player::CreateTimer(playerid, pyr::TIMER_PAYDAY, "OnPayDayReach", 3600000, true, "i", playerid);
     
     return 1; 
+}
+
+stock Payday::GetPlayerBonus(playerid, &Float:bonus)
+{
+    bonus = 0;
+
+    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_ORG))
+        bonus += 1200.0;
+    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IS_ADM))
+        bonus += 500.0;
+
+    return 1;
 }

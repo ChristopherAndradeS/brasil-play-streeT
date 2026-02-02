@@ -8,13 +8,20 @@ stock Acessory::UpdateTDForPlayer(playerid, textid, const text[], GLOBAL_TAG_TYP
 stock Acessory::UpdateModelForPlayer(playerid, textid, modelid)
 {
 	PlayerTextDrawSetPreviewModel(playerid, Acessory::PlayerTD[playerid][textid], modelid);
+	PlayerTextDrawShow(playerid, Acessory::PlayerTD[playerid][textid]); 
+}
+
+stock Acessory::UpdateColorPTD(playerid, textid, color)
+{
+	PlayerTextDrawColour(playerid, Acessory::PlayerTD[playerid][textid], color);
+	PlayerTextDrawShow(playerid, Acessory::PlayerTD[playerid][textid]); 
 }
 
 stock Acessory::ShowTDForPlayer(playerid)
 { 
-    for(new j = 0; j < 27; j++)
+    for(new j = 0; j < 21; j++)
         TextDrawShowForPlayer(playerid, Acessory::PublicTD[j]);
-	for(new i = 0; i < 8; i++)
+	for(new i = 0; i < 14; i++)
         PlayerTextDrawShow(playerid, Acessory::PlayerTD[playerid][i]); 
 
     SelectTextDraw(playerid, 0xFFFF33FF);
@@ -22,9 +29,9 @@ stock Acessory::ShowTDForPlayer(playerid)
 
 stock Acessory::HideTDForPlayer(playerid)
 {
-    for(new i = 0; i < 27; i++)
+    for(new i = 0; i < 21; i++)
         TextDrawHideForPlayer(playerid, Acessory::PublicTD[i]);
-    for(new i = 0; i < 8; i++)
+    for(new i = 0; i < 14; i++)
         PlayerTextDrawHide(playerid, Acessory::PlayerTD[playerid][i]); 
 
     CancelSelectTextDraw(playerid);    
@@ -32,7 +39,7 @@ stock Acessory::HideTDForPlayer(playerid)
 
 stock Acessory::DestroyPlayerTD(playerid)
 {
-    for(new i = 0; i < 8; i++)
+    for(new i = 0; i < 14; i++)
         PlayerTextDrawDestroy(playerid, Acessory::PlayerTD[playerid][i]);
 }
 
@@ -318,105 +325,19 @@ stock Acessory::CreatePublicTD()
 	TextDrawSetProportional(Acessory::PublicTD[19], true);
 	TextDrawSetSelectable(Acessory::PublicTD[19], false);
 
-	Acessory::PublicTD[20] = TextDrawCreate(430.000000, 157.500000, "ld_dual:white");
-	TextDrawFont(Acessory::PublicTD[20], TEXT_DRAW_FONT:4);
-	TextDrawLetterSize(Acessory::PublicTD[20], 0.600000, 2.000000);
-	TextDrawTextSize(Acessory::PublicTD[20], 60.000000, 30.000000);
-	TextDrawSetOutline(Acessory::PublicTD[20], true);
+	Acessory::PublicTD[20] = TextDrawCreate(432.500000, 349.500000, "ALTERAR VISAO");
+	TextDrawFont(Acessory::PublicTD[20], TEXT_DRAW_FONT:2);
+	TextDrawLetterSize(Acessory::PublicTD[20], 0.300000, 1.200000);
+	TextDrawTextSize(Acessory::PublicTD[20], 400.000000, 183.000000);
+	TextDrawSetOutline(Acessory::PublicTD[20], false);
 	TextDrawSetShadow(Acessory::PublicTD[20], false);
-	TextDrawAlignment(Acessory::PublicTD[20], TEXT_DRAW_ALIGN:1);
-	TextDrawColour(Acessory::PublicTD[20], -16777072);
+	TextDrawAlignment(Acessory::PublicTD[20], TEXT_DRAW_ALIGN:2);
+	TextDrawColour(Acessory::PublicTD[20], -1);
 	TextDrawBackgroundColour(Acessory::PublicTD[20], 255);
 	TextDrawBoxColour(Acessory::PublicTD[20], 50);
-	TextDrawUseBox(Acessory::PublicTD[20], true);
+	TextDrawUseBox(Acessory::PublicTD[20], false);
 	TextDrawSetProportional(Acessory::PublicTD[20], true);
 	TextDrawSetSelectable(Acessory::PublicTD[20], false);
-
-	Acessory::PublicTD[21] = TextDrawCreate(430.000000, 217.500000, "ld_dual:white");
-	TextDrawFont(Acessory::PublicTD[21], TEXT_DRAW_FONT:4);
-	TextDrawLetterSize(Acessory::PublicTD[21], 0.600000, 2.000000);
-	TextDrawTextSize(Acessory::PublicTD[21], 60.000000, 30.000000);
-	TextDrawSetOutline(Acessory::PublicTD[21], true);
-	TextDrawSetShadow(Acessory::PublicTD[21], false);
-	TextDrawAlignment(Acessory::PublicTD[21], TEXT_DRAW_ALIGN:1);
-	TextDrawColour(Acessory::PublicTD[21], 16711824);
-	TextDrawBackgroundColour(Acessory::PublicTD[21], 255);
-	TextDrawBoxColour(Acessory::PublicTD[21], 50);
-	TextDrawUseBox(Acessory::PublicTD[21], true);
-	TextDrawSetProportional(Acessory::PublicTD[21], true);
-	TextDrawSetSelectable(Acessory::PublicTD[21], false);
-
-	Acessory::PublicTD[22] = TextDrawCreate(430.000000, 277.500000, "ld_dual:white");
-	TextDrawFont(Acessory::PublicTD[22], TEXT_DRAW_FONT:4);
-	TextDrawLetterSize(Acessory::PublicTD[22], 0.600000, 2.000000);
-	TextDrawTextSize(Acessory::PublicTD[22], 60.000000, 30.000000);
-	TextDrawSetOutline(Acessory::PublicTD[22], true);
-	TextDrawSetShadow(Acessory::PublicTD[22], false);
-	TextDrawAlignment(Acessory::PublicTD[22], TEXT_DRAW_ALIGN:1);
-	TextDrawColour(Acessory::PublicTD[22], 65424);
-	TextDrawBackgroundColour(Acessory::PublicTD[22], 255);
-	TextDrawBoxColour(Acessory::PublicTD[22], 50);
-	TextDrawUseBox(Acessory::PublicTD[22], true);
-	TextDrawSetProportional(Acessory::PublicTD[22], true);
-	TextDrawSetSelectable(Acessory::PublicTD[22], false);
-
-	Acessory::PublicTD[23] = TextDrawCreate(460.000000, 167.500000, "EIXO X");
-	TextDrawFont(Acessory::PublicTD[23], TEXT_DRAW_FONT:2);
-	TextDrawLetterSize(Acessory::PublicTD[23], 0.250000, 1.000000);
-	TextDrawTextSize(Acessory::PublicTD[23], 400.000000, 183.000000);
-	TextDrawSetOutline(Acessory::PublicTD[23], false);
-	TextDrawSetShadow(Acessory::PublicTD[23], false);
-	TextDrawAlignment(Acessory::PublicTD[23], TEXT_DRAW_ALIGN:2);
-	TextDrawColour(Acessory::PublicTD[23], -1);
-	TextDrawBackgroundColour(Acessory::PublicTD[23], 255);
-	TextDrawBoxColour(Acessory::PublicTD[23], 50);
-	TextDrawUseBox(Acessory::PublicTD[23], false);
-	TextDrawSetProportional(Acessory::PublicTD[23], true);
-	TextDrawSetSelectable(Acessory::PublicTD[23], false);
-
-	Acessory::PublicTD[24] = TextDrawCreate(460.000000, 227.500000, "EIXO Y");
-	TextDrawFont(Acessory::PublicTD[24], TEXT_DRAW_FONT:2);
-	TextDrawLetterSize(Acessory::PublicTD[24], 0.250000, 1.000000);
-	TextDrawTextSize(Acessory::PublicTD[24], 400.000000, 183.000000);
-	TextDrawSetOutline(Acessory::PublicTD[24], false);
-	TextDrawSetShadow(Acessory::PublicTD[24], false);
-	TextDrawAlignment(Acessory::PublicTD[24], TEXT_DRAW_ALIGN:2);
-	TextDrawColour(Acessory::PublicTD[24], -1);
-	TextDrawBackgroundColour(Acessory::PublicTD[24], 255);
-	TextDrawBoxColour(Acessory::PublicTD[24], 50);
-	TextDrawUseBox(Acessory::PublicTD[24], false);
-	TextDrawSetProportional(Acessory::PublicTD[24], true);
-	TextDrawSetSelectable(Acessory::PublicTD[24], false);
-
-	Acessory::PublicTD[25] = TextDrawCreate(460.000000, 287.500000, "EIXO Z");
-	TextDrawFont(Acessory::PublicTD[25], TEXT_DRAW_FONT:2);
-	TextDrawLetterSize(Acessory::PublicTD[25], 0.250000, 1.000000);
-	TextDrawTextSize(Acessory::PublicTD[25], 400.000000, 183.000000);
-	TextDrawSetOutline(Acessory::PublicTD[25], false);
-	TextDrawSetShadow(Acessory::PublicTD[25], false);
-	TextDrawAlignment(Acessory::PublicTD[25], TEXT_DRAW_ALIGN:2);
-	TextDrawColour(Acessory::PublicTD[25], -1);
-	TextDrawBackgroundColour(Acessory::PublicTD[25], 255);
-	TextDrawBoxColour(Acessory::PublicTD[25], 50);
-	TextDrawUseBox(Acessory::PublicTD[25], false);
-	TextDrawSetProportional(Acessory::PublicTD[25], true);
-	TextDrawSetSelectable(Acessory::PublicTD[25], false);
-
-	Acessory::PublicTD[26] = TextDrawCreate(432.500000, 349.500000, "ALTERAR VISAO");
-	TextDrawFont(Acessory::PublicTD[26], TEXT_DRAW_FONT:2);
-	TextDrawLetterSize(Acessory::PublicTD[26], 0.300000, 1.200000);
-	TextDrawTextSize(Acessory::PublicTD[26], 400.000000, 183.000000);
-	TextDrawSetOutline(Acessory::PublicTD[26], false);
-	TextDrawSetShadow(Acessory::PublicTD[26], false);
-	TextDrawAlignment(Acessory::PublicTD[26], TEXT_DRAW_ALIGN:2);
-	TextDrawColour(Acessory::PublicTD[26], -1);
-	TextDrawBackgroundColour(Acessory::PublicTD[26], 255);
-	TextDrawBoxColour(Acessory::PublicTD[26], 50);
-	TextDrawUseBox(Acessory::PublicTD[26], false);
-	TextDrawSetProportional(Acessory::PublicTD[26], true);
-	TextDrawSetSelectable(Acessory::PublicTD[26], false);
-
-	return 1;
 }
 
 stock Acessory::CreatePlayerTD(playerid)
@@ -436,7 +357,6 @@ stock Acessory::CreatePlayerTD(playerid)
 	PlayerTextDrawSetSelectable(playerid, Acessory::PlayerTD[playerid][0], true);
 	PlayerTextDrawSetPreviewModel(playerid, Acessory::PlayerTD[playerid][0], 18631);
 	PlayerTextDrawSetPreviewRot(playerid, Acessory::PlayerTD[playerid][0], 0.000000, 0.000000, 90.000000, 0.750000);
-	PlayerTextDrawSetPreviewVehCol(playerid, Acessory::PlayerTD[playerid][0], 0, false);
 
 	Acessory::PlayerTD[playerid][1] = CreatePlayerTextDraw(playerid, 315.000000, 135.000000, "Preview_Model");
 	PlayerTextDrawFont(playerid, Acessory::PlayerTD[playerid][1], TEXT_DRAW_FONT:5);
@@ -453,7 +373,6 @@ stock Acessory::CreatePlayerTD(playerid)
 	PlayerTextDrawSetSelectable(playerid, Acessory::PlayerTD[playerid][1], true);
 	PlayerTextDrawSetPreviewModel(playerid, Acessory::PlayerTD[playerid][1], 18631);
 	PlayerTextDrawSetPreviewRot(playerid, Acessory::PlayerTD[playerid][1], 0.000000, 0.000000, 90.000000, 0.750000);
-	PlayerTextDrawSetPreviewVehCol(playerid, Acessory::PlayerTD[playerid][1], 0, false);
 
 	Acessory::PlayerTD[playerid][2] = CreatePlayerTextDraw(playerid, 315.000000, 235.000000, "Preview_Model");
 	PlayerTextDrawFont(playerid, Acessory::PlayerTD[playerid][2], TEXT_DRAW_FONT:5);
@@ -470,7 +389,6 @@ stock Acessory::CreatePlayerTD(playerid)
 	PlayerTextDrawSetSelectable(playerid, Acessory::PlayerTD[playerid][2], true);
 	PlayerTextDrawSetPreviewModel(playerid, Acessory::PlayerTD[playerid][2], 18631);
 	PlayerTextDrawSetPreviewRot(playerid, Acessory::PlayerTD[playerid][2], 0.000000, 0.000000, 90.000000, 0.750000);
-	PlayerTextDrawSetPreviewVehCol(playerid, Acessory::PlayerTD[playerid][2], 0, false);
 
 	Acessory::PlayerTD[playerid][3] = CreatePlayerTextDraw(playerid, 315.000000, 285.000000, "Preview_Model");
 	PlayerTextDrawFont(playerid, Acessory::PlayerTD[playerid][3], TEXT_DRAW_FONT:5);
@@ -487,7 +405,6 @@ stock Acessory::CreatePlayerTD(playerid)
 	PlayerTextDrawSetSelectable(playerid, Acessory::PlayerTD[playerid][3], true);
 	PlayerTextDrawSetPreviewModel(playerid, Acessory::PlayerTD[playerid][3], 18631);
 	PlayerTextDrawSetPreviewRot(playerid, Acessory::PlayerTD[playerid][3], 0.000000, 0.000000, 90.000000, 0.750000);
-	PlayerTextDrawSetPreviewVehCol(playerid, Acessory::PlayerTD[playerid][3], 0, false);
 
 	Acessory::PlayerTD[playerid][4] = CreatePlayerTextDraw(playerid, 315.000000, 335.000000, "Preview_Model");
 	PlayerTextDrawFont(playerid, Acessory::PlayerTD[playerid][4], TEXT_DRAW_FONT:5);
@@ -504,7 +421,6 @@ stock Acessory::CreatePlayerTD(playerid)
 	PlayerTextDrawSetSelectable(playerid, Acessory::PlayerTD[playerid][4], true);
 	PlayerTextDrawSetPreviewModel(playerid, Acessory::PlayerTD[playerid][4], 18631);
 	PlayerTextDrawSetPreviewRot(playerid, Acessory::PlayerTD[playerid][4], 0.000000, 0.000000, 90.000000, 0.750000);
-	PlayerTextDrawSetPreviewVehCol(playerid, Acessory::PlayerTD[playerid][4], 0, false);
 
 	Acessory::PlayerTD[playerid][5] = CreatePlayerTextDraw(playerid, 530.000000, 162.500000, "OFFSET:~n~9.9999");
 	PlayerTextDrawFont(playerid, Acessory::PlayerTD[playerid][5], TEXT_DRAW_FONT:2);
@@ -548,5 +464,87 @@ stock Acessory::CreatePlayerTD(playerid)
 	PlayerTextDrawSetProportional(playerid, Acessory::PlayerTD[playerid][7], true);
 	PlayerTextDrawSetSelectable(playerid, Acessory::PlayerTD[playerid][7], false);
 
-	return 1;
+	Acessory::PlayerTD[playerid][8] = CreatePlayerTextDraw(playerid, 430.000000, 157.500000, "ld_dual:white");
+	PlayerTextDrawFont(playerid, Acessory::PlayerTD[playerid][8], TEXT_DRAW_FONT:4);
+	PlayerTextDrawLetterSize(playerid, Acessory::PlayerTD[playerid][8], 0.600000, 2.000000);
+	PlayerTextDrawTextSize(playerid, Acessory::PlayerTD[playerid][8], 60.000000, 30.000000);
+	PlayerTextDrawSetOutline(playerid, Acessory::PlayerTD[playerid][8], true);
+	PlayerTextDrawSetShadow(playerid, Acessory::PlayerTD[playerid][8], false);
+	PlayerTextDrawAlignment(playerid, Acessory::PlayerTD[playerid][8], TEXT_DRAW_ALIGN:1);
+	PlayerTextDrawColour(playerid, Acessory::PlayerTD[playerid][8], -16777072);
+	PlayerTextDrawBackgroundColour(playerid, Acessory::PlayerTD[playerid][8], 255);
+	PlayerTextDrawBoxColour(playerid, Acessory::PlayerTD[playerid][8], 50);
+	PlayerTextDrawUseBox(playerid, Acessory::PlayerTD[playerid][8], true);
+	PlayerTextDrawSetProportional(playerid, Acessory::PlayerTD[playerid][8], true);
+	PlayerTextDrawSetSelectable(playerid, Acessory::PlayerTD[playerid][8], true);
+
+	Acessory::PlayerTD[playerid][9] = CreatePlayerTextDraw(playerid, 430.000000, 217.500000, "ld_dual:white");
+	PlayerTextDrawFont(playerid, Acessory::PlayerTD[playerid][9], TEXT_DRAW_FONT:4);
+	PlayerTextDrawLetterSize(playerid, Acessory::PlayerTD[playerid][9], 0.600000, 2.000000);
+	PlayerTextDrawTextSize(playerid, Acessory::PlayerTD[playerid][9], 60.000000, 30.000000);
+	PlayerTextDrawSetOutline(playerid, Acessory::PlayerTD[playerid][9], true);
+	PlayerTextDrawSetShadow(playerid, Acessory::PlayerTD[playerid][9], false);
+	PlayerTextDrawAlignment(playerid, Acessory::PlayerTD[playerid][9], TEXT_DRAW_ALIGN:1);
+	PlayerTextDrawColour(playerid, Acessory::PlayerTD[playerid][9], 16711824);
+	PlayerTextDrawBackgroundColour(playerid, Acessory::PlayerTD[playerid][9], 255);
+	PlayerTextDrawBoxColour(playerid, Acessory::PlayerTD[playerid][9], 50);
+	PlayerTextDrawUseBox(playerid, Acessory::PlayerTD[playerid][9], true);
+	PlayerTextDrawSetProportional(playerid, Acessory::PlayerTD[playerid][9], true);
+	PlayerTextDrawSetSelectable(playerid, Acessory::PlayerTD[playerid][9], true);
+
+	Acessory::PlayerTD[playerid][10] = CreatePlayerTextDraw(playerid, 430.000000, 277.500000, "ld_dual:white");
+	PlayerTextDrawFont(playerid, Acessory::PlayerTD[playerid][10], TEXT_DRAW_FONT:4);
+	PlayerTextDrawLetterSize(playerid, Acessory::PlayerTD[playerid][10], 0.600000, 2.000000);
+	PlayerTextDrawTextSize(playerid, Acessory::PlayerTD[playerid][10], 60.000000, 30.000000);
+	PlayerTextDrawSetOutline(playerid, Acessory::PlayerTD[playerid][10], true);
+	PlayerTextDrawSetShadow(playerid, Acessory::PlayerTD[playerid][10], false);
+	PlayerTextDrawAlignment(playerid, Acessory::PlayerTD[playerid][10], TEXT_DRAW_ALIGN:1);
+	PlayerTextDrawColour(playerid, Acessory::PlayerTD[playerid][10], 65424);
+	PlayerTextDrawBackgroundColour(playerid, Acessory::PlayerTD[playerid][10], 255);
+	PlayerTextDrawBoxColour(playerid, Acessory::PlayerTD[playerid][10], 50);
+	PlayerTextDrawUseBox(playerid, Acessory::PlayerTD[playerid][10], true);
+	PlayerTextDrawSetProportional(playerid, Acessory::PlayerTD[playerid][10], true);
+	PlayerTextDrawSetSelectable(playerid, Acessory::PlayerTD[playerid][10], true);
+
+	Acessory::PlayerTD[playerid][11] = CreatePlayerTextDraw(playerid, 460.000000, 167.500000, "EIXO X");
+	PlayerTextDrawFont(playerid, Acessory::PlayerTD[playerid][11], TEXT_DRAW_FONT:2);
+	PlayerTextDrawLetterSize(playerid, Acessory::PlayerTD[playerid][11], 0.250000, 1.000000);
+	PlayerTextDrawTextSize(playerid, Acessory::PlayerTD[playerid][11], 400.000000, 183.000000);
+	PlayerTextDrawSetOutline(playerid, Acessory::PlayerTD[playerid][11], false);
+	PlayerTextDrawSetShadow(playerid, Acessory::PlayerTD[playerid][11], false);
+	PlayerTextDrawAlignment(playerid, Acessory::PlayerTD[playerid][11], TEXT_DRAW_ALIGN:2);
+	PlayerTextDrawColour(playerid, Acessory::PlayerTD[playerid][11], -1);
+	PlayerTextDrawBackgroundColour(playerid, Acessory::PlayerTD[playerid][11], 255);
+	PlayerTextDrawBoxColour(playerid, Acessory::PlayerTD[playerid][11], 50);
+	PlayerTextDrawUseBox(playerid, Acessory::PlayerTD[playerid][11], false);
+	PlayerTextDrawSetProportional(playerid, Acessory::PlayerTD[playerid][11], true);
+	PlayerTextDrawSetSelectable(playerid, Acessory::PlayerTD[playerid][11], false);
+
+	Acessory::PlayerTD[playerid][12] = CreatePlayerTextDraw(playerid, 460.000000, 227.500000, "EIXO Y");
+	PlayerTextDrawFont(playerid, Acessory::PlayerTD[playerid][12], TEXT_DRAW_FONT:2);
+	PlayerTextDrawLetterSize(playerid, Acessory::PlayerTD[playerid][12], 0.250000, 1.000000);
+	PlayerTextDrawTextSize(playerid, Acessory::PlayerTD[playerid][12], 400.000000, 183.000000);
+	PlayerTextDrawSetOutline(playerid, Acessory::PlayerTD[playerid][12], false);
+	PlayerTextDrawSetShadow(playerid, Acessory::PlayerTD[playerid][12], false);
+	PlayerTextDrawAlignment(playerid, Acessory::PlayerTD[playerid][12], TEXT_DRAW_ALIGN:2);
+	PlayerTextDrawColour(playerid, Acessory::PlayerTD[playerid][12], -1);
+	PlayerTextDrawBackgroundColour(playerid, Acessory::PlayerTD[playerid][12], 255);
+	PlayerTextDrawBoxColour(playerid, Acessory::PlayerTD[playerid][12], 50);
+	PlayerTextDrawUseBox(playerid, Acessory::PlayerTD[playerid][12], false);
+	PlayerTextDrawSetProportional(playerid, Acessory::PlayerTD[playerid][12], true);
+	PlayerTextDrawSetSelectable(playerid, Acessory::PlayerTD[playerid][12], false);
+
+	Acessory::PlayerTD[playerid][13] = CreatePlayerTextDraw(playerid, 460.000000, 287.500000, "EIXO Z");
+	PlayerTextDrawFont(playerid, Acessory::PlayerTD[playerid][13], TEXT_DRAW_FONT:2);
+	PlayerTextDrawLetterSize(playerid, Acessory::PlayerTD[playerid][13], 0.250000, 1.000000);
+	PlayerTextDrawTextSize(playerid, Acessory::PlayerTD[playerid][13], 400.000000, 183.000000);
+	PlayerTextDrawSetOutline(playerid, Acessory::PlayerTD[playerid][13], false);
+	PlayerTextDrawSetShadow(playerid, Acessory::PlayerTD[playerid][13], false);
+	PlayerTextDrawAlignment(playerid, Acessory::PlayerTD[playerid][13], TEXT_DRAW_ALIGN:2);
+	PlayerTextDrawColour(playerid, Acessory::PlayerTD[playerid][13], -1);
+	PlayerTextDrawBackgroundColour(playerid, Acessory::PlayerTD[playerid][13], 255);
+	PlayerTextDrawBoxColour(playerid, Acessory::PlayerTD[playerid][13], 50);
+	PlayerTextDrawUseBox(playerid, Acessory::PlayerTD[playerid][13], false);
+	PlayerTextDrawSetProportional(playerid, Acessory::PlayerTD[playerid][13], true);
+	PlayerTextDrawSetSelectable(playerid, Acessory::PlayerTD[playerid][13], false);
 }

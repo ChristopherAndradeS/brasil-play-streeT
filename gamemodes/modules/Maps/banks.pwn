@@ -1,14 +1,14 @@
 stock Bank::RemoveGTAObjects(playerid)
 {
-    RemoveBuildingForPlayer(playerid, 5787, 1090.050, -1310.530, 17.546, 0.250);
-    RemoveBuildingForPlayer(playerid, 5936, 1090.050, -1310.530, 17.546, 0.250);
-    RemoveBuildingForPlayer(playerid, 5737, 1120.160, -1303.449, 18.570, 0.250);
-    RemoveBuildingForPlayer(playerid, 5935, 1120.160, -1303.449, 18.570, 0.250);
-    RemoveBuildingForPlayer(playerid, 1529, 1098.810, -1292.550, 17.140, 0.250);
-    RemoveBuildingForPlayer(playerid, 5788, 1080.979, -1305.520, 16.359, 0.250);
-    RemoveBuildingForPlayer(playerid, 716, 1068.810, -1308.479, 12.750, 0.250);
-    RemoveBuildingForPlayer(playerid, 1307, 1072.140, -1303.680, 12.265, 0.250);
-    RemoveBuildingForPlayer(playerid, 1283, 1063.400, -1291.410, 15.710, 0.250);
+    // RemoveBuildingForPlayer(playerid, 5787, 1090.050, -1310.530, 17.546, 0.250);
+    // RemoveBuildingForPlayer(playerid, 5936, 1090.050, -1310.530, 17.546, 0.250);
+    // RemoveBuildingForPlayer(playerid, 5737, 1120.160, -1303.449, 18.570, 0.250);
+    // RemoveBuildingForPlayer(playerid, 5935, 1120.160, -1303.449, 18.570, 0.250);
+    // RemoveBuildingForPlayer(playerid, 1529, 1098.810, -1292.550, 17.140, 0.250);
+    // RemoveBuildingForPlayer(playerid, 5788, 1080.979, -1305.520, 16.359, 0.250);
+    // RemoveBuildingForPlayer(playerid, 716, 1068.810, -1308.479, 12.750, 0.250);
+    // RemoveBuildingForPlayer(playerid, 1307, 1072.140, -1303.680, 12.265, 0.250);
+    // RemoveBuildingForPlayer(playerid, 1283, 1063.400, -1291.410, 15.710, 0.250);
 }
 
 stock Bank::LoadMap()

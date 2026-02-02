@@ -47,7 +47,7 @@
 #define COLOR_LIGHT_GREEN       0x88FF88FF
 #define COLOR_SUCESS            0x33FF33FF
 #define COLOR_ERRO              0xFF3333FF
-#define COLOR_WARNING           0xFFFF33FF  
+#define COLOR_WARNING           0xFFF9933FF  
 
 #define FCOLOR_THEME_BPS        "{0df205}"
 #define FCOLOR_LIGHT_GREEN      "{88FF88}"
@@ -56,53 +56,18 @@
 #define FCOLOR_WARNING          "{FFFF33}"  
 
 /*          FOWARDS          */
-forward Float:DB::LoadDataFloat(DB:db, const table[], const uid_field[], const uid[], const field[]);
+forward Float:floatclamp(Float:value, Float:min, Float:max);
 
-/*          VARIABLES          */
-new DB:db_entity;
-new DB:db_stock;
+enum _:OWNER_TYPES
+{
+    OWNER_TYPE_PLAYER = 1,
+    OWNER_TYPE_VEHICLE,
+}
 
 new const gMonths[][16] = 
 {   
-    "INVALID_MONTH", "Janeiro", "Fevereiro", "MarÃ§o", 
+    "INVALID_MONTH", "Janeiro", "Fevereiro", "Marco", 
     "Abril", "Maio", "Junho", 
     "Julho", "Agosto", "Setembro", 
     "Outubro", "Novembro", "Dezembro" 
 };
-
-new const gNameIssue[][32] =
-{
-    {"NO_PROBLEM"},
-    {"contÃ©m caractÃ©r ilegal"},
-    {"tem tamanho invÃ¡lido"}
-};
-
-new gLoginIssue[][64] = 
-{
-    {"sem problemas"},
-    {"pequena demais"},
-    {"grande demais"}
-};
-
-// new gBoneName[][16] = 
-// {
-//     {"INVALID_BONE"},
-//     {"Coluna"},
-//     {"Cabeça"},
-//     {"Braço esquerdo"},
-//     {"Braço direito"},
-//     {"Mão esquerda"},
-//     {"Mão direita"},
-//     {"Coxa esquerda"},
-//     {"Coxa direita"},
-//     {"Pé esquerdo"},
-//     {"Pé direito"},
-//     {"Panturrilha direita"},
-//     {"Panturrilha esquerda"},
-//     {"Antebraço esquerdo"},
-//     {"Antebraço direito"},
-//     {"Ombro esquerdo"},
-//     {"Ombro direito"},
-//     {"Pescoço"},
-//     {"Maxilar"}
-// };

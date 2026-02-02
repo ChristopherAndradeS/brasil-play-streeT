@@ -40,14 +40,3 @@ hook OnGameModeInit()
 
     return 1;
 }
-
-hook OnPlayerConnect(playerid)
-{
-    Bank::RemoveGTAObjects(playerid);
-    Officine::RemoveGTAObjects(playerid, MAP_MEC_LS);
-    Officine::RemoveGTAObjects(playerid, MAP_MEC_AIRPORT);
-    Org::RemoveGTAObjects(playerid);
-    Spawn::RemoveGTAObjects(playerid);
-    Square::RemoveGTAObjects(playerid, MAP_SQUARE_HP);
-    Square::RemoveGTAObjects(playerid, MAP_SQUARE_LS);
-}

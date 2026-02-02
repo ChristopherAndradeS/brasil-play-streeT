@@ -1,7 +1,6 @@
 #include <open.mp>
 #include <sscanf2>
 #include <streamer>
-#include <timestamp>
 #include <YSI\YSI_Data\y_iterate>
 #include <YSI\YSI_Coding\y_va>
 #include <YSI\YSI_Coding\y_inline>
@@ -12,13 +11,14 @@
 /*                  MASTER HEADERS                  */
 #include "../gamemodes/modules/header.pwn"
 #include "../gamemodes/modules/utils.pwn"
-#include "../gamemodes/modules/Player/punish.pwn"
 /*                  HEADERS                  */
+#include "../gamemodes/modules/DB/header.pwn"
 #include "../gamemodes/modules/TextDraws/header.pwn"
 #include "../gamemodes/modules/Player/header.pwn"
 #include "../gamemodes/modules/Server/header.pwn" 
-#include "../gamemodes/modules/DataBase/header.pwn"
 #include "../gamemodes/modules/Maps/header.pwn"
+/*                  HIGH PRIORITY */
+#include "../gamemodes/modules/Player/handle.pwn"
 /*                  MAPAS                  */
 #include "../gamemodes/modules/Maps/banks.pwn"
 #include "../gamemodes/modules/Maps/dealership.pwn"
@@ -32,24 +32,14 @@
 #include "../gamemodes/modules/TextDraws/gui/login.pwn"
 #include "../gamemodes/modules/TextDraws/gui/acs_editor.pwn"
 #include "../gamemodes/modules/TextDraws/hud/baseboard.pwn"
-/*                  DATABASE - ENTITYS                  */
-#include "../gamemodes/modules/DataBase/entitys/db_player.pwn"
-#include "../gamemodes/modules/DataBase/entitys/db_punish.pwn"
-#include "../gamemodes/modules/DataBase/entitys/db_acessory.pwn"
-/*                  DATABASE - STOCKS                  */
-#include "../gamemodes/modules/DataBase/stocks/stk_acessory.pwn"
+/*                  DATABASE                   */
+#include "../gamemodes/modules/DB/db_init.pwn"
 /*                  PLAYER                  */
 #include "../gamemodes/modules/Player/login.pwn"
 #include "../gamemodes/modules/Player/payday.pwn"
-//#include "../gamemodes/modules/Player/acessory.pwn"
-#include "../gamemodes/modules/Player/logout.pwn"
+#include "../gamemodes/modules/Player/acessory.pwn"
 
 main(){}
-
-public OnGameModeInit()
-{
-    return 1;
-}
 
 public OnGameModeExit()
 {
@@ -70,18 +60,4 @@ public OnPlayerClickMap(playerid, Float:fX, Float:fY, Float:fZ)
 {
     SetPlayerPos(playerid, fX, fY, fZ);
     return 1;
-}
-
-hook function SendClientMessage(playerid, Colour, const message[], GLOBAL_TAG_TYPES:...)
-{
-    if(!IsPlayerUsingOfficialClient(playerid) || !HasGraphicAccent(message))
-        return continue(playerid, Colour, message, ___(3));
-
-    new fixed_msg[144];
-
-    va_format(fixed_msg, sizeof(fixed_msg), message, ___(3));
-
-    RemoveGraphicAccent(fixed_msg);
-
-	return continue(playerid, Colour, fixed_msg);
 }
