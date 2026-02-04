@@ -79,13 +79,6 @@ hook OnPlayerConnect(playerid)
 
     /* HANDLE CARREGAMENTO GERAL  */
 
-    // TEXTDRAWS
-
-    Login::CreatePlayerTD(playerid); 
-    Baseboard::CreatePlayerTD(playerid);
-
-    // MAPAS
-
     //Bank::RemoveGTAObjects(playerid);
     Officine::RemoveGTAObjects(playerid, MAP_MEC_LS);
     Officine::RemoveGTAObjects(playerid, MAP_MEC_AIRPORT);
@@ -101,6 +94,12 @@ hook OnPlayerSpawn(playerid)
 {
     if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED))
         return -1;
+
+    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING))
+    {
+        ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING);
+        return -1;
+    }
 
     return 1;
 }

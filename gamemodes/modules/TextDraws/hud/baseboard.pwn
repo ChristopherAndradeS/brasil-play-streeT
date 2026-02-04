@@ -8,6 +8,8 @@ stock Baseboard::UpdateTDForPlayer(playerid, textid, const text[], GLOBAL_TAG_TY
 
 stock Baseboard::ShowTDForPlayer(playerid)
 {
+	Baseboard::CreatePlayerTD(playerid);
+	
 	for(new j = 0; j < 13; j++)
         TextDrawShowForPlayer(playerid, Baseboard::PublicTD[j]);
     for(new i = 0; i < 5; i++)
@@ -25,6 +27,8 @@ stock Baseboard::HideTDForPlayer(playerid)
         TextDrawHideForPlayer(playerid, Baseboard::PublicTD[i]);   
     for(new i = 0; i < 5; i++)
         PlayerTextDrawHide(playerid, Baseboard::PlayerTD[playerid][i]); 
+
+	Baseboard::DestroyPlayerTD(playerid);
 }
 
 stock Baseboard::DestroyPlayerTD(playerid)

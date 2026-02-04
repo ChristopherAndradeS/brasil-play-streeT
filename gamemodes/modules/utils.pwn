@@ -16,7 +16,7 @@ stock ResetFlag(&flag, tag_binary)
     flag &= ~tag_binary;
 
 stock IsFlagSet(flag, tag_binary) 
-    return (flag & tag_binary);
+    return (flag & tag_binary) ? 1 : 0;
 
 stock ClearAllFlags(&flag) 
     return (flag = 0x00000000);

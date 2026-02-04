@@ -87,3 +87,16 @@ public OnPlayerClickMap(playerid, Float:fX, Float:fY, Float:fZ)
     SetPlayerPos(playerid, fX, fY, fZ);
     return 1;
 }
+
+hook function TogglePlayerSpectating(playerid, bool:toggle)
+{
+    if(toggle)
+    {
+        SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING);
+        printf("%d", IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING));
+    }
+
+    printf("entrou");
+    
+    return continue(playerid, bool:toggle);
+}

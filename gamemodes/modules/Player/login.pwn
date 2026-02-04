@@ -26,7 +26,7 @@ hook OnPlayerSpawn(playerid)
 
     //Adicionar Timer e sistema de carregamento para evitar travamentos ao spwanar
 
-    GameTextForPlayer(playerid, "~g~~h~~h~Bem Vindo", 1500, 3);
+    GameTextForPlayer(playerid, "~g~~h~~h~Bem Vindo", 2000, 3);
 
     return 1;
 }
@@ -134,6 +134,8 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
 
 stock Login::SetPlayer(playerid)
 {
+    Player::ClearAllData(playerid);
+
     TogglePlayerSpectating(playerid, true);
 
     TogglePlayerControllable(playerid, false);
@@ -141,8 +143,6 @@ stock Login::SetPlayer(playerid)
     PlayAudioStreamForPlayer(playerid, LOGIN_MUSIC_URL);
 
     ClearChat(playerid, 25);
-
-    Player::ClearAllData(playerid);
  
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
@@ -229,6 +229,7 @@ stock Player::Spawn(playerid)
 
     /* SET SPAWN */
     SetSpawnInfo(playerid, 0, skinid, pX, pY, pZ, pA,  WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0);
+    
     TogglePlayerSpectating(playerid, false);
     TogglePlayerClock(playerid, true);
 
