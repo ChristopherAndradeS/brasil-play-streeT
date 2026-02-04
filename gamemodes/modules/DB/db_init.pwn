@@ -41,6 +41,7 @@ hook OnGameModeInit()
         "owner      VARCHAR(24),\
         slotid      INTEGER,\
         owner_type  INTEGER, \
+        flags       INTEGER, \
         price       FLOAT, \
         modelid     INTEGER,\
         boneid      INTEGER,\
@@ -59,7 +60,7 @@ hook OnGameModeInit()
         db_stock = DB_Open("stocks.db");
 
         DB::CreateTable(db_stock, "acessorys", 
-        "uid NOT NULL UNIQUE,\
+        "uid INT NOT NULL UNIQUE,\
         name VARCHAR(32),\
         creator VARCHAR(24),\
         price FLOAT,\

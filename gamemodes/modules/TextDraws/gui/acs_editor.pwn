@@ -19,6 +19,8 @@ stock Acessory::UpdateColorPTD(playerid, textid, color)
 
 stock Acessory::ShowTDForPlayer(playerid)
 { 
+	Acessory::CreatePlayerTD(playerid);
+
     for(new j = 0; j < 21; j++)
         TextDrawShowForPlayer(playerid, Acessory::PublicTD[j]);
 	for(new i = 0; i < 14; i++)
@@ -33,6 +35,8 @@ stock Acessory::HideTDForPlayer(playerid)
         TextDrawHideForPlayer(playerid, Acessory::PublicTD[i]);
     for(new i = 0; i < 14; i++)
         PlayerTextDrawHide(playerid, Acessory::PlayerTD[playerid][i]); 
+
+	Acessory::DestroyPlayerTD(playerid);
 
     CancelSelectTextDraw(playerid);    
 }

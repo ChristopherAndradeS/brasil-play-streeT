@@ -41,6 +41,32 @@
 
 main(){}
 
+public OnGameModeInit()
+{
+    new modelid, name[64], sucess;
+    Acessory::GetNameByModelid(modelid, name);
+
+    for(new i = 1; i <= 8; i++)
+    {
+        if(DB::Exists(db_stock, "acessorys", "uid", "uid = %d", i))
+            continue;
+
+        for(;;)
+        {
+            modelid = RandomMinMax(18632, 19914);
+            sucess = Acessory::GetNameByModelid(modelid, name);
+            
+            if(sucess)
+                break;
+        }
+
+        DB::Insert(db_stock, "acessorys", 
+        "uid, name, creator, price, modelid, boneid, pX, pY, pZ, rX, rY, rZ, sX, sY, sZ, color1, color2", 
+        "%i, '%s', 'SERVER', %.2f, %i, %i, %f, %f, %f, %f, %f, %f, %f, %f, %f, %i, %i", 
+        i, name, Float:RandomFloatMinMax(50.0, 300.0), modelid, 2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, -1, -1);
+    }
+}
+
 public OnGameModeExit()
 {
 	if(DB_Close(db_entity))

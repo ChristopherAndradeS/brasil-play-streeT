@@ -1,8 +1,10 @@
 #include <YSI\YSI_Coding\y_hooks>
 
-#define MAX_ACESSORYS           (3)
+#define MAX_PLAYER_ACESSORYS    (5)
 #define MAX_STOCK_ACESSORYS     (8)
 #define MAX_PLAYER_VEHICLES     (5)
+
+#define INVALID_SLOTID      (-1)
 
 /*                  PLAYER                  */
 enum E_PLAYER 
@@ -61,24 +63,33 @@ new pdy::Player[MAX_PLAYERS][E_PLAYER_PAYDAY];
 
 enum _:AXIS_TYPE
 {
-    AXIS_TYPE_NONE,
+    AXIS_TYPE_NONE = -1,
     AXIS_TYPE_X,
     AXIS_TYPE_Y,
     AXIS_TYPE_Z,
 }
 
+enum _:MEASUREMENT_TYPE
+{
+    MEA_TYPE_POSITION,
+    MEA_TYPE_ANGLE,
+    MEA_TYPE_SCALE,
+}
+
 enum E_PLAYER_ACESSORY
 {
-    acs::flags,
-    acs::slotid,
-    acs::camid,
-    Float:acs::pOffset, Float:acs::aOffset, Float:acs::sOffset,
-    acs::pAxis, acs::aAxis, acs::sAxis,
     acs::modelid,
+    acs::slotid,
     acs::boneid,
     Float:acs::pX, Float:acs::pY, Float:acs::pZ,
     Float:acs::rX, Float:acs::rY, Float:acs::rZ,
     Float:acs::sX, Float:acs::sY, Float:acs::sZ,
+    acs::color1, acs::color2,
+
+    acs::flags,
+    acs::camid,
+    Float:acs::pOffset, Float:acs::aOffset, Float:acs::sOffset,
+    acs::pAxis, acs::aAxis, acs::sAxis
 }
 
 enum (<<= 1)
@@ -143,6 +154,7 @@ stock acs::ClearData(playerid)
 {
     acs::Player[playerid][acs::flags]   = 0x00000000;
     acs::Player[playerid][acs::modelid] = INVALID_OBJECT_ID;
+    acs::Player[playerid][acs::slotid]  = INVALID_SLOTID;
     acs::Player[playerid][acs::boneid]  = 0;
     acs::Player[playerid][acs::pOffset] = 0.0;
     acs::Player[playerid][acs::aOffset] = 0.0;
@@ -150,6 +162,7 @@ stock acs::ClearData(playerid)
     acs::Player[playerid][acs::pAxis]   = AXIS_TYPE_NONE;
     acs::Player[playerid][acs::aAxis]   = AXIS_TYPE_NONE;
     acs::Player[playerid][acs::sAxis]   = AXIS_TYPE_NONE;
+    acs::Player[playerid][acs::camid]   = 0;
     acs::Player[playerid][acs::pX]      = 0.0;
     acs::Player[playerid][acs::pY]      = 0.0;
     acs::Player[playerid][acs::pZ]      = 0.0;
@@ -159,6 +172,8 @@ stock acs::ClearData(playerid)
     acs::Player[playerid][acs::sX]      = 0.0;
     acs::Player[playerid][acs::sY]      = 0.0;
     acs::Player[playerid][acs::sZ]      = 0.0;
+    acs::Player[playerid][acs::color1]  = -1;
+    acs::Player[playerid][acs::color2]  = -1;
 }
 
 stock Player::LoadData(playerid)
@@ -190,7 +205,7 @@ stock Player::KillTimer(playerid, timerid)
 
 stock Player::RemoveMoney(playerid, Float:price, bool:takeout = true)
 {
-    if(floatcmp(Player[playerid][pyr::money], price))
+    if(floatcmp(Player[playerid][pyr::money], price) >= 0)
     {
         Player[playerid][pyr::money] = takeout ? Player[playerid][pyr::money] - price : Player[playerid][pyr::money];
         
@@ -216,7 +231,10 @@ stock Player::GiveMoney(playerid, Float:price)
     
     DB::SetDataFloat(db_entity, "players", "money", Player[playerid][pyr::money], "name = '%s'", name);
     
-    Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_MONEY, "~g~~h~~h~R$: %2.f", Player[playerid][pyr::money]);
+    Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_MONEY, "~g~~h~~h~R$: %.2f", Player[playerid][pyr::money]);
+    
+    SendClientMessage(playerid, -1, "{339933} [ R$ ] {ffffff}Voce recebeu {339933}%.2f {ffffff}R$\n", price);
+    
     PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
 
     printf("[ BALANCE ] O jogador %s recebeu %.2f R$\n", name, price);

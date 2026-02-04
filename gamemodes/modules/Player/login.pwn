@@ -48,6 +48,9 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
         {
             #pragma unused spid, sdialogid, slistitem
 
+            if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_REGISTER))
+                return 1;
+
             if(!sresponse)
             {
                 SendClientMessage(playerid, -1, "{ffff33}[ ! ] {ffffff}Voce precisa digitar uma {ffff33}senha!"); 
@@ -70,11 +73,16 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
             Login::RegisterPlayer(playerid);
 
             Login::UnSetPlayer(playerid); 
+
+            return 1;
         }
 
         inline dialog_login(spid, sdialogid, sresponse, slistitem, string:stext[])
         {
             #pragma unused spid, sdialogid, slistitem
+
+            if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_LOGIN))
+                return 1;
 
             if(!sresponse)
             {
@@ -108,12 +116,14 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
             {ffff33}[ i ] {ffffff}Sua senha deve conter de {ffff33}5 {ffffff}a {ffff33}16 {ffffff}caracteres \
             Estes sendo: {ffff33}numeros{ffffff}, {ffff33}letras {ffffff} ou {ffff33}simbolos\n\n");
             Dialog_ShowCallback(playerid, using inline dialog_register, DIALOG_STYLE_PASSWORD, "{ffffff}BPS {33ff33}| {ffffff}Log-in", str, "Inserir", "Fechar");
+            return 1;
         }
 
         else if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_LOGIN))
         {
             format(str, 512, "{33ff33}>> {ffffff}Digite sua {33ff33}senha:\n\n");
             Dialog_ShowCallback(playerid, using inline dialog_login, DIALOG_STYLE_PASSWORD, "{ffffff}BPS {33ff33}| {ffffff}Log-in", str, "Inserir", "Fechar");
+            return 1;
         }
 
         return 1;

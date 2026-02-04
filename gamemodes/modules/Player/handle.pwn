@@ -97,6 +97,14 @@ hook OnPlayerConnect(playerid)
     return 1;
 }
 
+hook OnPlayerSpawn(playerid)
+{
+    if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED))
+        return -1;
+
+    return 1;
+}
+
 hook OnPlayerDisconnect(playerid, reason)
 {
     if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED))

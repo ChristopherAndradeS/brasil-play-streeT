@@ -14,7 +14,7 @@ stock Baseboard::ShowTDForPlayer(playerid)
         PlayerTextDrawShow(playerid, Baseboard::PlayerTD[playerid][i]);  
 	
 	Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_CPF, "CPF: %d", playerid);
-    Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_MONEY, "~g~~h~~h~R$: %2.f", Player[playerid][pyr::money]);
+    Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_MONEY, "~g~~h~~h~R$: %.2f", Player[playerid][pyr::money]);
     Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_LVL, "L: %d", Player[playerid][pyr::score]);
     Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_BITCOIN, "~y~B$: %d", Player[playerid][pyr::bitcoin]);
 }

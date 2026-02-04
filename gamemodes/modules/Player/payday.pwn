@@ -29,8 +29,6 @@ public OnPayDayReach(playerid)
     SendClientMessage(playerid, -1, "{00FF00}TOTAL RECEBIDO: R$ %.2f  |  +1 RESPECT (Nivel)", total);
     SendClientMessage(playerid, COLOR_THEME_BPS, "|________________________________________________|");
             
-    PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-
     Player::GiveMoney(playerid, total);
 
     new timerid = pyr::Timer[playerid][pyr::TIMER_PAYDAY];
