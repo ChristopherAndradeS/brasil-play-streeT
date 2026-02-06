@@ -4,7 +4,7 @@
 #define MAX_STOCK_ACESSORYS     (8)
 #define MAX_PLAYER_VEHICLES     (5)
 
-#define INVALID_SLOTID      (-1)
+#define INVALID_SLOTID          (-1)
 
 /*                  PLAYER                  */
 enum E_PLAYER 
@@ -17,6 +17,8 @@ enum E_PLAYER
     pyr::orgid,
     pyr::flags,
     Text3D:pyr::cpf_tag,
+
+    adm::adminid,
 }
 
 enum (<<= 1)
@@ -120,8 +122,12 @@ public Player::Kick(playerid, timerid, const msg[])
 
 /*                  PLAYER FUNCS                 */
 stock IsValidPlayer(playerid)
+{
+    if(playerid == INVALID_PLAYER_ID)
+        return 0;
+        
     return (IsPlayerConnected(playerid) && IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED));
-
+}
 stock Player::ClearAllData(playerid)
 {
     Player::ClearData(playerid);

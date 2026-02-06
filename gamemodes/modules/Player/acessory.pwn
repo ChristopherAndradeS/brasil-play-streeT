@@ -934,9 +934,9 @@ stock Acessory::GetNameByModelid(modelid, name[], len = sizeof(name))
     return 1;
 }
 
-YCMD:acessorios(playerid, params[], help)
+CMD:acessorios(playerid, params[])
 {
-    #pragma unused params, help
+    #pragma unused params
 
     new msg[1024], name[MAX_PLAYER_NAME], modelid;
     

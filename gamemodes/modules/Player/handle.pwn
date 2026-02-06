@@ -90,6 +90,37 @@ hook OnPlayerConnect(playerid)
     return 1;
 }
 
+hook OnPlayerDisconnect(playerid, reason)
+{
+    Player::KillTimer(playerid, pyr::TIMER_LOGIN_KICK);
+
+    if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED) || IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING))
+        return 1;
+        
+    new Float:pX, Float:pY, Float:pZ, Float:pA, name[MAX_PLAYER_NAME];
+
+    GetPlayerName(playerid, name);
+    GetPlayerPos(playerid, pX, pY, pZ);
+    GetPlayerFacingAngle(playerid, pA);
+    new t_left = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_PAYDAY]);
+
+    DB::Update(db_entity, "players", 
+    "pX = %f, pY = %f, pZ = %f, pA = %f, payday_tleft = %i WHERE name = '%q'",
+    pX, pY, pZ, pA, t_left, name);
+
+    Player::KillTimer(playerid, pyr::TIMER_PAYDAY);
+
+    if(IsValidDynamic3DTextLabel(Player[playerid][pyr::cpf_tag]))
+    {
+        DestroyDynamic3DTextLabel(Player[playerid][pyr::cpf_tag]);
+        Player[playerid][pyr::cpf_tag] = INVALID_3DTEXT_ID;
+    }
+
+    Player::ClearAllData(playerid);
+
+    return 1;
+}
+
 hook OnPlayerSpawn(playerid)
 {
     if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED))
@@ -100,39 +131,6 @@ hook OnPlayerSpawn(playerid)
         ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING);
         return -1;
     }
-
-    return 1;
-}
-
-hook OnPlayerDisconnect(playerid, reason)
-{
-    if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED))
-        return 1;
-        
-    new Float:pX, Float:pY, Float:pZ, Float:pA, name[MAX_PLAYER_NAME];
-
-    GetPlayerName(playerid, name);
-    GetPlayerPos(playerid, pX, pY, pZ);
-    GetPlayerFacingAngle(playerid, pA);
-
-    DB::SetDataFloat(db_entity, "players", "pX", pX, "name = '%s'", name);
-    DB::SetDataFloat(db_entity, "players", "pY", pY, "name = '%s'", name);
-    DB::SetDataFloat(db_entity, "players", "pZ", pZ, "name = '%s'", name);
-    DB::SetDataFloat(db_entity, "players", "pA", pA, "name = '%s'", name);
-
-    new t_left = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_PAYDAY]);
-    DB::SetDataInt(db_entity, "players", "payday_tleft", t_left, "name = '%s'", name);
-
-    Player::KillTimer(playerid, pyr::TIMER_PAYDAY);
-    Player::KillTimer(playerid, pyr::TIMER_LOGIN_KICK);
-
-    if(IsValidDynamic3DTextLabel(Player[playerid][pyr::cpf_tag]))
-    {
-        DestroyDynamic3DTextLabel(Player[playerid][pyr::cpf_tag]);
-        Player[playerid][pyr::cpf_tag] = INVALID_3DTEXT_ID;
-    }
-
-    Player::ClearAllData(playerid);
 
     return 1;
 }

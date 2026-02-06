@@ -34,6 +34,7 @@ stock DB::GetCount(DB:db, const table[], const field[], const where[], OPEN_MP_T
         new str[128];
         va_format(str, 128, where, ___(4));
         result = DB_ExecuteQuery(db, "SELECT %q FROM %q WHERE %s;", field, table, str);
+        //printf("SELECT %q FROM %q WHERE %s;", field, table, str);
     }
 
     if(!result)
@@ -46,7 +47,7 @@ stock DB::GetCount(DB:db, const table[], const field[], const where[], OPEN_MP_T
     return count;
 }
 
-stock DB::Exists(DB:db, const table[], const field[], const where[], OPEN_MP_TAGS:...)
+stock DB::Exists(DB:db, const table[], const field[], const where[] = "", OPEN_MP_TAGS:...)
     return (DB::GetCount(db, table, field, where, ___(4)) >= 1);
 
 stock DB::Insert(DB:db, const table[], const fields[], const values[], OPEN_MP_TAGS:...)
@@ -75,13 +76,13 @@ stock DB::Update(DB:db, const table[], const clause[], OPEN_MP_TAGS:...)
 {
     new str[512];
     va_format(str, 512, clause, ___(3));
-    new DBResult:result = DB_ExecuteQuery(db, "UPDATE %q SET %s;", table, clause);
+    new DBResult:result = DB_ExecuteQuery(db, "UPDATE %q SET %s;", table, str);
 
     if(!result)
     {
         new name[16];
         DB::GetNameByID(db, name);
-        printf("[ DB ] Erro: Ao atualizar dados %s > %s\n", name, table);
+        printf("[ DB ] Erro: Ao atualizar dados. query: %s > %s\n", "UPDATE %q SET %s;", table, str);
         return 0;
     }
 
@@ -192,7 +193,7 @@ stock DB::SetDataInt(DB:db, const table[], const field[], data, const where[], G
 {
     new str[128];
     va_format(str, 128, where, ___(5));
-    DB_FreeResultSet(DB_ExecuteQuery(db, "UPDATE %q SET %s = %i WHERE %s", table, field, data, str));
+    DB_FreeResultSet(DB_ExecuteQuery(db, "UPDATE %q SET %s = %i WHERE %s;", table, field, data, str));
 
     return 1;
 }
@@ -201,7 +202,7 @@ stock DB::SetDataFloat(DB:db, const table[], const field[], Float:data, const wh
 {
     new str[128];
     va_format(str, 128, where, ___(5));
-    DB_FreeResultSet(DB_ExecuteQuery(db, "UPDATE %q SET %s = %f WHERE %s", table, field, data, str));
+    DB_FreeResultSet(DB_ExecuteQuery(db, "UPDATE %q SET %s = %f WHERE %s;", table, field, data, str));
 
     return 1;
 }
@@ -210,7 +211,7 @@ stock DB::SetDataString(DB:db, const table[], const field[], const data[], const
 {
     new str[128];
     va_format(str, 128, where, ___(5));
-    DB_FreeResultSet(DB_ExecuteQuery(db, "UPDATE %q SET %s = '%s' WHERE %s", table, field, data, str));
+    DB_FreeResultSet(DB_ExecuteQuery(db, "UPDATE %q SET %s = '%s' WHERE %s;", table, field, data, str));
 
     return 1;
 }

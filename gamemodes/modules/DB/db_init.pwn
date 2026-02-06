@@ -29,13 +29,13 @@ hook OnGameModeInit()
         reason      VARCHAR(64),\
         left_tstamp INTEGER");
 
-        DB::CreateTable(db_entity, "vehicles", 
-        "owner      VARCHAR(24),\
-        owner_type  INTEGER, \
-        slotid      INTEGER,\
-        modelid     INTEGER,\
-        pX FLOAT pY FLOAT, pZ FLOAT,\
-        pA FLOAT, color1 INTEGER, color2 INTEGER");
+        // DB::CreateTable(db_entity, "vehicles", 
+        // "owner      VARCHAR(24),\
+        // owner_type  INTEGER, \
+        // slotid      INTEGER,\
+        // modelid     INTEGER,\
+        // pX FLOAT pY FLOAT, pZ FLOAT,\
+        // pA FLOAT, color1 INTEGER, color2 INTEGER");
 
         DB::CreateTable(db_entity, "acessorys", 
         "owner      VARCHAR(24),\
@@ -49,6 +49,13 @@ hook OnGameModeInit()
         rX FLOAT, rY FLOAT, rZ FLOAT,\
         sX FLOAT, sY FLOAT, sZ FLOAT,\
         color1 INTEGER, color2 INTEGER");
+
+        DB::CreateTable(db_entity, "admins", 
+        "name        VARCHAR(24),\
+        level        INTEGER,\
+        promoter     INTEGER,\
+        promote_date VARCHAR(32)\
+        ");
     }
 
     else db_entity = DB_Open("entitys.db");

@@ -1,5 +1,7 @@
 #include <YSI\YSI_Coding\y_hooks>
 
+#define abs(%0)                                 (((%0) < 0)?(-(%0)):((%0)))
+
 stock ClearChat(playerid, cells = 15)
 {
     for(new i = 0; i < cells; i++)
@@ -20,6 +22,14 @@ stock IsFlagSet(flag, tag_binary)
 
 stock ClearAllFlags(&flag) 
     return (flag = 0x00000000);
+
+stock GetISODate(timestr[], len, HourGMT, MinuteGMT = 0)
+{
+    new year, month, day, hour, minute, second;
+    TimestampToDate(gettime(), year, month, day, hour, minute, second, HourGMT);
+    format(timestr, len, "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
+    year, month, day, hour, minute, second, HourGMT > 0 ? '+' : '-', abs(HourGMT), MinuteGMT);
+}
 
 stock TimestampToDate(Timestamp, &year, &month, &day, &hour, &minute, &second, HourGMT, MinuteGMT = 0)
 {
@@ -61,9 +71,9 @@ stock GetTimestampString(string[64], timestamp, HourGMT = -3)
 
 stock IsValidPlayerName(name[], &issue)
 {        
-    if(strlen(name) < 3 || strlen(name) > 20)
+    if(strlen(name) < 3 || strlen(name) > MAX_PLAYER_NAME)
     {
-        issue = 3;
+        issue = 2;
         return 0;
     }
 
@@ -75,11 +85,7 @@ stock IsValidPlayerName(name[], &issue)
         {
             case '\0': continue;
             case 32: name[i] = '_';
-            case 48..57:
-            {
-                issue = 2;
-                return 0;
-            }
+            case 48..57: continue;
             case 65..90: continue;
             case 95: continue;
             case 97..122: continue;
@@ -150,4 +156,37 @@ stock Float:floatclamp(Float:value, Float:min, Float:max)
         clamped = value;
 
     return clamped;
+}
+
+stock GetPlayerIDByName(const name[])
+{
+    new tmp_name[MAX_PLAYER_NAME];
+   
+    foreach(new i : Player)
+    {
+        GetPlayerName(i, tmp_name);
+
+        if(!isnull(name) && !isnull(tmp_name) && strcmp(tmp_name, name) == 0)
+            return i;
+    }
+
+    return INVALID_PLAYER_ID;
+}
+
+stock GetVehicleNameByModel(modelid, vehname[], len = sizeof(vehname))
+{ 
+    if(modelid < 400 || modelid > 611)
+        format(vehname, len, "Modelo Invalido");
+    
+    else 
+        format(vehname, len, "%s", g_arrVehicleNames[modelid - 400]);
+}
+
+
+stock GetPlayerNameEx(playerid)
+{
+	new
+		name[MAX_PLAYER_NAME];
+	GetPlayerName(playerid, name, MAX_PLAYER_NAME - 1);
+	return name;
 }
