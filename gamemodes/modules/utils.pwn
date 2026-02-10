@@ -61,6 +61,18 @@ stock TimestampToDate(Timestamp, &year, &month, &day, &hour, &minute, &second, H
     year = y + (month <= 2 ? 1 : 0);
 }
 
+stock GetWeekDayFromTimestamp(timestamp, Hour_GMT = -3)
+{
+    // 86400 segundos em um dia
+    // Adicionamos 4 dias ao cálculo porque 01/01/1970 foi Quinta-feira (4º dia da semana)
+    // Se você quer que Domingo seja 0, Segunda 1, etc.
+    
+    new dayOfWeek = (((timestamp + (Hour_GMT * 3600)) / 86400) + 4) % 7;
+    
+    return dayOfWeek; 
+    // Retorna: 0 = Domingo, 1 = Segunda, 2 = Terça... 6 = Sábado
+}
+
 stock GetTimestampString(string[64], timestamp, HourGMT = -3)
 {
     new year, month, day, hour, minute, second;
@@ -102,29 +114,29 @@ stock RemoveGraphicAccent(str[])
 {
     for(new i = 0; str[i] != '\0'; i++)
     {
+        // Usamos o valor numérico do caractere para evitar erros de encoding no compilador
         switch(str[i])
         {
-            case 'á', 'à', 'â', 'ã': str[i] = 'a';
-            case 'Á', 'À', 'Â', 'Ã': str[i] = 'A';
-     
-            case 'é', 'è', 'ê': str[i] = 'e';
-            case 'É', 'È', 'Ê': str[i] = 'E';
-
-            case 'í', 'ì', 'î': str[i] = 'I';
-            case 'Í', 'Ì', 'Î': str[i] = 'i';
-
-            case 'ó', 'ò', 'ô', 'õ': str[i] = 'o';
-            case 'Ó', 'Ò', 'Ô', 'Õ': str[i] = 'O';
-
-            case 'ú', 'ù', 'û': str[i] = 'u';
-            case 'Ú', 'Ù', 'Û': str[i] = 'U';
-
-            case 'ç': str[i] = 'c';
-            case 'Ç': str[i] = 'C';
+            case 0xE0..0xE3: str[i] = 'a'; // à á â ã
+            case 0xC0..0xC3: str[i] = 'A'; // À Á Â Ã
+            
+            case 0xE8..0xEA: str[i] = 'e'; // è é ê
+            case 0xC8..0xCA: str[i] = 'E'; // È É Ê
+            
+            case 0xEC..0xEE: str[i] = 'i'; // ì í î
+            case 0xCC..0xCE: str[i] = 'I'; // Ì Í Î
+            
+            case 0xF2..0xF5: str[i] = 'o'; // ò ó ô õ
+            case 0xD2..0xD5: str[i] = 'O'; // Ò Ó Ô Õ
+            
+            case 0xF9..0xFB: str[i] = 'u'; // ù ú û
+            case 0xD9..0xDB: str[i] = 'U'; // Ù Ú Û
+            
+            case 0xE7: str[i] = 'c'; // ç
+            case 0xC7: str[i] = 'C'; // Ç
         }
     }
 }
-
 stock norm_hash(hash)
 {
     if(hash < 0)
@@ -181,7 +193,6 @@ stock GetVehicleNameByModel(modelid, vehname[], len = sizeof(vehname))
     else 
         format(vehname, len, "%s", g_arrVehicleNames[modelid - 400]);
 }
-
 
 stock GetPlayerNameEx(playerid)
 {

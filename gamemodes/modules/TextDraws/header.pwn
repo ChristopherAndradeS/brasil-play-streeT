@@ -9,6 +9,9 @@ new PlayerText:Baseboard::PlayerTD[MAX_PLAYERS][5];
 new Text:Acessory::PublicTD[21];
 new PlayerText:Acessory::PlayerTD[MAX_PLAYERS][14];
 
+new Text:Adm::PublicTD[14];
+new PlayerText:Adm::PlayerTD[MAX_PLAYERS][9];
+
 /*  LOGIN  */
 enum _:E_TD_LOGIN
 {
@@ -74,6 +77,28 @@ enum _:E_PTD_ACESSORY
     PlayerText:PTD_ACS_SCL_AXIS,
 }
 
+enum _:E_TD_ADMIN
+{
+    Text:TD_ADM_BTN_LEFT = 2,
+    Text:TD_ADM_BTN_RIGHT = 3, 
+    Text:TD_ADM_BTN_VIEW_INV = 6,
+    Text:TD_ADM_BTN_PANEL = 7,
+    Text:TD_ADM_BTN_HIDE = 8,
+}
+
+enum _:E_PTD_ADMIN
+{
+    PlayerText:PTD_ADM_TXT_NAME,
+    PlayerText:PTD_ADM_TXT_ROLE,
+    PlayerText:PTD_ADM_TXT_ID,
+    PlayerText:PTD_ADM_BAR_HEALTH,
+    PlayerText:PTD_ADM_BAR_ARMOUR,
+    PlayerText:PTD_ADM_TXT_WORLD,
+    PlayerText:PTD_ADM_TXT_PING,
+    PlayerText:PTD_ADM_TXT_STATE,
+    PlayerText:PTD_ADM_TXT_ORGNAME,
+}
+
 hook OnGameModeInit()
 {
     Login::CreatePublicTD();
@@ -84,6 +109,9 @@ hook OnGameModeInit()
 
     Acessory::CreatePublicTD();
     printf("[ TEXTDRAW ] TextDraw: Editor de acessórios carregada\n");
+
+    Adm::CreatePublicTD();
+    printf("[ TEXTDRAW ] TextDraw: Administração\n");
     return 1;
 }
 
@@ -91,8 +119,8 @@ hook OnPlayerDisconnect(playerid, reason)
 {
     Login::HideTDForPlayer(playerid);
     Baseboard::HideTDForPlayer(playerid);
+    Acessory::HideTDForPlayer(playerid);
+    Adm::HideTDForPlayer(playerid);
 
-    Login::DestroyPlayerTD(playerid);
-    Baseboard::DestroyPlayerTD(playerid);
     return 1;
 }

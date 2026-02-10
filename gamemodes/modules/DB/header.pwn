@@ -10,13 +10,13 @@ stock DB::CreateTable(DB:db, const table[], const definition[])
 
     if(!result)
     {
-        printf("[ DB ] Erro: Ao criar tabela %s > %s\n", name, table);
+        printf("[ DB ] Erro: Ao criar tabela %q > %q\n", name, table);
         return 0;
     }
 
     DB_FreeResultSet(result);
 
-    printf("[ DB ] Tabela %s > '%s' criada com sucesso\n", name, table);
+    printf("[ DB ] Tabela %q > %q criada com sucesso\n", name, table);
 
     return 1;
 }
@@ -82,7 +82,7 @@ stock DB::Update(DB:db, const table[], const clause[], OPEN_MP_TAGS:...)
     {
         new name[16];
         DB::GetNameByID(db, name);
-        printf("[ DB ] Erro: Ao atualizar dados. query: %s > %s\n", "UPDATE %q SET %s;", table, str);
+        printf("[ DB ] Erro: Ao atualizar dados. query: %q > %q\n", "UPDATE %q SET %s;", name, table, table, str);
         return 0;
     }
 
@@ -105,16 +105,15 @@ stock DB::Delete(DB:db, const table[], const where[], OPEN_MP_TAGS:...)
 
     if(!result)
     {
-        printf("[ DB ] Erro: Ao deletar %s > %s ONDE %s\n", name, table, str);
+        printf("[ DB ] Erro: Ao deletar %q > %q ONDE %s\n", name, table, str);
         return 0;
     }
 
-    new affected = DB_GetRowCount(result);
     DB_FreeResultSet(result);
 
-    printf("[ DB ] Elemento %s > %s removido da tabela com sucesso\n", name, str);
+    printf("[ DB ] Elemento %q > %q removido da tabela com sucesso\n", name, str);
 
-    return affected;
+    return 1;
 }
 
 stock DB::GetDataInt(DB:db, const table[], const field[], &output, const where[], OPEN_MP_TAGS:...)
@@ -130,7 +129,7 @@ stock DB::GetDataInt(DB:db, const table[], const field[], &output, const where[]
         new name[16];
         DB::GetNameByID(db, name);
 
-        printf("[ DB ] Erro: Ao carregar dado 'int' %s > %s > %s\n", name, table, field);
+        printf("[ DB ] Erro: Ao carregar dado 'int' %q > %q > %q\n", name, table, field);
         return 0;
     }
 
@@ -154,7 +153,7 @@ stock DB::GetDataFloat(DB:db, const table[], const field[], &Float:output, const
         new name[16];
         DB::GetNameByID(db, name);
 
-        printf("[ DB ] Erro: Ao carregar dado 'float' %s > %s > %s\n", name, table, field);
+        printf("[ DB ] Erro: Ao carregar dado 'float' %q > %q > %q\n", name, table, field);
         return 0;
     }
 
@@ -178,7 +177,7 @@ stock DB::GetDataString(DB:db, const table[], const field[], output[], len, cons
         new name[16];
         DB::GetNameByID(db, name);
 
-        printf("[ DB ] Erro: Ao carregar dado 'string' %s > %s > %s\n", name, table, field);
+        printf("[ DB ] Erro: Ao carregar dado 'string' %q > %q > %q\n", name, table, field);
         return 0;
     }
 
@@ -193,7 +192,19 @@ stock DB::SetDataInt(DB:db, const table[], const field[], data, const where[], G
 {
     new str[128];
     va_format(str, 128, where, ___(5));
-    DB_FreeResultSet(DB_ExecuteQuery(db, "UPDATE %q SET %s = %i WHERE %s;", table, field, data, str));
+
+    new DBResult:result = DB_ExecuteQuery(db, "UPDATE %q SET %s = %i WHERE %s;", table, field, data, str);
+
+    if(!result)
+    {
+        new name[16];
+        DB::GetNameByID(db, name);
+
+        printf("[ DB ] Erro: Ao setar valor 'int' %q > %q ONDE %s\n", name, table, str);
+        return 0;
+    }
+    
+    DB_FreeResultSet(result);
 
     return 1;
 }
@@ -202,7 +213,19 @@ stock DB::SetDataFloat(DB:db, const table[], const field[], Float:data, const wh
 {
     new str[128];
     va_format(str, 128, where, ___(5));
-    DB_FreeResultSet(DB_ExecuteQuery(db, "UPDATE %q SET %s = %f WHERE %s;", table, field, data, str));
+        
+    new DBResult:result = DB_ExecuteQuery(db, "UPDATE %q SET %s = %f WHERE %s;", table, field, data, str);
+
+    if(!result)
+    {
+        new name[16];
+        DB::GetNameByID(db, name);
+
+        printf("[ DB ] Erro: Ao setar valor 'float' %q > %q ONDE %s\n", name, table, str);
+        return 0;
+    }
+
+    DB_FreeResultSet(result);
 
     return 1;
 }
@@ -211,18 +234,26 @@ stock DB::SetDataString(DB:db, const table[], const field[], const data[], const
 {
     new str[128];
     va_format(str, 128, where, ___(5));
-    DB_FreeResultSet(DB_ExecuteQuery(db, "UPDATE %q SET %s = '%s' WHERE %s;", table, field, data, str));
+    
+    new DBResult:result = DB_ExecuteQuery(db, "UPDATE %q SET %s = '%q' WHERE %s;", table, field, data, str);
+
+    if(!result)
+    {
+        new name[16];
+        DB::GetNameByID(db, name);
+
+        printf("[ DB ] Erro: Ao setar valor 'string' %q > %q ONDE %s\n", name, table, str);
+        return 0;
+    }
+
+    DB_FreeResultSet(result);
 
     return 1;
 }
 
 stock DB::GetNameByID(DB:db, name[])
 {
-    if(db == db_entity)
-        format(name, 16, "db_entity");
-    else if(db_stock)
-        format(name, 16, "db_stock");
-    else
-        format(name, 16, "db_invalid");
-    return 1;
+    if(db == db_entity) return format(name, 16, "db_entity");
+    if(db == db_stock)  return format(name, 16, "db_stock");
+    else                return format(name, 16, "db_invalid");
 }

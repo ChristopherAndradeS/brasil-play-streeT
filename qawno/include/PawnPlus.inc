@@ -1,4 +1,4 @@
-/** PawnPlus v1.4.2 by IllidanS4 **/
+/** PawnPlus v1.5.2 by IS4 **/
 //github.com/IllidanS4/PawnPlus
 
 #if defined _inc_PawnPlus
@@ -14,7 +14,7 @@
 /*      Setup      */
 /*                 */
 
-const PP_VERSION = 0x142;
+const PP_VERSION = 0x152;
 
 #if defined PP_SYNTAX
 #define PP_SYNTAX_AMX_FORKED
@@ -128,6 +128,7 @@ native pp_max_recursion(level);
 native bool:pp_toggle_exec_hook(bool:toggle);
 native pp_public_min_index(index);
 native bool:pp_use_funcidx(bool:use);
+native bool:pp_native_hook_recursive(bool:recursive);
 
 native unit:pp_tick();
 native pp_num_tasks();
@@ -141,6 +142,7 @@ native pp_num_maps();
 native pp_num_pools();
 native pp_num_guards();
 native pp_num_amx_guards();
+native pp_num_amx_vars();
 native pp_entry(name[], size=sizeof name);
 native String:pp_entry_s();
 native pp_num_local_iters();
@@ -182,8 +184,8 @@ enum locale_category (<<= 1)
 }
 
 native unit:pp_locale(const locale[], locale_category:category=locale_all);
-native pp_locale_name(locale[], size=sizeof locale);
-native String:pp_locale_name_s();
+native pp_locale_name(locale[], size=sizeof locale, const encoding[]="", locale_category:category=locale_all);
+native String:pp_locale_name_s(const encoding[]="", locale_category:category=locale_all);
 
 native unit:pp_format_env_push(Map:env);
 native unit:pp_format_env_pop();
@@ -209,6 +211,7 @@ enum handler_flags
     handler_return = 1,
     handler_args = 2,
     handler_inverted_return = 4,
+    handler_add_first = 8,
 }
 
 const Guard:INVALID_GUARD = Guard:0;
@@ -507,13 +510,24 @@ enum str_create_mode
     str_no_nulls = 2
 }
 
+enum amx_buffer_options
+{
+    amx_buffer_default = 0,
+    amx_buffer_string_auto_fit = 1,
+    amx_buffer_string_set_unpacked = 0b010,
+    amx_buffer_string_set_packed = 0b110,
+    amx_buffer_string_set_narrow = 0b01000,
+    amx_buffer_string_set_wide = 0b11000,
+    amx_buffer_string_use_strlen = 0b100000
+}
+
 native String:str_new(const str[], str_create_mode:mode=str_preserve);
 native String:str_new_arr(const arr[], size=sizeof arr, str_create_mode:mode=str_preserve);
 native String:str_new_static(const str[], str_create_mode:mode=str_preserve, size=sizeof str);
 native String:str_new_buf(size);
-native AmxString:str_addr(StringTag:str);
-native ConstAmxString:str_addr_const(ConstStringTag:str);
-native AmxStringBuffer:str_buf_addr(StringTag:str);
+native AmxString:str_addr(StringTag:str, amx_buffer_options:options=amx_buffer_default);
+native ConstAmxString:str_addr_const(ConstStringTag:str, amx_buffer_options:options=amx_buffer_default);
+native AmxStringBuffer:str_buf_addr(StringTag:str, amx_buffer_options:options=amx_buffer_default);
 native String:str_acquire(StringTag:str);
 native String:str_release(StringTag:str);
 native unit:str_delete(StringTag:str);
@@ -521,6 +535,7 @@ native bool:str_valid(ConstStringTag:str);
 native String:str_clone(ConstStringTag:str);
 
 native str_len(ConstStringTag:str);
+native str_capacity(ConstStringTag:str);
 native str_get(ConstStringTag:str, buffer[], size=sizeof buffer, start=0, end=cellmax);
 native str_getc(ConstStringTag:str, pos);
 native str_setc(StringTag:str, pos, value);
@@ -529,6 +544,7 @@ native bool:str_empty(ConstStringTag:str);
 native bool:str_eq(ConstStringTag:str1, ConstStringTag:str2);
 native str_findc(ConstStringTag:str, value, offset=0);
 native str_find(ConstStringTag:str, ConstStringTag:value, offset=0);
+native str_count_chars(ConstStringTag:str, const encoding[]="", offset=0);
 
 native String:str_cat(ConstStringTag:str1, ConstStringTag:str2);
 native String:str_sub(ConstStringTag:str, start=0, end=cellmax);
@@ -539,8 +555,10 @@ native List:str_split(ConstStringTag:str, const delims[]);
 native List:str_split_s(ConstStringTag:str, ConstStringTag:delims);
 native String:str_join(List:list, const delim[]);
 native String:str_join_s(List:list, ConstStringTag:delim);
-native String:str_to_lower(ConstStringTag:str);
-native String:str_to_upper(ConstStringTag:str);
+native String:str_to_lower(ConstStringTag:str, const encoding[]="");
+native String:str_to_upper(ConstStringTag:str, const encoding[]="");
+native String:str_convert(ConstStringTag:str, const from_encoding[], const to_encoding[]);
+native String:str_collation_key(ConstStringTag:str, bool:is_primary=true, const encoding[]="");
 
 native String:str_set(StringTag:target, ConstStringTag:other);
 native String:str_append(StringTag:target, ConstStringTag:other);
@@ -548,8 +566,11 @@ native String:str_ins(StringTag:target, ConstStringTag:other, pos);
 native String:str_del(StringTag:target, start=0, end=cellmax);
 native String:str_clear(StringTag:str);
 native String:str_resize(StringTag:str, size, padding=0);
-native String:str_set_to_lower(StringTag:str);
-native String:str_set_to_upper(StringTag:str);
+native String:str_reserve(StringTag:str, size);
+native String:str_set_to_lower(StringTag:str, const encoding[]="");
+native String:str_set_to_upper(StringTag:str, const encoding[]="");
+native String:str_set_convert(StringTag:str, const from_encoding[], const to_encoding[]);
+native String:str_set_collation_key(StringTag:str, bool:is_primary=true, const encoding[]="");
 
 native String:str_format(const format[], AnyTag:...);
 native String:str_format_s(ConstStringTag:format, AnyTag:...);
@@ -568,11 +589,13 @@ enum regex_options (<<= 1)
     regex_awk = 3,
     regex_grep = 4,
     regex_egrep = 5,
+    regex_lex = 6,
     
     regex_icase = 8,
     regex_nosubs,
     regex_optimize,
     regex_collate,
+    regex_percents,
     
     regex_not_bol = 256,
     regex_not_eol,
@@ -635,9 +658,9 @@ native Variant:var_new_buf(size, TagTag:tag_id=0);
 native Variant:var_new_str(const value[]);
 native Variant:var_new_str_s(ConstStringTag:value);
 native Variant:var_new_var(ConstVariantTag:value);
-native AmxVariant:var_addr(VariantTag:var);
-native ConstAmxVariant:var_addr_const(ConstVariantTag:var);
-native AmxVariantBuffer:var_buf_addr(VariantTag:str);
+native AmxVariant:var_addr(VariantTag:var, amx_buffer_options:options=amx_buffer_default);
+native ConstAmxVariant:var_addr_const(ConstVariantTag:var, amx_buffer_options:options=amx_buffer_default);
+native AmxVariantBuffer:var_buf_addr(VariantTag:str, amx_buffer_options:options=amx_buffer_default);
 native Variant:var_acquire(VariantTag:var);
 native Variant:var_release(VariantTag:var);
 native unit:var_delete(VariantTag:var);
@@ -1818,18 +1841,18 @@ native expr_exec_multi(Expression:expr, List:output);
 enum parser_options (<<= 1)
 {
     parser_bare = 0,
-	parser_allow_unknown_symbols = 1,
-	parser_allow_debug_symbols,
-	parser_allow_natives,
-	parser_allow_publics,
-	parser_allow_pubvars,
-	parser_allow_constructions,
-	parser_allow_ranges,
-	parser_allow_arrays,
-	parser_allow_queries,
-	parser_allow_arguments,
-	parser_allow_environment,
-	parser_allow_casts,
+    parser_allow_unknown_symbols = 1,
+    parser_allow_debug_symbols,
+    parser_allow_natives,
+    parser_allow_publics,
+    parser_allow_pubvars,
+    parser_allow_constructions,
+    parser_allow_ranges,
+    parser_allow_arrays,
+    parser_allow_queries,
+    parser_allow_arguments,
+    parser_allow_environment,
+    parser_allow_casts,
     parser_allow_literals,
     parser_allow_intrinsics,
     parser_allow_strings,

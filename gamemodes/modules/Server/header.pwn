@@ -1,57 +1,30 @@
-#include <YSI\YSI_Coding\y_hooks>
-
 forward OnServerUpdate();
 
 enum E_SERVER
 {
-    srv::update_timerid,
+    srv::year, srv::month, srv::day,
+    srv::hour, srv::minute, srv::seconds,
+    srv::weekday, srv::timestamp, srv::gmt,
+
+    srv::g_weatherid, srv::j_weatherid,
+    Float:srv::g_weather_prob, Float:srv::j_weather_prob,
+
+    srv::is_count_down
 }
 
 new Server[E_SERVER];
 
-hook OnGameModeInit()
+enum E_SERVER_TIMER
 {
-    Server[srv::update_timerid] = SetTimer("OnServerUpdate", 1000, true);
-    
-    return 1;
+    srv::TIMER_ON_UPDATE_SEC,
+    srv::TIMER_ON_UPDATE_MIN,
+    srv::TIMER_COUNT_DOWN
 }
 
-hook OnGameModeExit()
-{
-    KillTimer(Server[srv::update_timerid]);
-    
-    return 1;
-}
+new E_SERVER_TIMER:srv::Timer[E_SERVER_TIMER];
 
-public OnServerUpdate()
-{
-    new day, mouth, year, hour, minute, sec; 
-    
-    getdate(year, mouth, day);
-    gettime(hour, minute, sec);
+stock Server::IsNewDay()
+    return (!Server[srv::hour] && !Server[srv::minute]);
 
-    Server::UpdatePlayerTime(hour, minute);
-
-    TextDrawSetString(Baseboard::PublicTD[TD_BASEBOARD_CLOCK], "%02d:%02d:%02d~n~%02d_de_%s_de_%04d", 
-    hour, minute, sec, day, gMonths[mouth], year);
-
-    return 1;
-}
-
-stock Server::UpdatePlayerTime(hour, minute)
-{
-    foreach (new i : Player)
-    {
-        SetPlayerTime(i, hour, minute);
-
-        if(IsValidTimer(pyr::Timer[i][pyr::TIMER_PAYDAY]))
-        {
-            new left_time = GetTimerRemaining(pyr::Timer[i][pyr::TIMER_PAYDAY]);
-            new lmin  = floatround((left_time / 60000));
-            new lsec  = floatround((left_time % 60000) / 1000);
-
-            Baseboard::UpdateTDForPlayer(i, PTD_BASEBOARD_PAYDAY, 
-            "~b~~h~~h~PAYDAY~w~ %02d~b~~h~~h~:~w~%02d", lmin, lsec);
-        }
-    }
-}
+stock Server::IsNewHour()
+    return (!Server[srv::minute]);

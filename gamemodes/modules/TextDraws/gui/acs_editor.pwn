@@ -1,14 +1,6 @@
-#include <YSI\YSI_Coding\y_hooks>
-
 stock Acessory::UpdateTDForPlayer(playerid, textid, const text[], GLOBAL_TAG_TYPES:...)
 {
 	PlayerTextDrawSetString(playerid, Acessory::PlayerTD[playerid][textid], text, ___(3));
-}
-
-stock Acessory::UpdateModelForPlayer(playerid, textid, modelid)
-{
-	PlayerTextDrawSetPreviewModel(playerid, Acessory::PlayerTD[playerid][textid], modelid);
-	PlayerTextDrawShow(playerid, Acessory::PlayerTD[playerid][textid]); 
 }
 
 stock Acessory::UpdateColorPTD(playerid, textid, color)
@@ -17,12 +9,15 @@ stock Acessory::UpdateColorPTD(playerid, textid, color)
 	PlayerTextDrawShow(playerid, Acessory::PlayerTD[playerid][textid]); 
 }
 
+stock Acessory::IsVisibleTDForPlayer(playerid)
+	return (IsTextDrawVisibleForPlayer(playerid, Acessory::PublicTD[0]));
+
 stock Acessory::ShowTDForPlayer(playerid)
 { 
 	Acessory::CreatePlayerTD(playerid);
 
-    for(new j = 0; j < 21; j++)
-        TextDrawShowForPlayer(playerid, Acessory::PublicTD[j]);
+    for(new i = 0; i < 21; i++)
+        TextDrawShowForPlayer(playerid, Acessory::PublicTD[i]);
 	for(new i = 0; i < 14; i++)
         PlayerTextDrawShow(playerid, Acessory::PlayerTD[playerid][i]); 
 
@@ -44,7 +39,10 @@ stock Acessory::HideTDForPlayer(playerid)
 stock Acessory::DestroyPlayerTD(playerid)
 {
     for(new i = 0; i < 14; i++)
+	{
         PlayerTextDrawDestroy(playerid, Acessory::PlayerTD[playerid][i]);
+		Acessory::PlayerTD[playerid][i] = INVALID_PLAYER_TEXT_DRAW;
+	}
 }
 
 stock Acessory::CreatePublicTD()

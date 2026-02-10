@@ -1,7 +1,5 @@
 #include <YSI\YSI_Coding\y_hooks>
 
-#define INDETERMINATE_TIME (0x7FFFFFFF)
-
 new const gNameIssue[][32] =
 {
     {"INVALID_ISSUE"},
@@ -11,6 +9,10 @@ new const gNameIssue[][32] =
 
 hook OnPlayerConnect(playerid)
 {
+    Player::ClearAllData(playerid);
+
+    if(IsPlayerNPC(playerid)) return -1;
+        
     ClearChat(playerid, 20);
 
     new name[MAX_PLAYER_NAME], issue;
@@ -25,79 +27,50 @@ hook OnPlayerConnect(playerid)
     }
 
     /* VERIFICAR PUNIÇÃO - ESTÁ BANIDO ?  */
-    if(DB::Exists(db_entity, "punishments", "name", "name = %s AND level = 2", name))
+    if(!Punish::VerifyPlayer(playerid))
     {
-        new left_time;
-
-        DB::GetDataInt(db_entity, "punishments", "left_tstamp", left_time, "name = %s AND level = 2", name);
-
-        if(left_time > gettime())
-        {
-            SendClientMessage(playerid, COLOR_THEME_BPS, "[ BPS ] {ffffff}Você foi {33ff33}perdoado \
-            {ffffff}do seu banimento. Esperamos {33ff33}bom {ffffff}comportamento de agora em diante!");
-
-            DB::Delete(db_entity, "punishments", "name = %s AND level = 2", name);
-
-            return 1;
-        }
-
-        new ip[16], reason[64], admin_name[MAX_PLAYER_NAME], date[16], level;
-
-        DB::GetDataString(db_entity, "punishments", "name", ip, 16, "name = %s AND level = 2", name);
-        DB::GetDataString(db_entity, "punishments", "reason", reason, 64, "name = %s AND level = 2", name);
-        DB::GetDataString(db_entity, "punishments", "punished_by", admin_name, 24, "name = %s AND level = 2", name);
-        DB::GetDataString(db_entity, "punishments", "date", date, 16, "name = %s AND level = 2", name);
-        DB::GetDataInt(db_entity, "punishments", "level", level, "name = %s AND level = 2", name);
-
-        new str[512], time_str[64];
-        
-        format(time_str, 64, "%s {ffffff}(%d dias)", date, floatround((left_time - gettime()) / 86400));
-     
-        format(str, sizeof(str), "{ff3333}Você foi banido!\n\n\
-        {ffffff}Indentificamos uma atividade suspeita neste usuario e aplicamos um banimento!\n\n\
-        Admin:     \t{ff3333}%s\n\
-        {ffffff}Punição:   \t{ff3333}Banimento\n\
-        {ffffff}Motivo:    \t{ff3333}%s{ffffff}\n\
-        {ffffff}Expira em: \t{ff3333}%s\n\n\
-        {ffffff}Você pode abrir uma revisão de BAN no nosso {7289da}discord:\n{ffffff}Link: {7289da}" DISCORD_LINK, 
-        admin_name, reason, time_str);
-        
-        inline dialog(spid, sdialogid, sresponse, slistitem, string:stext[])
-        {
-            #pragma unused spid, sdialogid, sresponse, slistitem, stext
-            return -1;
-        }
-
-        Dialog_ShowCallback(playerid, using inline dialog, DIALOG_STYLE_MSGBOX, "{ffffff}BPS {ff3333}| {ffffff}Punições", str, "Fechar", "");
-        
         SendClientMessage(playerid, -1 , FCOLOR_ERRO "[ KICK ] {ffffff}Você esta {ff3333}banido {ffffff}deste servidor!");
-
         Kick(playerid);
-
         return -1;
     }
 
-    /* HANDLE CARREGAMENTO GERAL  */
-
-    //Bank::RemoveGTAObjects(playerid);
-    Officine::RemoveGTAObjects(playerid, MAP_MEC_LS);
-    Officine::RemoveGTAObjects(playerid, MAP_MEC_AIRPORT);
-    Org::RemoveGTAObjects(playerid);
-    Spawn::RemoveGTAObjects(playerid);
-    Square::RemoveGTAObjects(playerid, MAP_SQUARE_HP);
-    Square::RemoveGTAObjects(playerid, MAP_SQUARE_LS);
-    
     return 1;
 }
 
 hook OnPlayerDisconnect(playerid, reason)
 {
+    /* JOGADOR É NPC */
+    if(IsPlayerNPC(playerid)) return -1;
+    
+    /* JOGADOR É VÁLIDO MAS NÃO LOGOU */
+    
     Player::KillTimer(playerid, pyr::TIMER_LOGIN_KICK);
 
-    if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED) || IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING))
-        return 1;
-        
-    new Float:pX, Float:pY, Float:pZ, Float:pA, name[MAX_PLAYER_NAME];
+    if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return -1;
+    
+    new name[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, name);
+
+    /* JOGADOR É VÁLIDO / LOGOU / ESTÁ PRESO */
+    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL))
+    {
+        if(DB::Exists(db_entity, "punishments", "name, level", "name = '%q' AND level = 1", name))
+        {
+            new left_time = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_JAIL]);
+            DB::SetDataInt(db_entity, "punishments", "left_tstamp", left_time, "name = '%q' AND level = 1", name);
+            Player::KillTimer(playerid, pyr::TIMER_JAIL); 
+        }
+
+        return -1;
+    }
+
+    /* JOGADOR É VÁLIDO / LOGOU / NÃO ESTÁ PRESO / ESTÁ EM MODO ESPECTADOR */
+    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING)) 
+    {
+        return -1;
+    }
+    
+    new Float:pX, Float:pY, Float:pZ, Float:pA;
 
     GetPlayerName(playerid, name);
     GetPlayerPos(playerid, pX, pY, pZ);
@@ -121,14 +94,57 @@ hook OnPlayerDisconnect(playerid, reason)
     return 1;
 }
 
-hook OnPlayerSpawn(playerid)
+hook OnPlayerLogin(playerid)
 {
-    if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED))
+    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL))
+    {
+        new time;
+        DB::GetDataInt(db_entity, "punishments", "left_tstamp", time, "name = '%q' AND level = 1", GetPlayerNameEx(playerid));
+        
+        Punish::SendPlayerToJail(playerid, time);
+        SendClientMessage(playerid, -1, "{ff3399}[ PUNICAO ADM ] {ffffff}Voce ainda precisa cumprir sua pena aqui na ilha!");
         return -1;
+    }
+
+    //Handle Spawn
+    Player::Spawn(playerid);
+
+    return 1;
+}
+
+hook OnPlayerRequestClass(playerid, classid)
+{
+    if(!IsValidPlayer(playerid)) return -1;
+
+    SpawnPlayer(playerid);
+    return SpawnPlayer(playerid);
+}
+
+hook OnPlayerSpawn(playerid)
+{    
+    if(IsPlayerNPC(playerid)) return -1;
+
+    if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) 
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ KICK ] {ffffff}Um erro desconhecido aconteceu! Voce spawnou sem estar logado!");
+        Kick(playerid);
+        return -1;
+    }
 
     if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING))
     {
-        ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING);
+        ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING);  
+
+        SendClientMessage(playerid, -1, "{33ff33}[ SERVER ] {ffffff}Voce saiu do modo espectador!");
+        Adm::AddSpectatorInList(playerid); 
+        SetPlayerWeather(playerid, Server[srv::g_weatherid]);
+
+        return -1;
+    }
+
+    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL))
+    {
+        SetPlayerWeather(playerid, Server[srv::j_weatherid]);
         return -1;
     }
 

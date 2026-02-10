@@ -27,6 +27,7 @@ enum (<<= 1)
     MASK_PLAYER_IN_REGISTER,  
     MASK_PLAYER_IN_LOGIN,
     MASK_PLAYER_SPECTATING,
+    MASK_PLAYER_IN_JAIL,
 
     MASK_PLAYER_IS_ADM = 256,
     MASK_PLAYER_IN_ORG
@@ -39,6 +40,7 @@ new Player[MAX_PLAYERS][E_PLAYER];
 enum _:E_PLAYER_TIMERS
 {
     pyr::TIMER_LOGIN_KICK,
+    pyr::TIMER_JAIL,
     pyr::TIMER_PAYDAY,
 }
 
@@ -103,7 +105,7 @@ enum (<<= 1)
 new acs::Player[MAX_PLAYERS][E_PLAYER_ACESSORY];
 
 /*                  PLAYER FORWARDS                 */
-forward Player::Kick(playerid, timerid, const msg[], GLOBAL_TAG_TYPES:...);
+forward Player::Kick(playerid, timerid, const msg[]);
 
 /*                  PLAYER PUBLICS                 */
 public Player::Kick(playerid, timerid, const msg[]) 
@@ -123,11 +125,11 @@ public Player::Kick(playerid, timerid, const msg[])
 /*                  PLAYER FUNCS                 */
 stock IsValidPlayer(playerid)
 {
-    if(playerid == INVALID_PLAYER_ID)
-        return 0;
-        
+    if(playerid == INVALID_PLAYER_ID)return 0;
+
     return (IsPlayerConnected(playerid) && IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED));
 }
+
 stock Player::ClearAllData(playerid)
 {
     Player::ClearData(playerid);
@@ -188,26 +190,34 @@ stock Player::LoadData(playerid)
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
     
-    DB::GetDataInt(db_entity, "players", "bitcoin", Player[playerid][pyr::bitcoin], "name = '%s'", name);
-    DB::GetDataFloat(db_entity, "players", "money", Player[playerid][pyr::money], "name = '%s'", name);
-    DB::GetDataInt(db_entity, "players", "score", Player[playerid][pyr::score], "name = '%s'", name);
-    DB::GetDataInt(db_entity, "players", "orgid", Player[playerid][pyr::orgid], "name = '%s'", name);
-    DB::GetDataInt(db_entity, "players", "payday_tleft", pdy::Player[playerid][pdy::time_left], "name = '%s'", name);
+    DB::GetDataInt(db_entity, "players", "bitcoin", Player[playerid][pyr::bitcoin], "name = '%q'", name);
+    DB::GetDataFloat(db_entity, "players", "money", Player[playerid][pyr::money], "name = '%q'", name);
+    DB::GetDataInt(db_entity, "players", "score", Player[playerid][pyr::score], "name = '%q'", name);
+    DB::GetDataInt(db_entity, "players", "orgid", Player[playerid][pyr::orgid], "name = '%q'", name);
+    DB::GetDataInt(db_entity, "players", "payday_tleft", pdy::Player[playerid][pdy::time_left], "name = '%q'", name);
 
     return 1;
 }
 
 stock Player::CreateTimer(playerid, timerid, const callback[] = "", time, bool:repeate, const specifiers[] = "", OPEN_MP_TAGS:...)
 {
+    if(IsValidTimer(KillTimer(pyr::Timer[playerid][timerid])))
+        return printf("[ TIMER Player ] Erro ao tentar criar Timer #%d (%s [PID : %d]) %d pois já existia", timerid, callback, playerid, time);
+    
     pyr::Timer[playerid][timerid] = SetTimerEx(callback, time, repeate, specifiers, ___(6));
-    printf("[ TIMER Player ] Timer #%d (%s [PID : %d]) %d foi criado\n", timerid, callback, playerid, time);
+    return printf("[ TIMER Player ] Timer #%d (%s [PID : %d]) %d foi criado\n", timerid, callback, playerid, time);
 }
 
 stock Player::KillTimer(playerid, timerid)
 {
+    if(!IsValidTimer(pyr::Timer[playerid][timerid])) return 0;
+    
     KillTimer(pyr::Timer[playerid][timerid]);
+
     pyr::Timer[playerid][timerid] = INVALID_TIMER;
     printf("[ TIMER Player ] Timer #%d ([PID : %d]) foi morto\n", timerid, playerid);
+    
+    return 1;
 }
 
 stock Player::RemoveMoney(playerid, Float:price, bool:takeout = true)
@@ -219,7 +229,7 @@ stock Player::RemoveMoney(playerid, Float:price, bool:takeout = true)
         new name[MAX_PLAYER_NAME];
         GetPlayerName(playerid, name);
 
-        DB::SetDataFloat(db_entity, "players", "money", Player[playerid][pyr::money], "name = '%s'", name);
+        DB::SetDataFloat(db_entity, "players", "money", Player[playerid][pyr::money], "name = '%q'", name);
 
         Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_MONEY, "~g~~h~~h~R$: %2.f", Player[playerid][pyr::money]);
 
@@ -236,15 +246,13 @@ stock Player::GiveMoney(playerid, Float:price)
     
     Player[playerid][pyr::money] += price;
     
-    DB::SetDataFloat(db_entity, "players", "money", Player[playerid][pyr::money], "name = '%s'", name);
+    DB::SetDataFloat(db_entity, "players", "money", Player[playerid][pyr::money], "name = '%q'", name);
     
     Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_MONEY, "~g~~h~~h~R$: %.2f", Player[playerid][pyr::money]);
     
     SendClientMessage(playerid, -1, "{339933} [ R$ ] {ffffff}Voce recebeu {339933}%.2f {ffffff}R$\n", price);
     
     PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
-
-    printf("[ BALANCE ] O jogador %s recebeu %.2f R$\n", name, price);
     
     return 1;   
 }
@@ -296,41 +304,62 @@ stock Login::IsValidPassword(const text[], &issue)
     return 1;
 }
 
-stock Player::GenerateFakeCPFFromName(const name[], output[], size)
+stock Player::Spawn(playerid)
 {
-    new hash;
-    
-    hash = hashname(name);
-    norm_hash(hash);
-    
-    new digits[11];
- 
-    for(new i = 0; i < 8; i++)
-    {
-        new nibble = (hash >> (i * 4)) & 0xF;
+    new name[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, name);
 
-        if (nibble <= 9)
-            digits[i] = nibble;
-        else
-            digits[i] = nibble % 10;
+    if(!DB::Exists(db_entity, "players", "name", "name = '%q'", name))
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ ERRO FATAL ] {ffffff}Sua conta {ff3333}nao esta registrada {ffffff}houve um erro grave ao spawnar, avise um {ff3333}moderador!");
+        Kick(playerid);
+        printf("[ DB (ERRO) ] Erro ao tentar carregar posições de spawn do jogador!");
+        return 0;
     }
 
-    new year, month, day;
-    getdate(year, month, day);
+    new skinid, Float:pX, Float:pY, Float:pZ, Float:pA;
+    DB::GetDataInt(db_entity, "players", "skinid", skinid, "name = '%q'", name);
+    DB::GetDataFloat(db_entity, "players", "pX", pX, "name = '%q'", name);
+    DB::GetDataFloat(db_entity, "players", "pY", pY, "name = '%q'", name);
+    DB::GetDataFloat(db_entity, "players", "pZ", pZ, "name = '%q'", name);
+    DB::GetDataFloat(db_entity, "players", "pA", pA, "name = '%q'", name);
 
-    new sum = 0;
-    for(new i = 0; i < 10; i++)
-        sum += digits[i];
+    /* SET SPAWN */
 
-    digits[8] = sum % 9; 
+    //new sucess = CA_RayCastLine(pX, pY, pZ + 0.5, x, y, pZ + 0.5, pX, pY, pZ);
+    new sucess = 1;
 
-    digits[9] =  floatround((year / 10) % 10);
-    digits[10] = (year % 100) % 10; 
+    if(sucess)
+        SetSpawnInfo(playerid, 0, 
+        skinid, pX, pY, pZ, pA, 
+        WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0);
+    else
+    {
+        SetSpawnInfo(playerid, 0, skinid, 
+        834.28 + RandomFloat(2.0), -1834.89 + RandomFloat(2.0), 12.502, 180.0, 
+        WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0);
 
-    format(output, size,
-        "%d%d%d.%d%d%d.%d%d%d-%d%d",
-        digits[0], digits[1], digits[2],
-        digits[3], digits[4], digits[5],
-        digits[6], digits[7], digits[8],
-        digits[9], digits[10]);
+        SendClientMessage(playerid, -1, "{ff9933}[ SERVER ] {ffffff}Seu Spawn anterior era inválido, enviado para spawn civil padrão!");
+    }
+    
+    SpawnPlayer(playerid);
+
+    /* PÓS SPAWN */
+
+    // CPF
+    Player::SetCPF(playerid);
+
+    // RODAPÉ
+    Baseboard::ShowTDForPlayer(playerid);
+
+    return 1;
+}
+
+stock Player::SetCPF(playerid)
+{
+    new str[64];
+    format(str, 64, "{33ff33}CPF: {ffffff}[ {33ff33}%d {ffffff}]", playerid);
+    new Text3D:label = CreateDynamic3DTextLabel(str, -1, 0.0, 0.0, 0.0, 25.0, playerid, INVALID_VEHICLE_ID, 1);
+    Attach3DTextLabelToPlayer(label, playerid, 0.0, 0.0, 0.4);
+    Player[playerid][pyr::cpf_tag] = label;
 }

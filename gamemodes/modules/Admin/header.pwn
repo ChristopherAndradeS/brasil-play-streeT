@@ -20,6 +20,23 @@
 
 #define INVALID_ADM_LEVEL    (0)
 
+#define MAX_ADM_COMANDS      (32)
+
+enum _:E_ROLES_ADMIN
+{
+    INVALID_ROLE_ID,  
+    ROLE_ADM_APR_HELPER,
+    ROLE_ADM_HELPER, 
+    ROLE_ADM_APR_STAFF,          
+    ROLE_ADM_STAFF,        
+    ROLE_ADM_FOREMAN,         
+    ROLE_ADM_MASTER,     
+    ROLE_ADM_MANAGER,     
+    ROLE_ADM_CEO,     
+    ROLE_ADM_FOUNDER, 
+    MAX_ADMIN_ROLES      
+}
+
 enum (<<= 1)
 {
     FLAG_ADM_NONE = 1,
@@ -38,14 +55,18 @@ enum (<<= 1)
 enum E_ADMIN
 {
     adm::flags,
-    adm::lvl
+    adm::lvl,
+    adm::spectateid,
 }
 
 new Admin[MAX_PLAYERS][E_ADMIN];
 
+new List:gAdminSpectates;
+new Iterator:Adm_Iter<MAX_PLAYERS>;
+
 new const Adm::gRoleNames[][32] = 
 { 
-    {"NO_ROLE"}, {"[ APR ] Helper"}, {"Helper"}, {"[ APR ] Staff"}, {"Staff"},
+    {"NO_ROLE"}, {"( APR ) Helper"}, {"Helper"}, {"( APR ) Staff"}, {"Staff"},
     {"Encarregado"}, {"Master"}, {"Gerente"}, {"Dono"}, {"Fundador"}
 };
 
@@ -70,11 +91,8 @@ stock Adm::GetColorString(level)
     return string;
 }
 
-stock Adm::IsAdmin(playerid, &level)
+stock Adm::Exists(const name[], &level)
 {
-    new name[MAX_PLAYER_NAME];
-    GetPlayerName(playerid, name);
-
     if(DB::Exists(db_entity, "admins", "name", "name = '%q'", name))
         return DB::GetDataInt(db_entity, "admins", "level", level, "name = '%q'", name);
     
@@ -93,7 +111,7 @@ stock Adm::SetPlayer(playerid, const promoter[], level)
 
     if(sucess)
     {
-        SendClientMessage(playerid, COLOR_SUCESS, "[ ADM ] {ffffff}Parabens! Voce faz parte da {33ff33}STAFF BPS");
+        SendClientMessage(playerid, COLOR_SUCESS,  "[ ADM ] {ffffff}Parabens! Voce faz parte da {33ff33}STAFF BPS");
         SendClientMessage(playerid, COLOR_WARNING, "[ ADM ] {ffffff}Voce se tornou um {ff9933}admin! \
         Cargo: %s%s",  Adm::GetColorString(level), Adm::gRoleNames[level]);
 
@@ -104,49 +122,129 @@ stock Adm::SetPlayer(playerid, const promoter[], level)
     return 0;
 }
 
-stock Adm::SetInWork(playerid)
+stock Adm::SetWork(playerid)
 {
-    new level = Admin[playerid][adm::lvl];
+    new level = Admin[playerid][adm::lvl], name[MAX_PLAYER_NAME];
   
-    if(IsFlagSet(Admin[playerid][adm::flags], FLAG_ADM_WORKING))
-    {
-        ResetFlag(Admin[playerid][adm::flags], FLAG_ADM_WORKING);
-        TogglePlayerSpectating(playerid, false);
+    GetPlayerName(playerid, name);
 
-        Adm::SendMsgToAllTagged(FLAG_ADM_APPRENTICE_HELPER, 0xFFFF33FF, 
-        "[ ADM AVISO ] %s%s {ffffff}%s {ffff33}saiu {ffffff}do modo de trabalho", 
-        Adm::GetColorString(Admin[playerid][adm::lvl]), Adm::gRoleNames[level], GetPlayerNameEx(playerid));
-    }
+    Admin[playerid][adm::spectateid] = Adm::GetNextSpectateID(playerid, -1, 1);
 
-    else
-    {
-        SetFlag(Admin[playerid][adm::flags], FLAG_ADM_WORKING);
+    if(Admin[playerid][adm::spectateid] == INVALID_PLAYER_ID) return 0;
 
-        if(IsAndroidPlayer(playerid))
-            TogglePlayerSpectating(playerid, true);
-        
-        else
-        {
-            new Float:pX, Float:pY, Float:pZ;
-            GetPlayerPos(playerid, pX, pY, pZ);
-        
-            CallRemoteFunction("FlyMode", "fff", pX, pY, pZ);
-        }
+    SetFlag(Admin[playerid][adm::flags], FLAG_ADM_WORKING);
+ 
+    TogglePlayerSpectating(playerid, true);
 
-        Adm::SendMsgToAllTagged(FLAG_ADM_APPRENTICE_HELPER, 0xFFFF33FF, 
-        "[ ADM AVISO ] %s%s {ffffff}%s {ffff33}entrou {ffffff}no modo de trabalho", 
-        Adm::GetColorString(Admin[playerid][adm::lvl]), Adm::gRoleNames[level], GetPlayerNameEx(playerid)); 
-    }
+    Baseboard::HideTDForPlayer(playerid);
+    Adm::ShowTDForPlayer(playerid);
+    
+    Adm::SpectatePlayer(playerid, Admin[playerid][adm::spectateid]);
+
+    Adm::SendMsgToAllTagged(FLAG_ADM_APPRENTICE_HELPER, -1, 
+    "{ffff33}[ ADM AVISO ] %s%s {ffff33}entrou {ffffff}no modo de trabalho", Adm::GetColorString(level), name);
+
+    Iter_Add(Adm_Iter, playerid);
 
     return 1;
 }
 
+stock Adm::UnSetWork(playerid)
+{
+    new level = Admin[playerid][adm::lvl], name[MAX_PLAYER_NAME];
+  
+    GetPlayerName(playerid, name);
+
+    ResetFlag(Admin[playerid][adm::flags], FLAG_ADM_WORKING);
+
+    Admin[playerid][adm::spectateid] = INVALID_PLAYER_ID;
+
+    TogglePlayerSpectating(playerid, false);
+
+    Adm::HideTDForPlayer(playerid);
+    Baseboard::ShowTDForPlayer(playerid);
+
+    Adm::SendMsgToAllTagged(FLAG_ADM_APPRENTICE_HELPER, -1, 
+    "[ ADM AVISO ] %s%s {ffff33}saiu {ffffff}no modo de trabalho", Adm::GetColorString(level), name);  
+
+    Iter_Remove(Adm_Iter, playerid);
+
+    return 1;
+}
+
+stock Adm::HandleWork(playerid)
+{    
+    if(!IsFlagSet(Admin[playerid][adm::flags], FLAG_ADM_WORKING))
+       return Adm::SetWork(playerid);
+    
+    Adm::UnSetWork(playerid);
+
+    return 1;
+}
+
+stock Adm::IsSpectating(playerid)
+    return (IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING) && IsFlagSet(Admin[playerid][adm::flags], FLAG_ADM_WORKING));
+
+stock Adm::SpectatePlayer(playerid, targetid)
+{
+    if(IsPlayerInAnyVehicle(targetid))
+        PlayerSpectateVehicle(playerid, targetid);
+    else
+        PlayerSpectatePlayer(playerid, targetid);
+
+    SetPlayerInterior(playerid, GetPlayerInterior(targetid));
+    SetPlayerVirtualWorld(playerid, GetPlayerVirtualWorld(targetid));
+
+    Adm::UpdateTextDraw(playerid, targetid);
+
+    return 1;
+}
+
+stock Adm::GetNextSpectateID(playerid, currentid, dir)
+{
+    if(!list_valid(gAdminSpectates)) return INVALID_PLAYER_ID;
+
+    new len = list_size(gAdminSpectates);
+    
+    if(len == 0) return INVALID_PLAYER_ID;
+
+    if(currentid < 0 || currentid >= len) currentid = (dir == 1) ? -1 : len;
+
+    new checked = 0, idx = currentid;
+
+    while(checked < len)
+    {
+        idx += dir;
+
+        if(idx >= len)      idx = 0;
+        else if(idx < 0)    idx = len - 1;
+
+        new targetid = list_get(gAdminSpectates, idx);
+
+        if(targetid == playerid)
+        {
+            checked++;
+            continue;
+        }
+
+        if(Adm::IsValidSpectateID(playerid, targetid)) return targetid;
+
+        checked++;
+    }
+
+    return INVALID_PLAYER_ID;
+}
+
+
 stock Adm::SendMsgToAllTagged(flags, color, const msg[], GLOBAL_TAG_TYPES:...)
 {
+    new format_msg[144];
+    va_format(format_msg, 144, msg, ___(3));
+    
     foreach(new i : Player)
     {
         if(Admin[i][adm::flags] >= flags)
-            SendClientMessage(i, color, msg, ___(3));
+            SendClientMessage(i, color, format_msg);
     }
 
     return 1;
@@ -172,40 +270,52 @@ stock Adm::HasPermission(playerid, flags)
     return 1;
 }
 
-stock Adm::ValidTargetID(playerid, targetid, can_equal = false)
+stock Adm::IsValidSpectateID(playerid, targetid)
+{
+//    if(playerid == targetid) return 0;
+
+    if((Admin[playerid][adm::flags] & ~FLAG_ADM_WORKING) <= (Admin[targetid][adm::flags] & ~FLAG_ADM_WORKING))
+        return 0;
+
+    return (!IsFlagSet(Player[targetid][pyr::flags], MASK_PLAYER_SPECTATING));
+}
+
+stock Adm::ValidTargetID(playerid, targetid, bool:can_equal = false, bool:sendmsg = true)
 {
     if(!IsValidPlayer(targetid)) 
     {
-        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}O jogador {ff3333}nao esta online!");
+        if(sendmsg)
+            SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}O jogador {ff3333}nao esta online!");
         return 0;
     }
 
     if(!can_equal && (playerid == targetid))
     {
-        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Voce nao poder aplicar essa acao em {ff3333}si mesmo!");
+        if(sendmsg)
+            SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Voce nao poder aplicar essa acao em {ff3333}si mesmo!");
         return 0;        
     }
 
     if((Admin[playerid][adm::flags] & ~FLAG_ADM_WORKING) <= (Admin[targetid][adm::flags] & ~FLAG_ADM_WORKING))
     {
-        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Voce nao poder aplicar essa acao ao seu {ff3333}colega/subordinado!");
+        if((can_equal && (playerid == targetid))) return 1;
+
+        if(sendmsg)
+            SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Voce nao poder aplicar essa acao ao seu {ff3333}colega/subordinado!");
         return 0;        
     }
 
     return 1;    
 }
 
-stock Adm::SpectatePlayer(playerid, targetid)
+stock Adm::IsValidTargetName(const name[], const target_name[])
 {
-    printf("%d", IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING));
-    if(playerid == targetid || !IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING)) return 0;
+    new player_lvl, target_lvl;
 
-    if(IsPlayerInAnyVehicle(targetid))
-        PlayerSpectateVehicle(playerid, targetid);
-    else
-        PlayerSpectatePlayer(playerid, targetid);
+    Adm::Exists(name, player_lvl);
+    Adm::Exists(target_name, target_lvl);
+
+    if(player_lvl <= target_lvl) return 0;        
     
-    SendClientMessage(playerid, -1, "{ffff33}[ ADM ] {ffffff}Espectando jogador: {ffff33}%s [ID : %d]", GetPlayerNameEx(targetid), targetid);
- 
     return 1;
 }

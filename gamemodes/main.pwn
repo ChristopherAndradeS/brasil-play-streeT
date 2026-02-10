@@ -1,10 +1,16 @@
+#define MAX_PLAYERS 20
+
 #include <open.mp>
 #include <sscanf2>
 #include <streamer>
-#include <YSI\YSI_Players\y_android>
+#include <PawnPlus>
+
+#define CGEN_MEMORY 20000
+
 #include <YSI\YSI_Data\y_iterate>
 #include <YSI\YSI_Coding\y_va>
 #include <YSI\YSI_Coding\y_inline>
+#include <YSI\YSI_Extra\y_inline_timers>
 #include <YSI\YSI_Visual\y_commands>
 #include <YSI\YSI_Visual\y_dialog> 
 #include <YSI\YSI_Coding\y_hooks>
@@ -20,8 +26,14 @@
 #include "../gamemodes/modules/Server/header.pwn" 
 #include "../gamemodes/modules/Maps/header.pwn"
 /*                          HANDLE                          */
+#include "../gamemodes/modules/Server/handle.pwn"
 #include "../gamemodes/modules/Player/handle.pwn"
 #include "../gamemodes/modules/Admin/handle.pwn"
+#include "../gamemodes/modules/DB/handle.pwn"
+#include "../gamemodes/modules/Maps/handle.pwn"
+/*                          SERVER                          */
+#include "../gamemodes/modules/Server/wheather.pwn"
+#include "../gamemodes/modules/Server/players.pwn"
 /*                          MAPAS                           */
 #include "../gamemodes/modules/Maps/banks.pwn"
 #include "../gamemodes/modules/Maps/dealership.pwn"
@@ -31,43 +43,20 @@
 #include "../gamemodes/modules/Maps/spawns.pwn"
 #include "../gamemodes/modules/Maps/squares.pwn"
 #include "../gamemodes/modules/Maps/store.pwn"
+#include "../gamemodes/modules/Maps/prision.pwn"
 /*                          TEXTDRAWS                       */
 #include "../gamemodes/modules/TextDraws/gui/login.pwn"
 #include "../gamemodes/modules/TextDraws/gui/acs_editor.pwn"
+#include "../gamemodes/modules/TextDraws/gui/admin.pwn"
 #include "../gamemodes/modules/TextDraws/hud/baseboard.pwn"
-/*                          DATABASE                        */
-#include "../gamemodes/modules/DB/db_init.pwn"
 /*                          PLAYER                          */
+#include "../gamemodes/modules/Player/punishment.pwn"
 #include "../gamemodes/modules/Player/login.pwn"
 #include "../gamemodes/modules/Player/payday.pwn"
 #include "../gamemodes/modules/Player/acessory.pwn"
+/*                          ADMIN                          */
 #include "../gamemodes/modules/Admin/commands.pwn"
-
-public OnGameModeInit()
-{
-    new modelid, name[64], sucess;
-    Acessory::GetNameByModelid(modelid, name);
-
-    for(new i = 1; i <= 8; i++)
-    {
-        if(DB::Exists(db_stock, "acessorys", "uid", "uid = %d", i))
-            continue;
-
-        for(;;)
-        {
-            modelid = RandomMinMax(18632, 19914);
-            sucess = Acessory::GetNameByModelid(modelid, name);
-            
-            if(sucess)
-                break;
-        }
-
-        DB::Insert(db_stock, "acessorys", 
-        "uid, name, creator, price, modelid, boneid, pX, pY, pZ, rX, rY, rZ, sX, sY, sZ, color1, color2", 
-        "%i, '%s', 'SERVER', %.2f, %i, %i, %f, %f, %f, %f, %f, %f, %f, %f, %f, %i, %i", 
-        i, name, Float:RandomFloatMinMax(50.0, 300.0), modelid, 2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, -1, -1);
-    }
-}
+#include "../gamemodes/modules/Admin/panel.pwn"
 
 public OnGameModeExit()
 {
@@ -86,25 +75,84 @@ public OnGameModeExit()
 
 public e_COMMAND_ERRORS:OnPlayerCommandReceived(playerid, cmdtext[], e_COMMAND_ERRORS:success)
 {
-    if(success == COMMAND_UNDEFINED)
+    switch(success)
     {
-        SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}O comando \'%s\' nao existe", cmdtext); 
-        return COMMAND_OK;
+        case COMMAND_UNDEFINED:
+        {
+            SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}O comando \'%s\' nao existe", cmdtext); 
+            return COMMAND_SILENT;            
+        }
+
+        case COMMAND_DENIED:
+        {
+            SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Voce nao pode usar esse comando!"); 
+            return COMMAND_SILENT;            
+        }
+
+        default: return success;
+    }
+}
+
+public OnPlayerText(playerid, text[])
+{
+    if(IsFlagSet(Admin[playerid][adm::flags], FLAG_ADM_WORKING))
+    {      
+        Adm::SendMsgToAllTagged(FLAG_ADM_WORKING | FLAG_ADM_APPRENTICE_HELPER, 0xFFFF33AA, 
+        "[ ADM CHAT ] %s%s {ffffff}: {ffff33}%s", 
+        Adm::GetColorString(Admin[playerid][adm::lvl]), GetPlayerNameEx(playerid), text);  
+
+        return 0;      
     }
 
-    return COMMAND_OK;
+    SendClientMessageToAll(-1, "%s [%d] diz: %s", GetPlayerNameEx(playerid), playerid, text);
+
+    return 0;
 }
 
 public OnPlayerClickMap(playerid, Float:fX, Float:fY, Float:fZ)
 {
+    if(!((Admin[playerid][adm::flags]) < (FLAG_ADM_MANAGER & ~FLAG_ADM_WORKING))) return 1;
+    
     SetPlayerPos(playerid, fX, fY, fZ);
+
     return 1;
 }
 
 hook function TogglePlayerSpectating(playerid, bool:toggle)
 {
     if(toggle)
+    {
         SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING);
-    
+        
+        if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED))
+            Adm::RemSpectatorInList(playerid, 2);
+    }
+
     return continue(playerid, bool:toggle);
+}
+
+hook function SendClientMessage(playerid, colour, const msg[], GLOBAL_TAG_TYPES:...)
+{
+    new fixed_msg[144];
+    va_format(fixed_msg, 144, msg, ___(3));
+    RemoveGraphicAccent(fixed_msg);
+    return continue(playerid, colour, fixed_msg);
+}
+
+YCMD:teste(playerid, params[], help)
+{
+    printf("[ ");
+    for(new Iter:i = list_iter(gAdminSpectates); iter_inside(i); iter_move_next(i))
+    {
+        printf("%d, ", iter_get(i));
+    }
+    printf("]");
+
+    return 1;
+}
+
+YCMD:teste2(playerid, params[], help)
+{
+    TogglePlayerSpectating(playerid, !bool:IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING));
+    return 1;
 }

@@ -36,6 +36,8 @@
 #define Store::             SRR_
 #define DB::                DTB_
 #define Baseboard::         bboard_
+#define Group::             GP_
+#define Prision::           PRS_
 
 /*          DEFINES          */
 #define DISCORD_LINK        "https://discord.gg/Czq6DWDvcB"
@@ -72,7 +74,13 @@ new const gMonths[][16] =
     "Outubro", "Novembro", "Dezembro" 
 };
 
-new stock g_arrVehicleNames[][] = {
+new const gWeekDays[][16] = 
+{
+    "Domingo", "Segunda", "Terca", 
+    "Quarta", "Quinta", "Sexta", "Sabado"
+};
+
+new const g_arrVehicleNames[][] = {
     "Landstalker", "Bravura", "Buffalo", "Linerunner", "Perrenial", "Sentinel", "Dumper", "Firetruck", "Trashmaster",
     "Stretch", "Manana", "Infernus", "Voodoo", "Pony", "Mule", "Cheetah", "Ambulance", "Leviathan", "Moonbeam",
     "Esperanto", "Taxi", "Washington", "Bobcat", "Whoopee", "BF Injection", "Hunter", "Premier", "Enforcer",

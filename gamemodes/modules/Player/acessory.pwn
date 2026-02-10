@@ -55,10 +55,8 @@ hook OnPlayerSpawn(playerid)
     GetPlayerName(playerid, name);
 
     for(new i = 0; i < MAX_PLAYER_ACESSORYS; i++)
-        if(DB::Exists(db_entity, "acessorys", "owner, slotid, flags", "owner = '%s' AND slotid = %d AND flags = 1", name, i))
+        if(DB::Exists(db_entity, "acessorys", "owner, slotid, flags", "owner = '%q' AND slotid = %d AND flags = 1", name, i))
             Acessory::LoadOnPlayer(playerid, i);
-    
-    Player::GiveMoney(playerid, 1000.0);
 
     return 1;
 }
@@ -69,9 +67,9 @@ hook OnPlayerDisconnect(playerid, reason)
     GetPlayerName(playerid, name);
 
     for(new i = 0; i < MAX_PLAYER_ACESSORYS; i++)
-        if(DB::Exists(db_entity, "acessorys", "owner, slotid", "owner = '%s' AND slotid = %d", name, i))
+        if(DB::Exists(db_entity, "acessorys", "owner, slotid", "owner = '%q' AND slotid = %d", name, i))
             DB::SetDataInt(db_entity, "acessorys", "flags", IsPlayerAttachedObjectSlotUsed(playerid, i), 
-            "owner = '%s' AND slotid = %d", name, i);
+            "owner = '%q' AND slotid = %d", name, i);
     
     for(new i = 0; i < 10; i++)
         RemovePlayerAttachedObject(playerid, i);
@@ -271,7 +269,7 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
             case AXIS_TYPE_Z: acs::Player[playerid][acs::pZ] = floatclamp(acs::Player[playerid][acs::pZ] - acs::Player[playerid][acs::pOffset], MIN_ACS_POS, MAX_ACS_POS);
             default: return 1;
         }
-        
+
         Acessory::UpdateForPlayer(playerid, slotid);
         return 1;
     }
@@ -286,7 +284,7 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
             case AXIS_TYPE_Z: acs::Player[playerid][acs::pZ] = floatclamp(acs::Player[playerid][acs::pZ] + acs::Player[playerid][acs::pOffset], MIN_ACS_POS, MAX_ACS_POS);
             default: return 1;
         }
-        
+
         Acessory::UpdateForPlayer(playerid, slotid);
         return 1;
     }
@@ -429,7 +427,7 @@ public Response_ACC_OPTIONS(playerid, dialogid, response, listitem, string:input
     new slotid = acs::Player[playerid][acs::slotid];
     new boneid;
 
-    DB::GetDataInt(db_entity, "acessorys", "boneid", boneid, "owner = '%s' AND slotid = %d", name, slotid);
+    DB::GetDataInt(db_entity, "acessorys", "boneid", boneid, "owner = '%q' AND slotid = %d", name, slotid);
 
     switch(listitem)
     { 
@@ -438,7 +436,7 @@ public Response_ACC_OPTIONS(playerid, dialogid, response, listitem, string:input
             if(IsPlayerAttachedObjectSlotUsed(playerid, slotid))
             {
                 RemovePlayerAttachedObject(playerid, slotid);
-                acs::ClearData(playerid);
+                //acs::ClearData(playerid);
                 SendClientMessage(playerid, COLOR_THEME_BPS, "[ ACS ] {ffffff}Acessorio {33ff33}#%d {ffffff}desequipado!", slotid + 1);
             }
 
@@ -466,8 +464,8 @@ public Response_ACC_OPTIONS(playerid, dialogid, response, listitem, string:input
         {
             new str[512], acs_name[64], modelid, Float:price;
 
-            DB::GetDataInt(db_entity, "acessorys", "modelid", modelid, "owner = '%s' AND slotid = %d", name, slotid);
-            DB::GetDataFloat(db_entity, "acessorys", "price", price, "owner = '%s' AND slotid = %d", name, slotid);
+            DB::GetDataInt(db_entity, "acessorys", "modelid", modelid, "owner = '%q' AND slotid = %d", name, slotid);
+            DB::GetDataFloat(db_entity, "acessorys", "price", price, "owner = '%q' AND slotid = %d", name, slotid);
             
             Acessory::GetNameByModelid(modelid, acs_name);
 
@@ -478,7 +476,7 @@ public Response_ACC_OPTIONS(playerid, dialogid, response, listitem, string:input
                 if(!sresponse) return 1;
 
                 Player::GiveMoney(playerid, price * 0.8);
-                DB::Delete(db_entity, "acessorys", "owner = '%s' AND slotid = %d", name, slotid);
+                DB::Delete(db_entity, "acessorys", "owner = '%q' AND slotid = %d", name, slotid);
                 RemovePlayerAttachedObject(playerid, slotid);
                 acs::ClearData(playerid);
                 SendClientMessage(playerid, COLOR_THEME_BPS, "[ ACS ] {ffffff}Acessorio {33ff33}#%d {ffffff}deletado e dinheiro reembolsado!", slotid + 1);
@@ -512,13 +510,13 @@ public Response_ACC_MENU(playerid, dialogid, response, listitem, string:inputtex
 
     if((listitem + 1) <= MAX_PLAYER_ACESSORYS)
     {              
-        if(!DB::Exists(db_entity, "acessorys", "owner, slotid", "owner = '%s' AND slotid = %d", name, listitem))
+        if(!DB::Exists(db_entity, "acessorys", "owner, slotid", "owner = '%q' AND slotid = %d", name, listitem))
         {
             Response_ACC_MENU(playerid, dialogid, response, MAX_PLAYER_ACESSORYS, inputtext);
             return 1;
         }
 
-        DB::GetDataInt(db_entity, "acessorys", "boneid", acs::Player[playerid][acs::boneid] , "owner = '%s' AND slotid = %d", name, listitem);
+        DB::GetDataInt(db_entity, "acessorys", "boneid", acs::Player[playerid][acs::boneid] , "owner = '%q' AND slotid = %d", name, listitem);
         acs::Player[playerid][acs::slotid] = listitem;
 
         new str[512];
@@ -580,6 +578,7 @@ public Response_ACC_MENU(playerid, dialogid, response, listitem, string:inputtex
 
 stock Acessory::SetPlayerEditor(playerid, slotid)
 {
+    printf("slotid = %d", slotid);
     Acessory::ShowTDForPlayer(playerid);
     Acessory::LoadOnPlayer(playerid, slotid);
 
@@ -622,25 +621,25 @@ stock Acessory::UnSetPlayerEditor(playerid)
 
 stock Acessory::LoadOnPlayer(playerid, slotid)
 {
-    if(IsPlayerAttachedObjectSlotUsed(playerid, slotid)) 
-        return 0;
-
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 
-    DB::GetDataInt(db_entity, "acessorys", "modelid", acs::Player[playerid][acs::modelid], "owner = '%s' AND slotid = %d", name, slotid);
-    DB::GetDataInt(db_entity, "acessorys", "boneid", acs::Player[playerid][acs::boneid], "owner = '%s' AND slotid = %d", name, slotid);
-    DB::GetDataFloat(db_entity, "acessorys", "pX", acs::Player[playerid][acs::pX], "owner = '%s' AND slotid = %d", name, slotid);
-    DB::GetDataFloat(db_entity, "acessorys", "pY", acs::Player[playerid][acs::pY], "owner = '%s' AND slotid = %d", name, slotid);
-    DB::GetDataFloat(db_entity, "acessorys", "pZ", acs::Player[playerid][acs::pZ], "owner = '%s' AND slotid = %d", name, slotid);
-    DB::GetDataFloat(db_entity, "acessorys", "rX", acs::Player[playerid][acs::rX], "owner = '%s' AND slotid = %d", name, slotid);
-    DB::GetDataFloat(db_entity, "acessorys", "rY", acs::Player[playerid][acs::rY], "owner = '%s' AND slotid = %d", name, slotid);
-    DB::GetDataFloat(db_entity, "acessorys", "rZ", acs::Player[playerid][acs::rZ], "owner = '%s' AND slotid = %d", name, slotid);
-    DB::GetDataFloat(db_entity, "acessorys", "sX", acs::Player[playerid][acs::sX], "owner = '%s' AND slotid = %d", name, slotid);
-    DB::GetDataFloat(db_entity, "acessorys", "sY", acs::Player[playerid][acs::sY], "owner = '%s' AND slotid = %d", name, slotid);
-    DB::GetDataFloat(db_entity, "acessorys", "sZ", acs::Player[playerid][acs::sZ], "owner = '%s' AND slotid = %d", name, slotid);
-    DB::GetDataInt(db_entity, "acessorys", "color1", acs::Player[playerid][acs::color1], "owner = '%s' AND slotid = %d", name, slotid);
-    DB::GetDataInt(db_entity, "acessorys", "color2", acs::Player[playerid][acs::color2], "owner = '%s' AND slotid = %d", name, slotid);
+    DB::GetDataInt(db_entity, "acessorys", "modelid", acs::Player[playerid][acs::modelid], "owner = '%q' AND slotid = %d", name, slotid);
+    DB::GetDataInt(db_entity, "acessorys", "boneid", acs::Player[playerid][acs::boneid], "owner = '%q' AND slotid = %d", name, slotid);
+    DB::GetDataFloat(db_entity, "acessorys", "pX", acs::Player[playerid][acs::pX], "owner = '%q' AND slotid = %d", name, slotid);
+    DB::GetDataFloat(db_entity, "acessorys", "pY", acs::Player[playerid][acs::pY], "owner = '%q' AND slotid = %d", name, slotid);
+    DB::GetDataFloat(db_entity, "acessorys", "pZ", acs::Player[playerid][acs::pZ], "owner = '%q' AND slotid = %d", name, slotid);
+    DB::GetDataFloat(db_entity, "acessorys", "rX", acs::Player[playerid][acs::rX], "owner = '%q' AND slotid = %d", name, slotid);
+    DB::GetDataFloat(db_entity, "acessorys", "rY", acs::Player[playerid][acs::rY], "owner = '%q' AND slotid = %d", name, slotid);
+    DB::GetDataFloat(db_entity, "acessorys", "rZ", acs::Player[playerid][acs::rZ], "owner = '%q' AND slotid = %d", name, slotid);
+    DB::GetDataFloat(db_entity, "acessorys", "sX", acs::Player[playerid][acs::sX], "owner = '%q' AND slotid = %d", name, slotid);
+    DB::GetDataFloat(db_entity, "acessorys", "sY", acs::Player[playerid][acs::sY], "owner = '%q' AND slotid = %d", name, slotid);
+    DB::GetDataFloat(db_entity, "acessorys", "sZ", acs::Player[playerid][acs::sZ], "owner = '%q' AND slotid = %d", name, slotid);
+    DB::GetDataInt(db_entity, "acessorys", "color1", acs::Player[playerid][acs::color1], "owner = '%q' AND slotid = %d", name, slotid);
+    DB::GetDataInt(db_entity, "acessorys", "color2", acs::Player[playerid][acs::color2], "owner = '%q' AND slotid = %d", name, slotid);
+
+    if(IsPlayerAttachedObjectSlotUsed(playerid, slotid))
+        RemovePlayerAttachedObject(playerid, slotid);
 
     SetPlayerAttachedObject(playerid, slotid, 
     acs::Player[playerid][acs::modelid], acs::Player[playerid][acs::boneid], 
@@ -676,13 +675,13 @@ stock Acessory::ChangeBone(playerid, slotid, new_boneid)
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 
-    DB::GetDataInt(db_entity, "acessorys", "boneid", old_boneid, "owner = '%s' AND slotid = %d", name, slotid);
+    DB::GetDataInt(db_entity, "acessorys", "boneid", old_boneid, "owner = '%q' AND slotid = %d", name, slotid);
 
     if(old_boneid == new_boneid) 
         return 0;
 
     acs::Player[playerid][acs::boneid] = new_boneid;
-    DB::SetDataInt(db_entity, "acessorys", "boneid", acs::Player[playerid][acs::boneid], "owner = '%s' AND slotid = %d", name, slotid);
+    DB::SetDataInt(db_entity, "acessorys", "boneid", acs::Player[playerid][acs::boneid], "owner = '%q' AND slotid = %d", name, slotid);
 
     if(IsPlayerAttachedObjectSlotUsed(playerid, slotid))
         RemovePlayerAttachedObject(playerid, slotid);
@@ -727,7 +726,7 @@ stock Acessory::GetFreeSlot(playerid)
     GetPlayerName(playerid, name);
 
     for(new i = 0; i < MAX_PLAYER_ACESSORYS; i++)
-        if(!DB::Exists(db_entity, "acessorys", "owner, slotid", "owner = '%s' AND slotid = %d", name, i))
+        if(!DB::Exists(db_entity, "acessorys", "owner, slotid", "owner = '%q' AND slotid = %d", name, i))
             return i;
     
     return -1;
@@ -738,7 +737,7 @@ stock Acessory::SaveData(playerid, slotid)
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 
-    if(!DB::Exists(db_entity, "acessorys", "owner, slotid", "owner = '%s' AND slotid = %d", name, slotid))
+    if(!DB::Exists(db_entity, "acessorys", "owner, slotid", "owner = '%q' AND slotid = %d", name, slotid))
         return 0;
 
     if(!IsPlayerAttachedObjectSlotUsed(playerid, slotid))
@@ -751,16 +750,24 @@ stock Acessory::SaveData(playerid, slotid)
 
     GetPlayerAttachedObject(playerid, slotid, acs::Player[playerid][acs::modelid], boneid, pX, pY, pZ, rX, rY, rZ, sX, sY, sZ, _, _);
 
-    DB::SetDataInt(db_entity, "acessorys", "boneid", boneid, "owner = '%s' AND slotid = %d", name, slotid);
-    DB::SetDataFloat(db_entity, "acessorys", "pX", pX, "owner = '%s' AND slotid = %d", name, slotid);
-    DB::SetDataFloat(db_entity, "acessorys", "pY", pY, "owner = '%s' AND slotid = %d", name, slotid);
-    DB::SetDataFloat(db_entity, "acessorys", "pZ", pZ, "owner = '%s' AND slotid = %d", name, slotid);
-    DB::SetDataFloat(db_entity, "acessorys", "rX", rX, "owner = '%s' AND slotid = %d", name, slotid);
-    DB::SetDataFloat(db_entity, "acessorys", "rY", rY, "owner = '%s' AND slotid = %d", name, slotid);
-    DB::SetDataFloat(db_entity, "acessorys", "rZ", rZ, "owner = '%s' AND slotid = %d", name, slotid);
-    DB::SetDataFloat(db_entity, "acessorys", "sX", sX, "owner = '%s' AND slotid = %d", name, slotid);
-    DB::SetDataFloat(db_entity, "acessorys", "sY", sY, "owner = '%s' AND slotid = %d", name, slotid);
-    DB::SetDataFloat(db_entity, "acessorys", "sZ", sZ, "owner = '%s' AND slotid = %d", name, slotid);
+    //MENSAGEM PERSONALIZADA
+    if(sX == 0.0 || sY == 0.0 || sZ == 0.0)
+    {
+        SendClientMessage(playerid, -1, "erro ao salvar");
+        printf("erro ao salvar");
+        return 1;
+    }
+
+    DB::SetDataInt(db_entity, "acessorys", "boneid", boneid, "owner = '%q' AND slotid = %d", name, slotid);
+    DB::SetDataFloat(db_entity, "acessorys", "pX", pX, "owner = '%q' AND slotid = %d", name, slotid);
+    DB::SetDataFloat(db_entity, "acessorys", "pY", pY, "owner = '%q' AND slotid = %d", name, slotid);
+    DB::SetDataFloat(db_entity, "acessorys", "pZ", pZ, "owner = '%q' AND slotid = %d", name, slotid);
+    DB::SetDataFloat(db_entity, "acessorys", "rX", rX, "owner = '%q' AND slotid = %d", name, slotid);
+    DB::SetDataFloat(db_entity, "acessorys", "rY", rY, "owner = '%q' AND slotid = %d", name, slotid);
+    DB::SetDataFloat(db_entity, "acessorys", "rZ", rZ, "owner = '%q' AND slotid = %d", name, slotid);
+    DB::SetDataFloat(db_entity, "acessorys", "sX", sX, "owner = '%q' AND slotid = %d", name, slotid);
+    DB::SetDataFloat(db_entity, "acessorys", "sY", sY, "owner = '%q' AND slotid = %d", name, slotid);
+    DB::SetDataFloat(db_entity, "acessorys", "sZ", sZ, "owner = '%q' AND slotid = %d", name, slotid);
 
     SendClientMessage(playerid, COLOR_SUCESS, "[ ACS ] {ffffff}Acessorio {33ff33}#%d salvo {ffffff}com sucesso.", slotid + 1);
         
@@ -793,7 +800,7 @@ stock Acessory::GivePlayerStock(playerid, slotid, stockid)
     DB::GetDataInt(db_stock, "acessorys", "color2", color2, "uid = %d", stockid);
     
     DB::Insert(db_entity, "acessorys", "owner, slotid, owner_type, flags, price, \
-    modelid, boneid, pX, pY, pZ, rX, rY, rZ, sX, sY, sZ, color1, color2", "'%s', %i, %i, 1, %f, \
+    modelid, boneid, pX, pY, pZ, rX, rY, rZ, sX, sY, sZ, color1, color2", "'%q', %i, %i, 1, %f, \
     %i, %i, %f, %f, %f, %f, %f, %f, %f, %f, %f, %i, %i", name, slotid, OWNER_TYPE_PLAYER, price,
     modelid, boneid, pX, pY, pZ, rX, rY, rZ, sX, sY, sZ, color1, color2);
     
@@ -934,9 +941,9 @@ stock Acessory::GetNameByModelid(modelid, name[], len = sizeof(name))
     return 1;
 }
 
-CMD:acessorios(playerid, params[])
+YCMD:acessorios(playerid, params[], help)
 {
-    #pragma unused params
+    acs::ClearData(playerid);
 
     new msg[1024], name[MAX_PLAYER_NAME], modelid;
     
@@ -946,9 +953,9 @@ CMD:acessorios(playerid, params[])
 
     for(new i = 0; i < MAX_PLAYER_ACESSORYS; i++)
     {
-        if(DB::Exists(db_entity, "acessorys", "owner, slotid", "owner = '%s' AND slotid = %d", name, i))
+        if(DB::Exists(db_entity, "acessorys", "owner, slotid", "owner = '%q' AND slotid = %d", name, i))
         {
-            DB::GetDataInt(db_entity, "acessorys", "modelid", modelid, "owner = '%s' AND slotid = %d", name, i);
+            DB::GetDataInt(db_entity, "acessorys", "modelid", modelid, "owner = '%q' AND slotid = %d", name, i);
 
             format(msg, sizeof(msg), "%s{ffffff}Slot: {9999ff}%d\t{ffffff}%d\t%s\n", 
             msg, i + 1, modelid,
@@ -961,8 +968,6 @@ CMD:acessorios(playerid, params[])
 
     format(msg, sizeof(msg), "%s{cdcdcd}CLIQUE AQUI para comprar\t\t\n", msg);
     
-    acs::ClearData(playerid);
-
     Dialog_ShowCallback(playerid, using public Response_ACC_MENU<iiiis>, DIALOG_STYLE_TABLIST_HEADERS, "{FFFFFF}Gerenciar Acessorios", msg, "Selecionar", "Fechar");
     return 1;
 }

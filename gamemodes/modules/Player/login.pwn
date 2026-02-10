@@ -1,5 +1,7 @@
 #include <YSI\YSI_Coding\y_hooks>
 
+forward OnPlayerLogin(playerid);
+
 new gLoginIssue[][64] = 
 {
     {"sem problemas"},
@@ -9,6 +11,7 @@ new gLoginIssue[][64] =
 
 hook OnPlayerConnect(playerid)
 {
+
     Player::CreateTimer(playerid, pyr::TIMER_LOGIN_KICK, "PYR_Kick", LOGIN_MUSIC_MS, false, "iis", 
     playerid, 
     pyr::TIMER_LOGIN_KICK, 
@@ -93,7 +96,7 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
             new name[MAX_PLAYER_NAME];
             GetPlayerName(playerid, name);
             
-            DB::GetDataString(db_entity, "players", "pass", Player[playerid][pyr::pass], 32, "name = '%s'", name);
+            DB::GetDataString(db_entity, "players", "pass", Player[playerid][pyr::pass], 32, "name = '%q'", name);
 
             if(strcmp(stext, Player[playerid][pyr::pass]))
             {  
@@ -134,8 +137,6 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
 
 stock Login::SetPlayer(playerid)
 {
-    Player::ClearAllData(playerid);
-
     TogglePlayerSpectating(playerid, true);
 
     TogglePlayerControllable(playerid, false);
@@ -147,7 +148,7 @@ stock Login::SetPlayer(playerid)
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 
-    if(!DB::Exists(db_entity, "players", "name", "name = '%s'", name))
+    if(!DB::Exists(db_entity, "players", "name", "name = '%q'", name))
     {
         SendClientMessage(playerid, COLOR_THEME_BPS, "[ BPS ] {ffffff}Parece que voce e {33ff33}novo aqui!{ffffff}, faca o registro para poder jogar!");
         SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_IN_REGISTER);
@@ -166,15 +167,16 @@ stock Login::UnSetPlayer(playerid)
 {
     ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_IN_REGISTER);
     ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_IN_LOGIN);
+    SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED);
     
-    Player::LoadData(playerid);
-
-    Player::Spawn(playerid);
+    Player::KillTimer(playerid, pyr::TIMER_LOGIN_KICK);
 
     Login::HideTDForPlayer(playerid);
-    Login::DestroyPlayerTD(playerid);
-
+    Player::LoadData(playerid);
     StopAudioStreamForPlayer(playerid);
+    TogglePlayerSpectating(playerid, false);
+    TogglePlayerClock(playerid, true);
+    Player::SetCPF(playerid);
 
     CallLocalFunction("OnPlayerLogin", "i", playerid);
 
@@ -201,51 +203,4 @@ stock Login::RegisterPlayer(playerid)
     Kick(playerid);
 
     return 0;
-}
-
-stock Player::Spawn(playerid)
-{
-    new name[MAX_PLAYER_NAME];
-    GetPlayerName(playerid, name);
-
-    if(!DB::Exists(db_entity, "players", "name", "name = '%s'", name))
-    {
-        SendClientMessage(playerid, -1, "{ff3333}[ ERRO FATAL ] {ffffff}Sua conta {ff3333}nao esta registrada {ffffff}houve um erro grave ao spawnar, avise um {ff3333}moderador!");
-        Kick(playerid);
-        printf("[ DB (ERRO) ] Erro ao tentar carregar posições de spawn do jogador!");
-        return 0;
-    }
-
-    new skinid, Float:pX, Float:pY, Float:pZ, Float:pA;
-    DB::GetDataInt(db_entity, "players", "skinid", skinid, "name = '%s'", name);
-    DB::GetDataFloat(db_entity, "players", "pX", pX, "name = '%s'", name);
-    DB::GetDataFloat(db_entity, "players", "pY", pY, "name = '%s'", name);
-    DB::GetDataFloat(db_entity, "players", "pZ", pZ, "name = '%s'", name);
-    DB::GetDataFloat(db_entity, "players", "pA", pA, "name = '%s'", name);
-
-    /* SET VAR */
-    SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED);
-    Player::KillTimer(playerid, pyr::TIMER_LOGIN_KICK);
-
-    /* SET SPAWN */
-    SetSpawnInfo(playerid, 0, skinid, pX, pY, pZ, pA,  WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0);
-    
-    TogglePlayerSpectating(playerid, false);
-    TogglePlayerClock(playerid, true);
-
-    SpawnPlayer(playerid);
-
-    /* PÓS SPAWN */
-
-    // CPF
-    new str[64];
-    format(str, 64, "{33ff33}CPF: {ffffff}[ {33ff33}%d {ffffff}]", playerid);
-    new Text3D:label = CreateDynamic3DTextLabel(str, -1, 0.0, 0.0, 0.0, 25.0, playerid, INVALID_VEHICLE_ID, 1);
-    Attach3DTextLabelToPlayer(label, playerid, 0.0, 0.0, 0.4);
-    Player[playerid][pyr::cpf_tag] = label;
-
-    // RODAPÉ
-    Baseboard::ShowTDForPlayer(playerid);
-
-    return 1;
 }

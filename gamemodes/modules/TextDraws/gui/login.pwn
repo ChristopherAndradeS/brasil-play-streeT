@@ -11,13 +11,16 @@ stock Login::ShowTDForPlayer(playerid, bool:in_login)
     PlayerTextDrawSetString(playerid, Login::PlayerTD[playerid][PTD_LOGIN_NAME], name);
     PlayerTextDrawSetString(playerid, Login::PlayerTD[playerid][PTD_LOGIN_PASS], in_login ? "Digite sua senha" : "Digite uma senha");
 
-    for(new j = 0; j < 7; j++)
-        TextDrawShowForPlayer(playerid, Login::PublicTD[j]);
+    for(new i = 0; i < 7; i++)
+        TextDrawShowForPlayer(playerid, Login::PublicTD[i]);
 	for(new i = 0; i < 3; i++)
         PlayerTextDrawShow(playerid, Login::PlayerTD[playerid][i]); 
 
     SelectTextDraw(playerid, 0xFFFF33FF);
 }
+
+stock Login::IsVisibleTDForPlayer(playerid)
+	return (IsTextDrawVisibleForPlayer(playerid, Login::PublicTD[0]));
 
 stock Login::HideTDForPlayer(playerid)
 {
@@ -34,7 +37,10 @@ stock Login::HideTDForPlayer(playerid)
 stock Login::DestroyPlayerTD(playerid)
 {
     for(new i = 0; i < 3; i++)
+	{
         PlayerTextDrawDestroy(playerid, Login::PlayerTD[playerid][i]);
+		Login::PlayerTD[playerid][i] = INVALID_PLAYER_TEXT_DRAW;
+	}
 }
 
 stock Login::CreatePublicTD()
