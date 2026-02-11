@@ -20,10 +20,10 @@
 #include "../gamemodes/modules/utils.pwn"
 /*                          HEADERS                        */
 #include "../gamemodes/modules/DB/header.pwn"
+#include "../gamemodes/modules/Server/header.pwn" 
 #include "../gamemodes/modules/TextDraws/header.pwn"
 #include "../gamemodes/modules/Player/header.pwn"
 #include "../gamemodes/modules/Admin/header.pwn"
-#include "../gamemodes/modules/Server/header.pwn" 
 #include "../gamemodes/modules/Maps/header.pwn"
 /*                          HANDLE                          */
 #include "../gamemodes/modules/Server/handle.pwn"
@@ -81,23 +81,17 @@ public e_COMMAND_ERRORS:OnPlayerCommandReceived(playerid, cmdtext[], e_COMMAND_E
         {
             SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}O comando \'%s\' nao existe", cmdtext); 
             return COMMAND_SILENT;            
-        }
-
-        case COMMAND_DENIED:
-        {
-            SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Voce nao pode usar esse comando!"); 
-            return COMMAND_SILENT;            
-        }
-
-        default: return success;
+        }    
     }
+
+    return success;
 }
 
 public OnPlayerText(playerid, text[])
 {
     if(IsFlagSet(Admin[playerid][adm::flags], FLAG_ADM_WORKING))
     {      
-        Adm::SendMsgToAllTagged(FLAG_ADM_WORKING | FLAG_ADM_APPRENTICE_HELPER, 0xFFFF33AA, 
+        Adm::SendMsgToAllTagged(FLAG_ADM_WORKING | FLAG_IS_ADMIN, 0xFFFF33AA, 
         "[ ADM CHAT ] %s%s {ffffff}: {ffff33}%s", 
         Adm::GetColorString(Admin[playerid][adm::lvl]), GetPlayerNameEx(playerid), text);  
 
@@ -111,7 +105,7 @@ public OnPlayerText(playerid, text[])
 
 public OnPlayerClickMap(playerid, Float:fX, Float:fY, Float:fZ)
 {
-    if(!((Admin[playerid][adm::flags]) < (FLAG_ADM_MANAGER & ~FLAG_ADM_WORKING))) return 1;
+    if(Admin[playerid][adm::lvl] < ROLE_ADM_MANAGER) return 1;
     
     SetPlayerPos(playerid, fX, fY, fZ);
 
@@ -145,22 +139,4 @@ hook function SendClientMessageToAll(colour, const msg[], GLOBAL_TAG_TYPES:...)
     va_format(fixed_msg, 144, msg, ___(2));
     RemoveGraphicAccent(fixed_msg);
     return continue(colour, fixed_msg);
-}
-
-YCMD:teste(playerid, params[], help)
-{
-    printf("[ ");
-    for(new Iter:i = list_iter(gAdminSpectates); iter_inside(i); iter_move_next(i))
-    {
-        printf("%d, ", iter_get(i));
-    }
-    printf("]");
-
-    return 1;
-}
-
-YCMD:teste2(playerid, params[], help)
-{
-    TogglePlayerSpectating(playerid, !bool:IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING));
-    return 1;
 }

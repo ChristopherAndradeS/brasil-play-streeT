@@ -37,19 +37,17 @@ enum _:E_ROLES_ADMIN
     MAX_ADMIN_ROLES      
 }
 
+enum _:E_ADM_CMD_ERROR
+{
+    ADM_CMD_NOT_IN_WORK,
+    ADM_CMD_LOW_LEVEL,
+    ADM_CMD_IS_NOT_ADMIN,
+}
+
 enum (<<= 1)
 {
-    FLAG_ADM_NONE = 1,
-    FLAG_ADM_APPRENTICE_HELPER,    
-    FLAG_ADM_HELPER,        
-    FLAG_ADM_APPRENTICE_STAFF,        
-    FLAG_ADM_STAFF,        
-    FLAG_ADM_FOREMAN,         
-    FLAG_ADM_MASTER,     
-    FLAG_ADM_MANAGER,     
-    FLAG_ADM_CEO,     
-    FLAG_ADM_FOUNDER, 
-    FLAG_ADM_WORKING      
+    FLAG_ADM_WORKING = 1,
+    FLAG_IS_ADMIN,    
 }
 
 enum E_ADMIN
@@ -91,7 +89,7 @@ stock Adm::GetColorString(level)
     return string;
 }
 
-stock Adm::Exists(const name[], &level)
+stock Adm::Exists(const name[], &level = INVALID_ADM_LEVEL)
 {
     if(DB::Exists(db_entity, "admins", "name", "name = '%q'", name))
         return DB::GetDataInt(db_entity, "admins", "level", level, "name = '%q'", name);
@@ -101,25 +99,114 @@ stock Adm::Exists(const name[], &level)
     return 0;
 }
 
-stock Adm::SetPlayer(playerid, const promoter[], level)
+stock Adm::Set(const name[], const promoter[], level)
 {
+    new old_level;
     new timestr[32];
-    GetISODate(timestr, 32, -3);
+    GetISODate(timestr, 32, Server[srv::gmt]);
+    
+    new targetid = GetPlayerIDByName(name);
 
-    new sucess = DB::Insert(db_entity, "admins", "name, level, promoter, promote_date", 
-    "'%q', %i, '%q', '%q'", GetPlayerNameEx(playerid), level, promoter, timestr);
-
-    if(sucess)
+    if(Adm::Exists(name, old_level))
     {
-        SendClientMessage(playerid, COLOR_SUCESS,  "[ ADM ] {ffffff}Parabens! Voce faz parte da {33ff33}STAFF BPS");
-        SendClientMessage(playerid, COLOR_WARNING, "[ ADM ] {ffffff}Voce se tornou um {ff9933}admin! \
-        Cargo: %s%s",  Adm::GetColorString(level), Adm::gRoleNames[level]);
+        if(old_level == level) return 1;
+        
+        if(!level)
+        {
+            DB::Delete(db_entity, "admins", "name = '%q'", name);
+            
+            printf("[ ADMIN ] O jogador %s foi expulso da equipe por %s\n", name, promoter);
 
-        printf("[ ADMIN ] O jogador %s tornou-se admin. Nível: %d. Promotor: %s\n", GetPlayerNameEx(playerid), level, promoter);
-        return 1;
+            if(targetid != INVALID_PLAYER_ID)
+            {
+                Adm::UnSet(targetid);
+                SendClientMessage(targetid, -1, "{ff3333}[ ADM ] {ffffff}Voce foi {ff3333}expulso {ffffff}da equipe!");
+            }
+
+            return 1;
+        }
+
+        if(old_level < level)
+        {
+            if(targetid != INVALID_PLAYER_ID)
+            {
+                SendClientMessage(targetid, -1, "{33ff33}[ ADM ] {ffffff}Voce foi {33ff33}provido {ffffff}para %s%s",
+                Adm::GetColorString(level), Adm::gRoleNames[level]);
+                Adm::UpdateLevel(targetid, level);
+                DB::Update(db_entity, "admins", "level = %i, promoter = '%q', promote_date = '%q' WHERE name = '%q'", 
+                level, promoter, timestr, name);
+            }
+
+            printf("[ ADMIN ] O jogador %s foi provido por %s. Nível: %d\n", name, promoter, level);
+        }
+        
+        else if(old_level > level)
+        {
+            if(targetid != INVALID_PLAYER_ID)
+            {
+                SendClientMessage(targetid, -1, "{ff3333}[ ADM ] {ffffff}Voce foi {ff3333}rebaixado {ffffff}para %s%s",
+                Adm::GetColorString(level), Adm::gRoleNames[level]);
+                Adm::UpdateLevel(targetid, level);
+                DB::Update(db_entity, "admins", "level = %i, promoter = '%q', promote_date = '%q' WHERE name = '%q'", 
+                level, promoter, timestr, name);
+            }
+            printf("[ ADMIN ] O jogador %s foi rebaixado por %s. Nível: %d\n", name, promoter, level);
+        }
     }
 
-    return 0;
+    else
+    {
+        new sucess = DB::Insert(db_entity, "admins", "name, level, promoter, promote_date", 
+        "'%q', %i, '%q', '%q'", name, level, promoter, timestr);
+
+        if(sucess)
+        {
+            SendClientMessage(targetid, COLOR_SUCESS,  "[ ADM ] {ffffff}Parabens! Voce faz parte da {33ff33}STAFF BPS");
+            SendClientMessage(targetid, COLOR_WARNING, "[ ADM ] {ffffff}Voce se tornou um {ff9933}admin! \
+            Cargo: %s%s",  Adm::GetColorString(level), Adm::gRoleNames[level]);
+
+            Adm::UpdateLevel(targetid, level);
+
+            printf("[ ADMIN ] O jogador %s tornou-se admin. Nível: %d. Promotor: %s\n", name, level, promoter);
+        }
+
+        else
+        {
+            printf("[ DB (ADMIN) ] Erro fatal ao setar admin lvl: %d em %s por %s", level, name, promoter);
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+stock Adm::Load(playerid)
+{
+    new level;
+
+    if(!Adm::Exists(GetPlayerNameEx(playerid), level)) return 0;
+    
+    SetFlag(Admin[playerid][adm::flags], FLAG_IS_ADMIN);
+    Admin[playerid][adm::lvl] = level;
+    Admin[playerid][adm::spectateid] = INVALID_PLAYER_ID; 
+
+    return 1;   
+}
+
+stock Adm::UpdateLevel(playerid, level)
+{
+    SetFlag(Admin[playerid][adm::flags], FLAG_IS_ADMIN);
+    Admin[playerid][adm::lvl] = level;
+}
+
+stock Adm::UnSet(playerid)
+{
+    if(Adm::IsSpectating(playerid))
+        Adm::UnSetWork(playerid);
+    
+    Admin[playerid][adm::spectateid] = INVALID_PLAYER_ID;
+    Admin[playerid][adm::lvl]        = 0;
+    Admin[playerid][adm::flags]      = 0;
 }
 
 stock Adm::SetWork(playerid)
@@ -141,7 +228,7 @@ stock Adm::SetWork(playerid)
     
     Adm::SpectatePlayer(playerid, Admin[playerid][adm::spectateid]);
 
-    Adm::SendMsgToAllTagged(FLAG_ADM_APPRENTICE_HELPER, -1, 
+    Adm::SendMsgToAllTagged(FLAG_IS_ADMIN, -1, 
     "{ffff33}[ ADM AVISO ] %s%s {ffff33}entrou {ffffff}no modo de trabalho", Adm::GetColorString(level), name);
 
     Iter_Add(Adm_Iter, playerid);
@@ -164,7 +251,7 @@ stock Adm::UnSetWork(playerid)
     Adm::HideTDForPlayer(playerid);
     Baseboard::ShowTDForPlayer(playerid);
 
-    Adm::SendMsgToAllTagged(FLAG_ADM_APPRENTICE_HELPER, -1, 
+    Adm::SendMsgToAllTagged(FLAG_IS_ADMIN, -1, 
     "{ffff33}[ ADM AVISO ] %s%s {ffff33}saiu {ffffff}no modo de trabalho", Adm::GetColorString(level), name);  
 
     Iter_Remove(Adm_Iter, playerid);
@@ -250,21 +337,24 @@ stock Adm::SendMsgToAllTagged(flags, color, const msg[], GLOBAL_TAG_TYPES:...)
     return 1;
 }
 
-stock Adm::HasPermission(playerid, flags)
+stock Adm::HasPermission(playerid, level)
 {    
-    if((Admin[playerid][adm::flags]) < (flags & ~FLAG_ADM_WORKING))
+    if(!IsFlagSet(Admin[playerid][adm::flags], FLAG_IS_ADMIN))
     {
         SendClientMessage(playerid,  -1, "{ff3333}[ ADM ] {ffffff}Voce nao tem permissao para isso!");
         return 0;
     }
 
-    if(flags & FLAG_ADM_WORKING)
+    if((Admin[playerid][adm::lvl]) < level)
     {
-        if(!(Admin[playerid][adm::flags] & FLAG_ADM_WORKING))
-        {
-            SendClientMessage(playerid,  -1, "{ff3333}[ ADM ] {ffffff}Voce precisar estar em modo de trabalho: /aw!");
-            return 0;
-        }
+        SendClientMessage(playerid,  -1, "{ff3333}[ ADM ] {ffffff}Voce nao tem cargo de admin para isso!");
+        return 0;
+    }   
+
+    if(!IsFlagSet(Admin[playerid][adm::flags], FLAG_ADM_WORKING))
+    {
+        SendClientMessage(playerid,  -1, "{ff3333}[ ADM ] {ffffff}Voce precisar estar em modo de trabalho: /aw!");
+        return 0;
     }
 
     return 1;
@@ -272,10 +362,7 @@ stock Adm::HasPermission(playerid, flags)
 
 stock Adm::IsValidSpectateID(playerid, targetid)
 {
-//    if(playerid == targetid) return 0;
-
-    if((Admin[playerid][adm::flags] & ~FLAG_ADM_WORKING) <= (Admin[targetid][adm::flags] & ~FLAG_ADM_WORKING))
-        return 0;
+    if((Admin[playerid][adm::lvl] <= Admin[targetid][adm::lvl])) return 0;
 
     return (!IsFlagSet(Player[targetid][pyr::flags], MASK_PLAYER_SPECTATING));
 }
@@ -296,16 +383,16 @@ stock Adm::ValidTargetID(playerid, targetid, bool:can_equal = false, bool:sendms
         return 0;        
     }
 
-    if((Admin[playerid][adm::flags] & ~FLAG_ADM_WORKING) <= (Admin[targetid][adm::flags] & ~FLAG_ADM_WORKING))
+    if((Admin[playerid][adm::lvl] <= Admin[targetid][adm::lvl]))
     {
         if((can_equal && (playerid == targetid))) return 1;
 
         if(sendmsg)
             SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Voce nao poder aplicar essa acao ao seu {ff3333}colega/subordinado!");
         return 0;        
-    }
+    }   
 
-    return 1;    
+    return 1;     
 }
 
 stock Adm::IsValidTargetName(playerid, const name[], const target_name[])
@@ -317,7 +404,7 @@ stock Adm::IsValidTargetName(playerid, const name[], const target_name[])
 
     if(!isnull(name) && !strcmp(name, target_name))
     {
-        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Voce nao poder banir voce mesmo!");
+        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Voce nao poder aplicar essa acao em voce mesmo!");
         return 0;
     }
 

@@ -46,9 +46,9 @@ stock Payday::GetPlayerBonus(playerid, &Float:bonus)
 {
     bonus = 0;
 
-    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_ORG))
-        bonus += 1200.0;
-    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IS_ADM))
+    // if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_ORG))
+    //     bonus += 1200.0;
+    if(IsFlagSet(Admin[playerid][adm::flags], FLAG_IS_ADMIN))
         bonus += 500.0;
 
     return 1;

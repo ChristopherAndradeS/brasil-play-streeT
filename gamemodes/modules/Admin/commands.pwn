@@ -1,6 +1,5 @@
 #include <YSI\YSI_Coding\y_hooks>
 
-
 forward ban_input_dialog(playerid, dialogid, response, listitem, string:inputtext[]);
 
 public ban_input_dialog(playerid, dialogid, response, listitem, string:inputtext[])
@@ -24,7 +23,7 @@ public ban_input_dialog(playerid, dialogid, response, listitem, string:inputtext
     new sucess, admin[MAX_PLAYER_NAME];
     GetPlayerName(playerid, admin);
 
-    if(days != -1) sucess = Punish::SetBan(admin, name, days, reason);
+    if(days != -1) sucess = Punish::SetBan(admin, name, clamp(days, 1, 60), reason);
     else           sucess = Punish::SetPermaban(admin, name, reason);
 
     if(sucess)
@@ -55,49 +54,39 @@ public ban_input_dialog(playerid, dialogid, response, listitem, string:inputtext
 
 YCMD:mkfnd(playerid, params[], help)
 {
-    if(!IsPlayerAdmin(playerid)) return 0;
+    if(!IsPlayerAdmin(playerid)) return 1;
 
-    new level = floatround(floatlog(float(FLAG_ADM_FOUNDER), 2.0));
+    new name[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, name);
 
-    new sucess = Adm::SetPlayer(playerid, "SERVER", level);
-
-    if(!sucess)
-        SendClientMessage(playerid, COLOR_ERRO, "[ ADM ] {ffffff}Erro ao setar voce como fundador!");
+    if(!Adm::Set(name, "SERVER", 9))
+        SendClientMessage(playerid, COLOR_ERRO, "[ ADM ] {ffffff}Erro Fatal ao setar voce como fundador!");
     
     return 1;
 }
 
 YCMD:aa(playerid, params[], help)
 {
-    //if(!Adm::HasPermission(playerid, FLAG_ADM_APPRENTICE_STAFF)) return 1;
-    
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Ajuda Admin - Lista de comandos disponiveis");
+        return 1;
+    }
+
+    if(!IsFlagSet(Admin[playerid][adm::flags], FLAG_IS_ADMIN)) return 1;
+
     new str[512];
     
-    strcat(str, Command_GetPlayer(YCMD:aw, playerid) ? "aw\n" : " ");
-    strcat(str, Command_GetPlayer(YCMD:ir, playerid) ? "ir\n" : " ");
-    strcat(str, Command_GetPlayer(YCMD:verid, playerid) ? "verid\n" : " ");
-    strcat(str, Command_GetPlayer(YCMD:aviso, playerid) ? "aviso\n" : " ");
-    strcat(str, Command_GetPlayer(YCMD:congelar, playerid) ? "congelar\n" : " ");
-    strcat(str, Command_GetPlayer(YCMD:descongelar, playerid) ? "descongelar\n" : " ");
-    strcat(str, Command_GetPlayer(YCMD:lchat, playerid) ? "lchat\n" : " ");
-    strcat(str, Command_GetPlayer(YCMD:kick, playerid) ? "kick\n" : " ");
-    strcat(str, Command_GetPlayer(YCMD:setarskin, playerid) ? "setarskin\n" : " ");
-    strcat(str, Command_GetPlayer(YCMD:setarvida, playerid) ? "setarvida\n" : " ");
-    strcat(str, Command_GetPlayer(YCMD:setarcolete, playerid) ? "setarcolete\n" : " ");
-    strcat(str, Command_GetPlayer(YCMD:megafone, playerid) ? "megafone\n" : " ");
-    strcat(str, Command_GetPlayer(YCMD:cronometro, playerid) ? "cronometro\n" : " ");
-    strcat(str, Command_GetPlayer(YCMD:prender, playerid) ? "prender\n" : " ");
-    strcat(str, Command_GetPlayer(YCMD:soltar, playerid) ? "soltar" : " ");
-    //strcat(str, Command_GetPlayer(YCMD:prenderoff, playerid) ? "prenderoff\n" : " ");
-    //strcat(str, Command_GetPlayer(YCMD:soltaroff, playerid) ? "soltaroff\n" : " ");
-    // strcat(str, Command_GetPlayer(YCMD:criargps, playerid) ? "criargps\n" : " ");
-    // strcat(str, Command_GetPlayer(YCMD:criarorg, playerid) ? "criarorg\n" : " ");
-    // strcat(str, Command_GetPlayer(YCMD:ban, playerid) ? "ban\n" : " ");
-    // strcat(str, Command_GetPlayer(YCMD:banip, playerid) ? "banip\n" : " ");
-    // strcat(str, Command_GetPlayer(YCMD:desban, playerid) ? "desban\n" : " ");
-    // strcat(str, Command_GetPlayer(YCMD:desbanip, playerid) ? "desbanip\n" : " ");
-    // strcat(str, Command_GetPlayer(YCMD:setadm, playerid) ? "setadm\n" : " ");
-    // strcat(str, Command_GetPlayer(YCMD:remadm, playerid) ? "remadm\n" : " ");
+    if(Admin[playerid][adm::lvl] >= ROLE_ADM_APR_HELPER)
+        strcat(str, "aa\naw\nir\nverid\naviso\n");
+    if(Admin[playerid][adm::lvl] >= ROLE_ADM_APR_STAFF)
+        strcat(str, "congelar\ndescongelar\nkick\n");
+    if(Admin[playerid][adm::lvl] >= ROLE_ADM_FOREMAN)
+        strcat(str, "cronometro\nmegafone\nprender\nprenderoff\nsoltar\nsoltaroff\n");
+    if(Admin[playerid][adm::lvl] >= ROLE_ADM_MANAGER)
+        strcat(str, "tp\nlchat\nsetarskin\nsetarvida\nsetarcolete\n");
+    if(Admin[playerid][adm::lvl] >= ROLE_ADM_CEO)
+        strcat(str, "ban\ndesban\nsetadm\nremadm\n");
 
     inline no_use_dialog(targetid, dialogid, response, listitem, string:inputtext[])
     {
@@ -124,6 +113,10 @@ YCMD:aw(playerid, params[], help)
         return 1;
     }
 
+    printf("%d lvl: %d", playerid, Admin[playerid][adm::lvl]);
+
+    if(!IsFlagSet(Admin[playerid][adm::flags], FLAG_IS_ADMIN)) return 1;
+
     if(!Adm::HandleWork(playerid))
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Nenhum jogador online para entrar em modo de trabalho!"); 
     
@@ -132,13 +125,13 @@ YCMD:aw(playerid, params[], help)
 
 YCMD:ir(playerid, params[], help)
 {
-    //if(!Adm::HasPermission(playerid, FLAG_ADM_WORKING | FLAG_ADM_APPRENTICE_HELPER)) return 1;
-
     if(help)
     {
         SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Selecionar jogador para espectar");
         return 1;
     }
+
+    if(!Adm::HasPermission(playerid, ROLE_ADM_APR_HELPER)) return 1;
 
     new targetid;
 
@@ -157,13 +150,13 @@ YCMD:ir(playerid, params[], help)
 
 YCMD:verid(playerid, params[], help)
 {
-    //if(!Adm::HasPermission(playerid, FLAG_ADM_WORKING | FLAG_ADM_APPRENTICE_HELPER)) return 1;
-
     if(help)
     {
         SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Ver ID de jogador pelo nome");
         return 1;
     }
+
+    if(!Adm::HasPermission(playerid, ROLE_ADM_APR_HELPER)) return 1;
 
     new name[MAX_PLAYER_NAME];
 
@@ -183,13 +176,13 @@ YCMD:verid(playerid, params[], help)
 
 YCMD:aviso(playerid, params[], help)
 {
-    //if(!Adm::HasPermission(playerid, FLAG_ADM_WORKING | FLAG_ADM_APPRENTICE_HELPER)) return 1;
-
     if(help)
     {
         SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Enviar aviso personalizado ao jogador");
         return 1;
     }
+
+    if(!Adm::HasPermission(playerid, ROLE_ADM_APR_HELPER)) return 1;
 
     new targetid, reason[64];
 
@@ -211,6 +204,8 @@ YCMD:congelar(playerid, params[], help)
         SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Congela um jogador");
         return 1;
     }
+
+    if(!Adm::HasPermission(playerid, ROLE_ADM_APR_STAFF)) return 1;
 
     new targetid;
     if(sscanf(params, "u", targetid)) 
@@ -242,6 +237,8 @@ YCMD:descongelar(playerid, params[], help)
         return 1;
     }
 
+    if(!Adm::HasPermission(playerid, ROLE_ADM_APR_STAFF)) return 1;
+
     new targetid;
     if(sscanf(params, "u", targetid)) 
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /descongelar {ff3333}[ ID ]");
@@ -265,40 +262,6 @@ YCMD:descongelar(playerid, params[], help)
     return 1;
 }
 
-YCMD:tp(playerid, params[], help)
-{
-    if(help)
-    {
-        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Teleporta para uma posição X, Y, Z no mundo");
-        return 1;
-    }
-
-    new Float:pX, Float:pY, Float:pZ, interiorid, vw;
-    if(sscanf(params, "fffii", pX, pY, pZ, interiorid, vw)) 
-        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /tp {ff3333}[ X ] [ Y ] [ Z ] [ INTERIORID ] [ VIRTUAL WORLD ]");
-
-    SetPlayerPos(playerid, pX, pY, pZ);
-    SetPlayerInterior(playerid, interiorid);
-    SetPlayerVirtualWorld(playerid, vw);
-
-    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Teleportado com sucesso!");
-
-    return 1;
-}
-
-YCMD:lchat(playerid, params[], help)
-{
-    if(help)
-    {
-        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Limpa o Chat de todos os jogadores");
-        return 1;
-    }
-
-    ClearChat(playerid, 45);
-    SendClientMessageToAll(-1, "{33ff33}[ ADM ] {ffffff}Chat limpo! :)");
-    return 1;
-}
-
 YCMD:kick(playerid, params[], help)
 {
     if(help)
@@ -306,7 +269,9 @@ YCMD:kick(playerid, params[], help)
         SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Kika um jogador");
         return 1;
     }
-    
+
+    if(!Adm::HasPermission(playerid, ROLE_ADM_APR_STAFF)) return 1;
+
     new targetid, reason[64];
     if(sscanf(params, "us[64]", targetid, reason))
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /kick {ff3333}[ ID ] [ MOTIVO ]");
@@ -325,77 +290,6 @@ YCMD:kick(playerid, params[], help)
     return 1;
 }
 
-YCMD:setarskin(playerid, params[], help)
-{
-    if(help)
-    {
-        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Altera o skinid de um jogador");
-        return 1;
-    }
-
-    new targetid, skinid;
-    if(sscanf(params, "ui", targetid, skinid))
-        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /kick {ff3333}[ ID ] [ SKINID ]");
-    
-    if(skinid < 0 || skinid > 311) 
-        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Erro do parâmetro: {ff3333}skinid {ffffff}[0 - 311]");
-    
-    if(!Adm::ValidTargetID(playerid, targetid, true)) return 1;
-
-    SetPlayerSkin(targetid, skinid);
-
-    SendClientMessage(targetid, -1, "{ff9933}[ AVISO ] {ffffff}Um admin alterou sua skin.");
-    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Você alterou a {33ff33}skin {ffffff}de %s. skinid : %d ", GetPlayerNameEx(targetid), skinid);
- 
-    return 1;
-}
-
-YCMD:setarvida(playerid, params[], help)
-{
-    if(help)
-    {
-        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Altera o valor de vida de um jogador");
-        return 1;
-    }
-
-    new targetid, Float:health;
-    if(sscanf(params, "uf", targetid, health))
-        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /setarvida {ff3333}[ ID ] [ VIDA ]");
-   
-    if(!Adm::ValidTargetID(playerid, targetid, true)) return 1;
-
-    health = floatclamp(health, 0.0, 100.0);
-    SetPlayerHealth(targetid, health);
-
-    SendClientMessage(targetid, -1, "{ff9933}[ AVISO ] {ffffff}Um admin alterou sua vida para %.1f%%.", health);
-    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce alterou a {33ff33}vida {ffffff}de %s para %.1f%%.", GetPlayerNameEx(targetid), health);
-
-    return 1;
-}
-
-YCMD:setarcolete(playerid, params[], help)
-{
-    if(help)
-    {
-        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Altera o valor de colete de um jogador");
-        return 1;
-    }
-    
-    new targetid, Float:armour;
-    if(sscanf(params, "uf", targetid, armour))
-        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /setarcolete {ff3333}[ ID ] [ COLETE ]");
-   
-    if(!Adm::ValidTargetID(playerid, targetid, true)) return 1;
-
-    armour = floatclamp(armour, 0.0, 100.0);
-    SetPlayerArmour(targetid, floatclamp(armour, 0.0, 100.0));
-
-    SendClientMessage(targetid, -1, "{ff9933}[ AVISO ] {ffffff}Um admin alterou seu colete para %.1f%%.", armour);
-    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce alterou o {33ff33}colete {ffffff}de %s para %.1f%%.", GetPlayerNameEx(targetid), armour);
-
-    return 1;
-}
-
 YCMD:megafone(playerid, params[], help)
 {
     if(help)
@@ -403,6 +297,8 @@ YCMD:megafone(playerid, params[], help)
         SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Envia uma gametext personalizada para todos");
         return 1;
     }
+
+    if(!Adm::HasPermission(playerid, ROLE_ADM_FOREMAN)) return 1;
 
     new msg[144], time;
     if(sscanf(params, "is[144]", time, msg))
@@ -424,9 +320,11 @@ YCMD:cronometro(playerid, params[], help)
         return 1;
     }
 
+    if(!Adm::HasPermission(playerid, ROLE_ADM_FOREMAN)) return 1;
+
     if(Server[srv::is_count_down])
         return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Ja existe um cronometro rodando!");
-      
+   
     new time;
     if(sscanf(params, "i", time))
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /cronometro {ff3333}[ TEMPO (segundos) ]");
@@ -462,6 +360,8 @@ YCMD:prender(playerid, params[], help)
         SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Prende um delinquente na cadeia staff por um tempo em minutos/horas");
         return 1;
     }
+    
+    if(!Adm::HasPermission(playerid, ROLE_ADM_FOREMAN)) return 1;
 
     new targetid, minutes, reason[64];
     if(sscanf(params, "uis[64]", targetid, minutes, reason)) 
@@ -475,7 +375,9 @@ YCMD:prender(playerid, params[], help)
     GetPlayerName(targetid, name, sizeof(name));
     GetPlayerName(playerid, admin, sizeof(admin));
 
-    new result = Punish::SetJail(name, admin, reason, clamp(minutes * 60000, 180000, 18000000));
+    minutes = clamp(minutes * 60000, 180000, 18000000);
+
+    new result = Punish::SetJail(name, admin, reason, minutes);
 
     if(result == 0)
     {
@@ -488,7 +390,7 @@ YCMD:prender(playerid, params[], help)
     {
         // SendClientMessageToAll(-1, "{ff3399}[ ILHA ] %s {ffffff}ficará na ilha abandonada por mais tempo: {ff3399}%d {ffffff}minutos", name, minutes);
         // SendClientMessageToAll(-1, "{ff3399}[ ILHA ] Motivo: {ffffff}%s", reason);
-        Punish::UpdatePlayerJail(targetid, minutes * 60000);
+        Punish::UpdatePlayerJail(targetid, minutes);
         return 1;
     }
 
@@ -497,7 +399,7 @@ YCMD:prender(playerid, params[], help)
 
     if(targetid != INVALID_PLAYER_ID)
     {
-        Punish::SendPlayerToJail(targetid, minutes * 60000);
+        Punish::SendPlayerToJail(targetid, minutes);
         SendClientMessage(targetid, -1, "{ff3333}[ ILHA ] {ffffff}Bem vindo a ilha abandonada! Aqui você vai refletir suas más ações");
     }
 
@@ -513,6 +415,8 @@ YCMD:soltar(playerid, params[], help)
         SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Solta um arrependido da cadeia staff");
         return 1;
     }
+
+    if(!Adm::HasPermission(playerid, ROLE_ADM_FOREMAN)) return 1;
 
     new targetid;
     if(sscanf(params, "u", targetid)) 
@@ -548,6 +452,8 @@ YCMD:prenderoff(playerid, params[], help)
         return 1;
     }
 
+    if(!Adm::HasPermission(playerid, ROLE_ADM_FOREMAN)) return 1;
+
     new name[MAX_PLAYER_NAME], minutes, reason[64];
     if(sscanf(params, "s[24]is[64]", name, minutes, reason)) 
         return SendClientMessage(playerid, -1, 
@@ -579,6 +485,8 @@ YCMD:soltaroff(playerid, params[], help)
         return 1;
     }
 
+    if(!Adm::HasPermission(playerid, ROLE_ADM_FOREMAN)) return 1;
+
     new name[MAX_PLAYER_NAME];
     if(sscanf(params, "s[24]", name)) 
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /soltaroff {ff3333}[ NAME ]");
@@ -600,6 +508,122 @@ YCMD:soltaroff(playerid, params[], help)
     return 1;
 }
 
+YCMD:tp(playerid, params[], help)
+{
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Teleporta para uma posição X, Y, Z no mundo");
+        return 1;
+    }
+
+    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER)) return 1;
+ 
+    new Float:pX, Float:pY, Float:pZ, interiorid, vw;
+    if(sscanf(params, "fffii", pX, pY, pZ, interiorid, vw)) 
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /tp {ff3333}[ X ] [ Y ] [ Z ] [ INTERIORID ] [ VIRTUAL WORLD ]");
+
+    SetPlayerPos(playerid, pX, pY, pZ);
+    SetPlayerInterior(playerid, interiorid);
+    SetPlayerVirtualWorld(playerid, vw);
+
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Teleportado com sucesso!");
+
+    return 1;
+}
+
+YCMD:lchat(playerid, params[], help)
+{
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Limpa o Chat de todos os jogadores");
+        return 1;
+    }
+    
+    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER)) return 1;
+
+    ClearChat(playerid, 45);
+    SendClientMessageToAll(-1, "{33ff33}[ ADM ] {ffffff}Chat limpo! :)");
+    return 1;
+}
+
+
+YCMD:setarskin(playerid, params[], help)
+{
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Altera o skinid de um jogador");
+        return 1;
+    }
+
+    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER)) return 1;
+
+    new targetid, skinid;
+    if(sscanf(params, "ui", targetid, skinid))
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /kick {ff3333}[ ID ] [ SKINID ]");
+    
+    if(skinid < 0 || skinid > 311) 
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Erro do parâmetro: {ff3333}skinid {ffffff}[0 - 311]");
+    
+    if(!Adm::ValidTargetID(playerid, targetid, true)) return 1;
+
+    SetPlayerSkin(targetid, skinid);
+
+    SendClientMessage(targetid, -1, "{ff9933}[ AVISO ] {ffffff}Um admin alterou sua skin.");
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Você alterou a {33ff33}skin {ffffff}de %s. skinid : %d ", GetPlayerNameEx(targetid), skinid);
+ 
+    return 1;
+}
+
+YCMD:setarvida(playerid, params[], help)
+{
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Altera o valor de vida de um jogador");
+        return 1;
+    }
+
+    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER)) return 1;
+
+    new targetid, Float:health;
+    if(sscanf(params, "uf", targetid, health))
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /setarvida {ff3333}[ ID ] [ VIDA ]");
+   
+    if(!Adm::ValidTargetID(playerid, targetid, true)) return 1;
+
+    health = floatclamp(health, 0.0, 100.0);
+    SetPlayerHealth(targetid, health);
+
+    SendClientMessage(targetid, -1, "{ff9933}[ AVISO ] {ffffff}Um admin alterou sua vida para %.1f%%.", health);
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce alterou a {33ff33}vida {ffffff}de %s para %.1f%%.", GetPlayerNameEx(targetid), health);
+
+    return 1;
+}
+
+YCMD:setarcolete(playerid, params[], help)
+{
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Altera o valor de colete de um jogador");
+        return 1;
+    }
+    
+    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER)) return 1;
+
+    new targetid, Float:armour;
+    if(sscanf(params, "uf", targetid, armour))
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /setarcolete {ff3333}[ ID ] [ COLETE ]");
+   
+    if(!Adm::ValidTargetID(playerid, targetid, true)) return 1;
+
+    armour = floatclamp(armour, 0.0, 100.0);
+    SetPlayerArmour(targetid, floatclamp(armour, 0.0, 100.0));
+
+    SendClientMessage(targetid, -1, "{ff9933}[ AVISO ] {ffffff}Um admin alterou seu colete para %.1f%%.", armour);
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce alterou o {33ff33}colete {ffffff}de %s para %.1f%%.", GetPlayerNameEx(targetid), armour);
+
+    return 1;
+}
+
 YCMD:ban(playerid, params[], help)
 {
     if(help)
@@ -607,6 +631,8 @@ YCMD:ban(playerid, params[], help)
         SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Bane um delinquente por uma quantidade de dias.");
         return 1;
     }
+
+    if(!Adm::HasPermission(playerid, ROLE_ADM_CEO)) return 1;
 
     Dialog_ShowCallback(playerid, using public ban_input_dialog<iiiis>, DIALOG_STYLE_INPUT, 
     "{ffff33}Banimentos", "{ffff33}>> {ffffff}Digite baixo as informações para realizar um banimento:\n\n\
@@ -624,6 +650,8 @@ YCMD:desban(playerid, params[], help)
         SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Desbane um jogador.");
         return 1;
     }
+
+    if(!Adm::HasPermission(playerid, ROLE_ADM_CEO)) return 1;
 
     new name[24];
     
@@ -649,73 +677,62 @@ YCMD:desban(playerid, params[], help)
     return 1;
 }
 
-// YCMD:setadm(playerid, params[], help)
-// {
-//     // Apenas Fundador (Nível 6) ou RCON Admin
-//     if(Player[playerid][pAdmin] < 6 && !IsPlayerAdmin(playerid)) return SendClientMessage(playerid, -1, "Apenas Fundador.");
-    
-//     new id, nivel;
-//     if(sscanf(params, "ui", id, nivel)) return SendClientMessage(playerid, -1, "Use: /daradmin [ID] [Nivel 1-6]");
-//     if(!IsValidPlayer(id)) return SendClientMessage(playerid, -1, "Jogador offline.");
-//     if(nivel < 1 || nivel > 6) return SendClientMessage(playerid, -1, "Nivel invalido (1 a 6).");
+YCMD:setadm(playerid, params[], help)
+{
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Promove/Rebaixa um jogador a um cargo de administração.");
+        return 1;
+    }
 
-//     // 1. Seta na variável do jogo e salva na conta
-//     Player[id][pAdmin] = nivel;
-//     // SalvarConta(id); (Chame sua função de salvar conta normal aqui se tiver)
+    //if(!IsPlayerAdmin(playerid)) return 1;
+    
+    new name[MAX_PLAYER_NAME], level;
+    if(sscanf(params, "s[24]i", name, level)) 
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /setadm {ff3333}[ NOME ] [ CARGO <1 - 9>]");
+    
+    new admin_name[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, admin_name);
 
-//     // 2. CRIA ARQUIVO NA PASTA ADMINS (Para registro)
-//     new name[MAX_PLAYER_NAME], admin[MAX_PLAYER_NAME], arquivo[64], data[32];
-//     GetPlayerName(id, name, sizeof(name));
-//     GetPlayerName(playerid, admin, sizeof(admin));
-//     getdate(data[0], data[1], data[2]);
-//     format(data, sizeof(data), "%d/%d/%d", data[2], data[1], data[0]);
+    level = clamp(level, 1, 9);
 
-//     format(arquivo, sizeof(arquivo), PASTA_ADMINS, name);
-//     DOF2_CreateFile(arquivo);
-//     DOF2_SetInt(arquivo, "Nivel", nivel);
-//     DOF2_SetString(arquivo, "PromovidoPor", admin);
-//     DOF2_SetString(arquivo, "Data", data);
-//     DOF2_SaveFile();
+    if(!Adm::Set(name, admin_name, level))
+        return SendClientMessage(playerid, COLOR_ERRO, "[ ADM ] {ffffff}Erro Fatal ao setar voce como fundador, procure um programador!");
 
-//     // Mensagens
-//     new str[128];
-//     format(str, "Voce promoveu %s a Admin Nivel %d.", name, nivel);
-//     SendClientMessage(playerid, COLOR_SUCESS, str);
-    
-//     format(str, "PARABENS! Voce agora e Admin Nivel %d.", nivel);
-//     SendClientMessage(id, 0x00FFFFAA, str);
-//     return 1;
-// }
+    Adm::Load(playerid);
 
-// YCMD:remadm(playerid, params[], help)
-// {
-//     if(Player[playerid][pAdmin] < 6 && !IsPlayerAdmin(playerid)) return SendClientMessage(playerid, -1, "Apenas Fundador.");
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce promoveu {33ff33}%s {ffffff}com sucesso.", name);
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Cargo de promoção: %s%s", Adm::GetColorString(level), Adm::gRoleNames[level]);
+    return 1;
+}
+
+YCMD:remadm(playerid, params[], help)
+{
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Remove um jogador a um cargo de administração.");
+        return 1;
+    }
+
+    //if(!IsPlayerAdmin(playerid)) return 1;
     
-//     new id;
-//     if(sscanf(params, "u", id)) return SendClientMessage(playerid, -1, "Use: /tiraradmin [ID]");
+    new name[MAX_PLAYER_NAME];
+    if(sscanf(params, "s[24]", name)) 
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /remadm {ff3333}[ NOME ]");
     
-//     // Remove in-game
-//     Player[id][pAdmin] = 0;
-//     // SalvarConta(id);
+    if(!Adm::Exists(name, _))
+        return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] %s {ffffff}não faz parte da administração!", name);
     
-//     // Remove o arquivo da pasta Admins
-//     new name[MAX_PLAYER_NAME], arquivo[64];
-//     GetPlayerName(id, name, sizeof(name));
-//     format(arquivo, sizeof(arquivo), PASTA_ADMINS, name);
-    
-//     if(DOF2_FileExists(arquivo)) 
-//     {
-//         DOF2_RemoveFile(arquivo);
-//         SendClientMessage(playerid, COLOR_SUCESS, "Arquivo de Admin deletado e cargo removido.");
-//     }
-//     else
-//     {
-//         SendClientMessage(playerid, COLOR_SUCESS, "Cargo removido (mas nao tinha arquivo na pasta Admins).");
-//     }
-    
-//     SendClientMessage(id, 0xFF0000AA, "Seu cargo de Admin foi removido.");
-//     return 1;
-// }
+    new admin_name[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, admin_name);
+
+    if(!Adm::Set(name, admin_name, 0))
+        return SendClientMessage(playerid, COLOR_ERRO, "[ ADM ] {ffffff}Erro Fatal ao remover admin, procure um programador!");
+
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce removeu {33ff33}%s {ffffff}com sucesso.", name);
+
+    return 1;
+}
 
 // YCMD:criargps(playerid, params[], help)
 // {

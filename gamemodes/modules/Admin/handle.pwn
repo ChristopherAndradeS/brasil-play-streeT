@@ -2,41 +2,6 @@
 
 forward OnSpectatorListUpdate(spectatorid, reason);
 
-stock Adm::SetPlayerCommands(playerid, roleid)
-{   
-    Command_SetPlayer(YCMD:aa, playerid, roleid >= ROLE_ADM_APR_HELPER);
-    Command_SetPlayer(YCMD:aw, playerid, roleid >= ROLE_ADM_APR_HELPER);
-    Command_SetPlayer(YCMD:ir, playerid, roleid >= ROLE_ADM_APR_HELPER);
-    Command_SetPlayer(YCMD:verid, playerid, roleid >= ROLE_ADM_APR_HELPER);
-
-    Command_SetPlayer(YCMD:kick, playerid, roleid >= ROLE_ADM_APR_STAFF);
-    Command_SetPlayer(YCMD:congelar, playerid, roleid >= ROLE_ADM_APR_STAFF);
-    Command_SetPlayer(YCMD:descongelar, playerid, roleid >= ROLE_ADM_APR_STAFF);
-
-    Command_SetPlayer(YCMD:megafone, playerid, roleid >= ROLE_ADM_FOREMAN);
-  
-    Command_SetPlayer(YCMD:cronometro, playerid, roleid >= ROLE_ADM_FOREMAN);
-
-    Command_SetPlayer(YCMD:lchat, playerid, roleid >= ROLE_ADM_MANAGER);
-    Command_SetPlayer(YCMD:setarskin, playerid, roleid >= ROLE_ADM_MANAGER);
-    Command_SetPlayer(YCMD:setarvida, playerid, roleid >= ROLE_ADM_MANAGER);
-    Command_SetPlayer(YCMD:setarcolete, playerid, roleid >= ROLE_ADM_MANAGER);
-
-    Command_SetPlayer(YCMD:prender, playerid, roleid >= ROLE_ADM_APR_HELPER);  //ROLE_ADM_MANAGER  
-    Command_SetPlayer(YCMD:soltar, playerid, roleid >= ROLE_ADM_APR_HELPER);
-    Command_SetPlayer(YCMD:prenderoff, playerid, roleid >= ROLE_ADM_APR_HELPER);    
-    //Command_SetPlayer(YCMD:soltaroff, playerid, roleid >= ROLE_ADM_MANAGER);
-    //Command_SetPlayer(YCMD:criargps, playerid, roleid >= ROLE_ADM_MANAGER);
-    //Command_SetPlayer(YCMD:criarorg, playerid, roleid >= ROLE_ADM_MANAGER);
-
-    //Command_SetPlayer(YCMD:ban, playerid, roleid >= ROLE_ADM_CEO);  
-    //Command_SetPlayer(YCMD:banip, playerid, roleid >= ROLE_ADM_CEO);  
-    //Command_SetPlayer(YCMD:desban, playerid, roleid >= ROLE_ADM_CEO);  
-    //Command_SetPlayer(YCMD:desbanip, playerid, roleid >= ROLE_ADM_CEO);  
-    //Command_SetPlayer(YCMD:setadm, playerid, roleid >= ROLE_ADM_CEO);  
-    //Command_SetPlayer(YCMD:remadm, playerid, roleid >= ROLE_ADM_CEO);  
-}
-
 hook OnGameModeInit()
 {
     gAdminSpectates = list_new();
@@ -52,20 +17,14 @@ hook OnGameModeExit()
 
 hook OnPlayerLogin(playerid)
 {
-    new level;
-
-    if(!Adm::Exists(GetPlayerNameEx(playerid), level)) return 1;
-    
-    SetFlag(Admin[playerid][adm::flags], floatround(Float:floatpower(2, level)));
-    Admin[playerid][adm::lvl] = level;
-    Adm::SetPlayerCommands(playerid, Admin[playerid][adm::lvl]);
-    Admin[playerid][adm::spectateid] = INVALID_PLAYER_ID;
+    Adm::Load(playerid);
     return 1;
 }
 
 hook OnPlayerDisconnect(playerid, reason)
 {
-    Adm::SetPlayerCommands(playerid, 0);
+    Adm::UnSet(playerid);
+
     return 1;
 }
 
@@ -79,7 +38,7 @@ public OnSpectatorListUpdate(spectatorid, reason)
         {
             SendClientMessage(i, -1, "{ffff33}[ ADM ] {ffffff}O jogador \
             {ffffff}[ {ffff33}ID: %d {ffffff}] {ffff33}%s", 
-            spectatorid, reason > 1 ? "Sai do mundo!" :  "Se desconectou!");
+            spectatorid, reason > 1 ? "Saiu do mundo!" :  "Se desconectou!");
             
             Admin[i][adm::spectateid] = Adm::GetNextSpectateID(i, 0, 1);
             
