@@ -96,7 +96,7 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
             new name[MAX_PLAYER_NAME];
             GetPlayerName(playerid, name);
             
-            DB::GetDataString(db_entity, "players", "pass", Player[playerid][pyr::pass], 32, "name = '%q'", name);
+            DB::GetDataString(db_entity, "players", "pass", Player[playerid][pyr::pass], 32, "name = '%s'", name);
 
             if(strcmp(stext, Player[playerid][pyr::pass]))
             {  

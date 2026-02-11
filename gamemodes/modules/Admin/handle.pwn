@@ -24,7 +24,7 @@ stock Adm::SetPlayerCommands(playerid, roleid)
 
     Command_SetPlayer(YCMD:prender, playerid, roleid >= ROLE_ADM_APR_HELPER);  //ROLE_ADM_MANAGER  
     Command_SetPlayer(YCMD:soltar, playerid, roleid >= ROLE_ADM_APR_HELPER);
-    Command_SetPlayer(YCMD:prenderoff, playerid, roleid >= ROLE_ADM_MANAGER);    
+    Command_SetPlayer(YCMD:prenderoff, playerid, roleid >= ROLE_ADM_APR_HELPER);    
     //Command_SetPlayer(YCMD:soltaroff, playerid, roleid >= ROLE_ADM_MANAGER);
     //Command_SetPlayer(YCMD:criargps, playerid, roleid >= ROLE_ADM_MANAGER);
     //Command_SetPlayer(YCMD:criarorg, playerid, roleid >= ROLE_ADM_MANAGER);
@@ -65,7 +65,6 @@ hook OnPlayerLogin(playerid)
 
 hook OnPlayerDisconnect(playerid, reason)
 {
-    Adm::RemSpectatorInList(playerid, 1);
     Adm::SetPlayerCommands(playerid, 0);
     return 1;
 }
@@ -118,6 +117,7 @@ stock Adm::RemSpectatorInList(spectatorid, reason)
 
     if(idx != -1)
     {
+        printf("removido %d, ", spectatorid);
         list_remove(gAdminSpectates, idx);
         CallLocalFunction("OnSpectatorListUpdate", "ii", spectatorid, reason);
         return 1;

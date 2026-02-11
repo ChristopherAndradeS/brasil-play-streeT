@@ -433,8 +433,8 @@ YCMD:prender(playerid, params[], help)
 
     else if(result < 0)
     {
-        SendClientMessageToAll(-1, "{ff3399}[ ILHA ] %s {ffffff}ficará na ilha abandonada por mais tempo: {ff3399}%d {ffffff}minutos", name, minutes);
-        SendClientMessageToAll(-1, "{ff3399}[ ILHA ] Motivo: {ffffff}%s", reason);
+        // SendClientMessageToAll(-1, "{ff3399}[ ILHA ] %s {ffffff}ficará na ilha abandonada por mais tempo: {ff3399}%d {ffffff}minutos", name, minutes);
+        // SendClientMessageToAll(-1, "{ff3399}[ ILHA ] Motivo: {ffffff}%s", reason);
         Punish::UpdatePlayerJail(targetid, minutes * 60000);
         return 1;
     }
@@ -467,7 +467,7 @@ YCMD:soltar(playerid, params[], help)
     
     if(!Adm::ValidTargetID(playerid, targetid)) return 1;
 
-    new result = Punish::UnsetJail(playerid);
+    new result = Punish::UnsetJail(targetid);
 
     if(result == 0)
     {
@@ -500,7 +500,10 @@ YCMD:prenderoff(playerid, params[], help)
         return SendClientMessage(playerid, -1, 
         "{ff3333}[ CMD ] {ffffff}Use: /prenderoff {ff3333}[ NOME ] [ TEMPO (minutos) ] [ MOTIVO ]");
     
-    if(!Adm::IsValidTargetName(GetPlayerNameEx(playerid), name))
+    new admin_name[24];
+    GetPlayerName(playerid, admin_name);
+
+    if(!Adm::IsValidTargetName(admin_name, name))
     {
         SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Voce nao poder aplicar essa acao ao seu {ff3333}colega/subordinado!");
         return 1;

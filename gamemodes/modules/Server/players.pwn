@@ -6,28 +6,38 @@ hook OnServerUpdateSeconds()
     Server[srv::hour], Server[srv::minute], Server[srv::seconds],
     gWeekDays[Server[srv::weekday]], Server[srv::day], gMonths[Server[srv::month]], Server[srv::year]);
 
-    Server::UpdatePlayer(Server[srv::hour], Server[srv::minute]);
+    Server::UpdatePlayerSeconds();
 }
 
-stock Server::UpdatePlayer(hour, minute)
+hook OnServerUpdateMinutes()
 {
     foreach (new i : Player)
     {
-        SetPlayerTime(i, hour, minute);
+        SetPlayerTime(i, Server[srv::hour], Server[srv::minute]);
+    }
+}
+
+stock Server::UpdatePlayerSeconds()
+{
+    foreach (new i : Player)
+    {
         Player::UpdatePayday(i);
         Player::UpdateJail(i);
+    }
+
+    foreach(new i : Adm_Iter)
+    {
         Adm::Update(i);
     }
 }
 
 stock Player::UpdatePayday(playerid)
 {
-    if(!Baseboard::IsVisibleTDForPlayer(playerid)) return;
-
-    if(IsValidTimer(pyr::Timer[playerid][pyr::TIMER_PAYDAY]))
+    if(IsValidTimer(pyr::Timer[playerid][pyr::TIMER_PAYDAY]) && Baseboard::IsVisibleTDForPlayer(playerid))
     {
         new left_time = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_PAYDAY]);
     
+        if(Baseboard::IsVisibleTDForPlayer(playerid))
         Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_PAYDAY, 
         "~b~~h~~h~PAYDAY~w~ %02d~b~~h~~h~:~w~%02d", 
         floatround((left_time / 60000)), floatround((left_time % 60000) / 1000));

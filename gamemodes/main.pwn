@@ -139,6 +139,14 @@ hook function SendClientMessage(playerid, colour, const msg[], GLOBAL_TAG_TYPES:
     return continue(playerid, colour, fixed_msg);
 }
 
+hook function SendClientMessageToAll(colour, const msg[], GLOBAL_TAG_TYPES:...)
+{
+    new fixed_msg[144];
+    va_format(fixed_msg, 144, msg, ___(2));
+    RemoveGraphicAccent(fixed_msg);
+    return continue(colour, fixed_msg);
+}
+
 YCMD:teste(playerid, params[], help)
 {
     printf("[ ");

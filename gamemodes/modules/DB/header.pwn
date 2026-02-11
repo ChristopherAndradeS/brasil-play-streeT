@@ -10,13 +10,13 @@ stock DB::CreateTable(DB:db, const table[], const definition[])
 
     if(!result)
     {
-        printf("[ DB ] Erro: Ao criar tabela %q > %q\n", name, table);
+        printf("[ DB ] Erro: Ao criar tabela %s > %s\n", name, table);
         return 0;
     }
 
     DB_FreeResultSet(result);
 
-    printf("[ DB ] Tabela %q > %q criada com sucesso\n", name, table);
+    printf("[ DB ] Tabela %s > %s criada com sucesso\n", name, table);
 
     return 1;
 }
@@ -29,6 +29,7 @@ stock DB::GetCount(DB:db, const table[], const field[], const where[], OPEN_MP_T
     {
         result = DB_ExecuteQuery(db, "SELECT %q FROM %q", field, table);
     }
+
     else
     {
         new str[128];
@@ -65,7 +66,7 @@ stock DB::Insert(DB:db, const table[], const fields[], const values[], OPEN_MP_T
         return 0;
     }
 
-    printf("[ DB ] Elementos %s > %s > %s inseridos com sucesso\n", name, table, str);
+    printf("[ DB ] Elementos %q > %q > %s inseridos com sucesso\n", name, table, str);
 
     DB_FreeResultSet(result);
 
@@ -111,7 +112,7 @@ stock DB::Delete(DB:db, const table[], const where[], OPEN_MP_TAGS:...)
 
     DB_FreeResultSet(result);
 
-    printf("[ DB ] Elemento %q > %q removido da tabela com sucesso\n", name, str);
+    printf("[ DB ] Elemento %q > %s removido da tabela com sucesso\n", name, str);
 
     return 1;
 }

@@ -94,8 +94,10 @@ stock Punish::VerifyPlayer(playerid)
 
 stock Punish::SendPlayerToJail(playerid, time)
 {
-    new skinid;
-    DB::GetDataInt(db_entity, "players", "skinid", skinid, "name = '%q'", GetPlayerNameEx(playerid));
+    new skinid, name[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, name);
+
+    DB::GetDataInt(db_entity, "players", "skinid", skinid, "name = '%q'", name);
     
     SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL);
     
@@ -106,6 +108,18 @@ stock Punish::SendPlayerToJail(playerid, time)
     SpawnPlayer(playerid);
     
     Player::CreateTimer(playerid, pyr::TIMER_JAIL, "OnJailFinish", time, false, "i", playerid);
+
+    if(IsValidTimer(pyr::Timer[playerid][pyr::TIMER_PAYDAY]))
+    {
+        new t_left = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_PAYDAY]);
+        DB::SetDataInt(db_entity, "players", "payday_tleft", t_left, "name = '%q'", name);
+        Player::KillTimer(playerid, pyr::TIMER_PAYDAY);
+    }
+
+    if(!Baseboard::IsVisibleTDForPlayer(playerid))
+        Baseboard::ShowTDForPlayer(playerid);
+    
+    Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_PAYDAY, "~r~~h~PAYDAY~w~ ...");
 
     SetPlayerWeather(playerid, Server[srv::j_weatherid]);
 
@@ -180,8 +194,6 @@ stock Punish::UnsetJail(playerid)
 
 stock Punish::UpdatePlayerJail(playerid, time)
 {
-    if(!IsValidPlayer(playerid)) return 0;
-
     if(IsValidTimer(pyr::Timer[playerid][pyr::TIMER_JAIL]))
     {
         new t_left = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_JAIL]);
@@ -195,8 +207,6 @@ stock Punish::UpdatePlayerJail(playerid, time)
             SendClientMessage(playerid, -1, 
             "{ff3399}[ ILHA ] {ffffff}Seu tempo de prisão aumentou {ff3399}%i {ffffff}minutos", (time - t_left)/60000);
     }
-
-    printf("[ CADEIA ] Erro: O código não poderia ter acançado essa parte!");
     
     return 1;
 }

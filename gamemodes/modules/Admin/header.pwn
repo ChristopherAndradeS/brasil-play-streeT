@@ -165,7 +165,7 @@ stock Adm::UnSetWork(playerid)
     Baseboard::ShowTDForPlayer(playerid);
 
     Adm::SendMsgToAllTagged(FLAG_ADM_APPRENTICE_HELPER, -1, 
-    "[ ADM AVISO ] %s%s {ffff33}saiu {ffffff}no modo de trabalho", Adm::GetColorString(level), name);  
+    "{ffff33}[ ADM AVISO ] %s%s {ffff33}saiu {ffffff}no modo de trabalho", Adm::GetColorString(level), name);  
 
     Iter_Remove(Adm_Iter, playerid);
 

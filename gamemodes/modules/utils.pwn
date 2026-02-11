@@ -137,6 +137,7 @@ stock RemoveGraphicAccent(str[])
         }
     }
 }
+
 stock norm_hash(hash)
 {
     if(hash < 0)

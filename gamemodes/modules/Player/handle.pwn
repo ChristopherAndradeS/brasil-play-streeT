@@ -39,56 +39,59 @@ hook OnPlayerConnect(playerid)
 
 hook OnPlayerDisconnect(playerid, reason)
 {
+    printf("1");
     /* JOGADOR É NPC */
     if(IsPlayerNPC(playerid)) return -1;
-    
+
     /* JOGADOR É VÁLIDO MAS NÃO LOGOU */
     
     Player::KillTimer(playerid, pyr::TIMER_LOGIN_KICK);
 
     if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return -1;
-    
+
+    /* JOGADOR É VÁLIDO / LOGOU / ESTÁ EM MODO ESPECTADOR */
+    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING)) 
+    {
+        return -1;
+    }
+    printf("2");
+
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 
     /* JOGADOR É VÁLIDO / LOGOU / ESTÁ PRESO */
     if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL))
     {
+        printf("3");
         if(DB::Exists(db_entity, "punishments", "name, level", "name = '%q' AND level = 1", name))
         {
             new left_time = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_JAIL]);
             DB::SetDataInt(db_entity, "punishments", "left_tstamp", left_time, "name = '%q' AND level = 1", name);
-            Player::KillTimer(playerid, pyr::TIMER_JAIL); 
         }
 
-        return -1;
+        Player::KillTimer(playerid, pyr::TIMER_JAIL); 
     }
 
-    /* JOGADOR É VÁLIDO / LOGOU / NÃO ESTÁ PRESO / ESTÁ EM MODO ESPECTADOR */
-    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING)) 
+    else
     {
-        return -1;
-    }
-    
-    new Float:pX, Float:pY, Float:pZ, Float:pA;
+        printf("4");
+        new Float:pX, Float:pY, Float:pZ, Float:pA;
 
-    GetPlayerName(playerid, name);
-    GetPlayerPos(playerid, pX, pY, pZ);
-    GetPlayerFacingAngle(playerid, pA);
-    new t_left = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_PAYDAY]);
+        GetPlayerName(playerid, name);
+        GetPlayerPos(playerid, pX, pY, pZ);
+        GetPlayerFacingAngle(playerid, pA);
+        new t_left = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_PAYDAY]);
 
-    DB::Update(db_entity, "players", 
-    "pX = %f, pY = %f, pZ = %f, pA = %f, payday_tleft = %i WHERE name = '%q'",
-    pX, pY, pZ, pA, t_left, name);
+        DB::Update(db_entity, "players", 
+        "pX = %f, pY = %f, pZ = %f, pA = %f, payday_tleft = %i WHERE name = '%q'",
+        pX, pY, pZ, pA, t_left, name);
 
-    Player::KillTimer(playerid, pyr::TIMER_PAYDAY);
-
-    if(IsValidDynamic3DTextLabel(Player[playerid][pyr::cpf_tag]))
-    {
-        DestroyDynamic3DTextLabel(Player[playerid][pyr::cpf_tag]);
-        Player[playerid][pyr::cpf_tag] = INVALID_3DTEXT_ID;
+        Player::KillTimer(playerid, pyr::TIMER_PAYDAY);
     }
 
+    printf("5");
+    Player::DestroyCpfTag(playerid);
+    Adm::RemSpectatorInList(playerid, 1);
     Player::ClearAllData(playerid);
 
     return 1;
@@ -134,8 +137,7 @@ hook OnPlayerSpawn(playerid)
     if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING))
     {
         ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING);  
-
-        SendClientMessage(playerid, -1, "{33ff33}[ SERVER ] {ffffff}Voce saiu do modo espectador!");
+        //SendClientMessage(playerid, -1, "{33ff33}[ SERVER ] {ffffff}Voce saiu do modo espectador!");
         Adm::AddSpectatorInList(playerid); 
         SetPlayerWeather(playerid, Server[srv::g_weatherid]);
 
@@ -149,4 +151,13 @@ hook OnPlayerSpawn(playerid)
     }
 
     return 1;
+}
+
+stock Player::DestroyCpfTag(playerid)
+{
+    if(IsValidDynamic3DTextLabel(Player[playerid][pyr::cpf_tag]))
+    {
+        DestroyDynamic3DTextLabel(Player[playerid][pyr::cpf_tag]);
+        Player[playerid][pyr::cpf_tag] = INVALID_3DTEXT_ID;
+    }
 }
