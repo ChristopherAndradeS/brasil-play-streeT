@@ -25,6 +25,7 @@
 #include "../gamemodes/modules/Player/header.pwn"
 #include "../gamemodes/modules/Admin/header.pwn"
 #include "../gamemodes/modules/Maps/header.pwn"
+#include "../gamemodes/modules/Vehicle/header.pwn"
 /*                          HANDLE                          */
 #include "../gamemodes/modules/Server/handle.pwn"
 #include "../gamemodes/modules/Player/handle.pwn"
