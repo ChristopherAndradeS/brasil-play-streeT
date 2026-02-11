@@ -54,8 +54,12 @@ public ban_input_dialog(playerid, dialogid, response, listitem, string:inputtext
 
 YCMD:mkfnd(playerid, params[], help)
 {
-    if(!IsPlayerAdmin(playerid)) return 1;
-
+    if(!IsPlayerAdmin(playerid))
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}O comando \'mkfnd\' nao existe"); 
+        return 1;
+    }
+    
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 
@@ -73,7 +77,11 @@ YCMD:aa(playerid, params[], help)
         return 1;
     }
 
-    if(!IsFlagSet(Admin[playerid][adm::flags], FLAG_IS_ADMIN)) return 1;
+    if(!IsFlagSet(Admin[playerid][adm::flags], FLAG_IS_ADMIN)) 
+    {
+        SendClientMessage(playerid,  -1, "{ff3333}[ ADM ] {ffffff}Voce nao tem permissao para isso!");
+        return 1;
+    }
 
     new str[512];
     
@@ -113,9 +121,11 @@ YCMD:aw(playerid, params[], help)
         return 1;
     }
 
-    printf("%d lvl: %d", playerid, Admin[playerid][adm::lvl]);
-
-    if(!IsFlagSet(Admin[playerid][adm::flags], FLAG_IS_ADMIN)) return 1;
+    if(!IsFlagSet(Admin[playerid][adm::flags], FLAG_IS_ADMIN)) 
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Voce nao tem permissao para isso!");
+        return 1;
+    }
 
     if(!Adm::HandleWork(playerid))
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Nenhum jogador online para entrar em modo de trabalho!"); 
@@ -685,7 +695,7 @@ YCMD:setadm(playerid, params[], help)
         return 1;
     }
 
-    //if(!IsPlayerAdmin(playerid)) return 1;
+    if(!IsPlayerAdmin(playerid)) return 1;
     
     new name[MAX_PLAYER_NAME], level;
     if(sscanf(params, "s[24]i", name, level)) 
@@ -714,7 +724,7 @@ YCMD:remadm(playerid, params[], help)
         return 1;
     }
 
-    //if(!IsPlayerAdmin(playerid)) return 1;
+    if(!IsPlayerAdmin(playerid)) return 1;
     
     new name[MAX_PLAYER_NAME];
     if(sscanf(params, "s[24]", name)) 

@@ -75,6 +75,7 @@ public OnGameModeExit()
 
 public e_COMMAND_ERRORS:OnPlayerCommandReceived(playerid, cmdtext[], e_COMMAND_ERRORS:success)
 {
+    printf("%d", success);
     switch(success)
     {
         case COMMAND_UNDEFINED:
