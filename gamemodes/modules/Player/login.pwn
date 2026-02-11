@@ -11,12 +11,6 @@ new gLoginIssue[][64] =
 
 hook OnPlayerConnect(playerid)
 {
-
-    Player::CreateTimer(playerid, pyr::TIMER_LOGIN_KICK, "PYR_Kick", LOGIN_MUSIC_MS, false, "iis", 
-    playerid, 
-    pyr::TIMER_LOGIN_KICK, 
-    "Demorou muito para fazer login!");
-
     Login::SetPlayer(playerid);
     
     return 1;
@@ -137,6 +131,12 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
 
 stock Login::SetPlayer(playerid)
 {
+
+    Player::CreateTimer(playerid, pyr::TIMER_LOGIN_KICK, "PYR_Kick", LOGIN_MUSIC_MS, false, "iis", 
+    playerid, 
+    pyr::TIMER_LOGIN_KICK, 
+    "Demorou muito para fazer login!");
+    
     TogglePlayerSpectating(playerid, true);
 
     TogglePlayerControllable(playerid, false);
@@ -185,11 +185,12 @@ stock Login::UnSetPlayer(playerid)
 
 stock Login::RegisterPlayer(playerid)
 {
-    new name[MAX_PLAYER_NAME];
+    new name[MAX_PLAYER_NAME], ip[16];
     GetPlayerName(playerid, name);
+    GetPlayerIp(playerid, ip);
 
-    new status = DB::Insert(db_entity, "players", "name, pass, payday_tleft, bitcoin, money, pX, pY, pZ, pA, \
-    score, skinid, orgid", "'%q', '%q', %i, %i, %f, %f, %f, %f, %f, %i, %i, %i", name, Player[playerid][pyr::pass], 
+    new status = DB::Insert(db_entity, "players", "name, pass, ip, payday_tleft, bitcoin, money, pX, pY, pZ, pA, \
+    score, skinid, orgid", "'%q', '%q', '%q', %i, %i, %f, %f, %f, %f, %f, %i, %i, %i", name, Player[playerid][pyr::pass], ip, 
     3600000, 0, 500.0, 834.28 + RandomFloat(2.0), -1834.89 + RandomFloat(2.0), 12.502, 180.0,
     1, random(300), 0);
 

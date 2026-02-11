@@ -39,7 +39,6 @@ hook OnPlayerConnect(playerid)
 
 hook OnPlayerDisconnect(playerid, reason)
 {
-    printf("1");
     /* JOGADOR É NPC */
     if(IsPlayerNPC(playerid)) return -1;
 
@@ -54,7 +53,6 @@ hook OnPlayerDisconnect(playerid, reason)
     {
         return -1;
     }
-    printf("2");
 
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
@@ -62,7 +60,6 @@ hook OnPlayerDisconnect(playerid, reason)
     /* JOGADOR É VÁLIDO / LOGOU / ESTÁ PRESO */
     if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL))
     {
-        printf("3");
         if(DB::Exists(db_entity, "punishments", "name, level", "name = '%q' AND level = 1", name))
         {
             new left_time = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_JAIL]);
@@ -74,7 +71,6 @@ hook OnPlayerDisconnect(playerid, reason)
 
     else
     {
-        printf("4");
         new Float:pX, Float:pY, Float:pZ, Float:pA;
 
         GetPlayerName(playerid, name);
@@ -89,7 +85,6 @@ hook OnPlayerDisconnect(playerid, reason)
         Player::KillTimer(playerid, pyr::TIMER_PAYDAY);
     }
 
-    printf("5");
     Player::DestroyCpfTag(playerid);
     Adm::RemSpectatorInList(playerid, 1);
     Player::ClearAllData(playerid);
@@ -109,7 +104,13 @@ hook OnPlayerLogin(playerid)
         return -1;
     }
 
-    //Handle Spawn
+    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IS_PARDON))
+    {
+        SendClientMessage(playerid, COLOR_THEME_BPS, "[ BPS ] {ffffff}Você foi {33ff33}perdoado \
+            {ffffff}do seu banimento. Esperamos {33ff33}bom {ffffff}comportamento de agora em diante!");
+        ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_IS_PARDON);
+    }
+
     Player::Spawn(playerid);
 
     return 1;

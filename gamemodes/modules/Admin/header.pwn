@@ -308,14 +308,24 @@ stock Adm::ValidTargetID(playerid, targetid, bool:can_equal = false, bool:sendms
     return 1;    
 }
 
-stock Adm::IsValidTargetName(const name[], const target_name[])
+stock Adm::IsValidTargetName(playerid, const name[], const target_name[])
 {
     new player_lvl, target_lvl;
 
     Adm::Exists(name, player_lvl);
     Adm::Exists(target_name, target_lvl);
 
-    if(player_lvl <= target_lvl) return 0;        
-    
+    if(!isnull(name) && !strcmp(name, target_name))
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Voce nao poder banir voce mesmo!");
+        return 0;
+    }
+
+    if(player_lvl <= target_lvl)
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Voce nao poder aplicar essa acao ao seu {ff3333}colega/subordinado!");
+        return 0;        
+    }
+
     return 1;
 }

@@ -23,7 +23,8 @@ enum E_PLAYER
 
 enum (<<= 1)
 {
-    MASK_PLAYER_LOGGED = 1,        
+    MASK_PLAYER_LOGGED = 1,   
+    MASK_PLAYER_IS_PARDON,     
     MASK_PLAYER_IN_REGISTER,  
     MASK_PLAYER_IN_LOGIN,
     MASK_PLAYER_SPECTATING,
@@ -40,8 +41,8 @@ new Player[MAX_PLAYERS][E_PLAYER];
 enum _:E_PLAYER_TIMERS
 {
     pyr::TIMER_LOGIN_KICK,
-    pyr::TIMER_JAIL,
     pyr::TIMER_PAYDAY,
+    pyr::TIMER_JAIL,
 }
 
 new pyr::Timer[MAX_PLAYERS][E_PLAYER_TIMERS];

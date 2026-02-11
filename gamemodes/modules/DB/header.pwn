@@ -3,7 +3,7 @@ new DB:db_stock;
 
 stock DB::CreateTable(DB:db, const table[], const definition[])
 {
-    new DBResult:result = DB_ExecuteQuery(db, "CREATE TABLE IF NOT EXISTS %q (%q);", table, definition);
+    new DBResult:result = DB_ExecuteQuery(db, "CREATE TABLE IF NOT EXISTS %s (%s);", table, definition);
 
     new name[16];
     DB::GetNameByID(db, name);
@@ -66,7 +66,7 @@ stock DB::Insert(DB:db, const table[], const fields[], const values[], OPEN_MP_T
         return 0;
     }
 
-    printf("[ DB ] Elementos %q > %q > %s inseridos com sucesso\n", name, table, str);
+    printf("[ DB ] Elementos %q > %q > inseridos com sucesso\n", name, table);
 
     DB_FreeResultSet(result);
 
@@ -79,15 +79,19 @@ stock DB::Update(DB:db, const table[], const clause[], OPEN_MP_TAGS:...)
     va_format(str, 512, clause, ___(3));
     new DBResult:result = DB_ExecuteQuery(db, "UPDATE %q SET %s;", table, str);
 
+    new name[16];
+    DB::GetNameByID(db, name);
+
     if(!result)
     {
-        new name[16];
-        DB::GetNameByID(db, name);
         printf("[ DB ] Erro: Ao atualizar dados. query: %q > %q\n", "UPDATE %q SET %s;", name, table, table, str);
         return 0;
     }
 
     new affected = DB_GetRowCount(result);
+
+    printf("[ DB ] Elementos %q > %q > atualizados com sucesso\n", name, table);
+    
     DB_FreeResultSet(result);
 
     return affected;
@@ -112,7 +116,7 @@ stock DB::Delete(DB:db, const table[], const where[], OPEN_MP_TAGS:...)
 
     DB_FreeResultSet(result);
 
-    printf("[ DB ] Elemento %q > %s removido da tabela com sucesso\n", name, str);
+    printf("[ DB ] Elemento %q > %q removido da tabela com sucesso\n", name, table);
 
     return 1;
 }

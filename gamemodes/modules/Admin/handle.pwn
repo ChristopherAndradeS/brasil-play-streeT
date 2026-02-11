@@ -117,7 +117,6 @@ stock Adm::RemSpectatorInList(spectatorid, reason)
 
     if(idx != -1)
     {
-        printf("removido %d, ", spectatorid);
         list_remove(gAdminSpectates, idx);
         CallLocalFunction("OnSpectatorListUpdate", "ii", spectatorid, reason);
         return 1;

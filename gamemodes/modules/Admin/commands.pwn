@@ -1,5 +1,58 @@
 #include <YSI\YSI_Coding\y_hooks>
 
+
+forward ban_input_dialog(playerid, dialogid, response, listitem, string:inputtext[]);
+
+public ban_input_dialog(playerid, dialogid, response, listitem, string:inputtext[])
+{
+    if(!response) return 1;
+
+    new name[MAX_PLAYERS], days, reason[64];
+
+    if(sscanf(inputtext, "s[24]is[64]", name, days, reason)) 
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ ADMIN ] {ffffff}Escreva separando por espaço: {ff3333}NOME + DIAS + MOTIVO {ffffff}para banir");
+        SendClientMessage(playerid, -1, "{ff3333}[ ADMIN ] {ffffff}Ou escreva: {ff3333}NOME + [-1] + MOTIVO {ffffff}para banir permanentemente");
+        return 1;
+    }
+
+    new admin_name[24];
+    GetPlayerName(playerid, admin_name);
+
+    if(!Adm::IsValidTargetName(playerid, admin_name, name)) return 1;
+    
+    new sucess, admin[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, admin);
+
+    if(days != -1) sucess = Punish::SetBan(admin, name, days, reason);
+    else           sucess = Punish::SetPermaban(admin, name, reason);
+
+    if(sucess)
+    {
+        new msg[32];
+        if(days != -1)  format(msg, 32, "%d {ffffff}dia(s)", days);
+        else            format(msg, 32, "Tempo Indeterminado");
+        SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Você baniu {33ff33}%s \
+        {ffffff}por {33ff33}%s", name, msg);
+    
+        SendClientMessageToAll(-1, "{ff3399}[ ADM PUNICAO ] {ffffff}%s {ff3399}baniu {ffffff}%s por {ff3399}%s.", GetPlayerNameEx(playerid), name, msg);
+        SendClientMessageToAll(-1, "{ff3399}[ ADM PUNICAO ] {ff3399}Motivo: {ffffff}%s", reason);
+
+        new targetid = GetPlayerIDByName(name);
+        if(targetid != INVALID_PLAYER_ID)
+            Kick(targetid);
+    }
+
+    else
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}O jogador {ff3333}%s {ffffff}não está registrado no bando de dados!", name);
+        if(days == -1)
+            SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Ou o jogador já foi banido permanentemente");
+    }
+
+    return 1;
+}
+
 YCMD:mkfnd(playerid, params[], help)
 {
     if(!IsPlayerAdmin(playerid)) return 0;
@@ -422,7 +475,7 @@ YCMD:prender(playerid, params[], help)
     GetPlayerName(targetid, name, sizeof(name));
     GetPlayerName(playerid, admin, sizeof(admin));
 
-    new result = Punish::SetJail(name, admin, reason, minutes * 60000);
+    new result = Punish::SetJail(name, admin, reason, clamp(minutes * 60000, 180000, 18000000));
 
     if(result == 0)
     {
@@ -482,7 +535,7 @@ YCMD:soltar(playerid, params[], help)
         return 1;
     }
 
-    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce soltou {33ff33}%s.", GetPlayerNameEx(targetid));
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce soltou {33ff33}%s {ffffff}com sucesso.", GetPlayerNameEx(targetid));
     SendClientMessageToAll(-1, "{ff3399}[ ILHA ] O jogador {ff3399}%s foi {ffffff}perdoado e foi embora da ilha", GetPlayerNameEx(targetid));
     return 1;
 }
@@ -491,7 +544,7 @@ YCMD:prenderoff(playerid, params[], help)
 {
     if(help)
     {
-        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Prende um delinquente offline na cadeia staff por um tempo em minutos/horas");
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Prende um delinquente offline, na cadeia staff por um tempo em minutos/horas");
         return 1;
     }
 
@@ -503,18 +556,14 @@ YCMD:prenderoff(playerid, params[], help)
     new admin_name[24];
     GetPlayerName(playerid, admin_name);
 
-    if(!Adm::IsValidTargetName(admin_name, name))
-    {
-        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Voce nao poder aplicar essa acao ao seu {ff3333}colega/subordinado!");
-        return 1;
-    }
+    if(!Adm::IsValidTargetName(playerid, admin_name, name)) return 1;
 
     new targetid = GetPlayerIDByName(name);
     
     if(targetid != INVALID_PLAYER_ID)
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] Jogador %s está online! {ffffff}Seu ID é {ff3333}%d", name, targetid);
 
-    if(Punish::SetJail(name, GetPlayerNameEx(playerid), reason, minutes * 60000) == 0)
+    if(!Punish::SetJail(name, GetPlayerNameEx(playerid), reason, clamp(minutes * 60000, 180000, 18000000)))
         return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Houve um erro. Provalmente o jogador não existe nos dados!");
   
     SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce definiu {33ff33}%d {ffffff}minutos de cadeia para {33ff33}%s {ffffff}com sucesso.", minutes, name);
@@ -522,104 +571,83 @@ YCMD:prenderoff(playerid, params[], help)
     return 1;
 }
 
-// YCMD:ban(playerid, params[], help)
-// {
-//     VerificarAdmin(playerid, 4); // Rank 4+
-//     VerificarTra(playerid);
+YCMD:soltaroff(playerid, params[], help)
+{
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Solta um arrependido offline, da cadeia staff");
+        return 1;
+    }
+
+    new name[MAX_PLAYER_NAME];
+    if(sscanf(params, "s[24]", name)) 
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /soltaroff {ff3333}[ NAME ]");
     
-//     new id, motivo[64];
-//     if(sscanf(params, "us[64]", id, motivo)) return SendClientMessage(playerid, -1, "Use: /ban [ID] [Motivo]");
-//     if(!IsValidPlayer(id)) return SendClientMessage(playerid, -1, "Jogador offline.");
+    new admin_name[24];
+    GetPlayerName(playerid, admin_name);
 
-//     new name[MAX_PLAYER_NAME], admin[MAX_PLAYER_NAME], arquivo[64], data[32];
-//     GetPlayerName(id, name, sizeof(name));
-//     GetPlayerName(playerid, admin, sizeof(admin));
-//     getdate(data[0], data[1], data[2]); // Pega ano, mes, dia
-//     format(data, sizeof(data), "%d/%d/%d", data[2], data[1], data[0]);
+    if(!Adm::IsValidTargetName(playerid, admin_name, name)) return 1;
 
-//     // Cria o arquivo na pasta Banidos
-//     format(arquivo, sizeof(arquivo), PASTA_BANIDOS, name);
-//     DOF2_CreateFile(arquivo);
-//     DOF2_SetString(arquivo, "Admin", admin);
-//     DOF2_SetString(arquivo, "Motivo", motivo);
-//     DOF2_SetString(arquivo, "Data", data);
-//     DOF2_SaveFile();
+    if(!DB::Delete(db_entity, "punishments", "name = '%q' AND level = 1", name))
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Não foi possível soltar o jogador {ff3333}%s{ffffff}, pois ele não está preso!", name);
+        printf("[ DB (ERRO) ] Erro ao remover cadeia de %s", name);
+        return -1;
+    }
 
-//     // Mensagem Global
-//     new str[144];
-//     format(str, "| BAN | O Admin %s baniu %s. Motivo: %s", admin, name, motivo);
-//     SendClientMessageToAll(0xFF0000AA, str);
-
-//     Kick(id); // Chuta do servidor
-//     return 1;
-// }
-
-// // BANIMENTO POR IP
-// YCMD:banip(playerid, params[], help)
-// {
-//     VerificarAdmin(playerid, 4);
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce soltou {33ff33}%s {ffffff}com sucesso.", name);
     
-//     new id, motivo[64];
-//     if(sscanf(params, "us[64]", id, motivo)) return SendClientMessage(playerid, -1, "Use: /banip [ID] [Motivo]");
-//     if(!IsValidPlayer(id)) return SendClientMessage(playerid, -1, "Jogador offline.");
+    return 1;
+}
 
-//     new ip[16], name[MAX_PLAYER_NAME], admin[MAX_PLAYER_NAME], arquivo[64];
-//     GetPlayerIp(id, ip, sizeof(ip));
-//     GetPlayerName(id, name, sizeof(name));
-//     GetPlayerName(playerid, admin, sizeof(admin));
+YCMD:ban(playerid, params[], help)
+{
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Bane um delinquente por uma quantidade de dias.");
+        return 1;
+    }
 
-//     // Cria arquivo na pasta BanidosIP (O name do arquivo será o IP)
-//     format(arquivo, sizeof(arquivo), PASTA_BANIP, ip);
-//     DOF2_CreateFile(arquivo);
-//     DOF2_SetString(arquivo, "UltimoNick", name);
-//     DOF2_SetString(arquivo, "Admin", admin);
-//     DOF2_SetString(arquivo, "Motivo", motivo);
-//     DOF2_SaveFile();
+    Dialog_ShowCallback(playerid, using public ban_input_dialog<iiiis>, DIALOG_STYLE_INPUT, 
+    "{ffff33}Banimentos", "{ffff33}>> {ffffff}Digite baixo as informações para realizar um banimento:\n\n\
+    {ffff33}[ i ] Se você digitar {ffff33}[ NOME ] + [ TEMPO DIA(S) ] + [ MOTIVO ] {ffffff}banira um jogador por alguns dias\n\n\
+    {ffff33}[ i ] Se você digitar {ffff33}[ NOME ] + [ -1 ] + [ MOTIVO ] {ffffff}banira um jogador permanentemente\n\n\
+    {ff9933}[ ! ] {ffffff}Se o jogador já estiver banido, o motivo e tempo serão {ff9933}redefinidos\n\n", "Banir", "Fechar");
 
-//     new str[144];
-//     format(str, "| BAN-IP | O IP de %s foi banido por %s.", name, admin);
-//     SendClientMessageToAll(0xFF0000AA, str);
+    return 1;
+}
 
-//     Kick(id);
-//     return 1;
-// }
+YCMD:desban(playerid, params[], help)
+{
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Desbane um jogador.");
+        return 1;
+    }
 
-// YCMD:desban(playerid, params[], help)
-// {
-//     VerificarAdmin(playerid, 4);
-//     new nick[24], arquivo[64];
+    new name[24];
     
-//     if(sscanf(params, "s[24]", nick)) return SendClientMessage(playerid, -1, "Use: /desban [Nick exato]");
+    if(sscanf(params, "s[24]", name)) 
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /desban {ff3333}[ NOME ]");
     
-//     format(arquivo, sizeof(arquivo), PASTA_BANIDOS, nick);
-    
-//     if(DOF2_FileExists(arquivo))
-//     {
-//         DOF2_RemoveFile(arquivo); // Deleta o arquivo de ban
-//         SendClientMessage(playerid, COLOR_SUCESS, "Jogador desbanido com sucesso!");
-//     }
-//     else
-//     {
-//         SendClientMessage(playerid, -1, "Este jogador nao esta banido (Arquivo nao encontrado).");
-//     }
-//     return 1;
-// }
+    new admin_name[24];
+    GetPlayerName(playerid, admin_name);
 
-// YCMD:dv(playerid, params[], help)
-// {
-//     VerificarAdmin(playerid, 4);
-//     VerificarTra(playerid);
-//     new id;
-//     if(sscanf(params, "i", id)) // Se nao digitar ID, tenta destruir o que esta dentro
-//     {
-//         if(IsPlayerInAnyVehicle(playerid)) id = GetPlayerVehicleID(playerid);
-//         else return SendClientMessage(playerid, -1, "Use: /dv [ID]");
-//     }
+    if(!Adm::IsValidTargetName(playerid, admin_name, name)) return 1;
     
-//     DestroyVehicle(id);
-//     SendClientMessage(playerid, COLOR_SUCESS, "Veiculo destruido.");
-//     return 1;
-// }
+    if(!DB::Exists(db_entity, "punishments", "name", "name = '%q' AND level = 2", name))
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Não foi possível desbanir o jogador {ff3333}%s{ffffff}, pois ele não está banido!", name);
+        return 1;
+    }
+
+    DB::SetDataInt(db_entity, "punishments", "left_tstamp", 0, "name = '%q' AND level = 2", name);
+
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce desbaniu {33ff33}%s {ffffff}com sucesso.", name);
+    printf("[ PUNICOES ] O admin %s desbaniu %s.", admin_name, name);
+
+    return 1;
+}
 
 // YCMD:setadm(playerid, params[], help)
 // {
@@ -686,46 +714,6 @@ YCMD:prenderoff(playerid, params[], help)
 //     }
     
 //     SendClientMessage(id, 0xFF0000AA, "Seu cargo de Admin foi removido.");
-//     return 1;
-// }
-
-// YCMD:desbanip(playerid, params[], help)
-// {
-//     if(Player[playerid][pAdmin] < 6) return SendClientMessage(playerid, -1, "Apenas Fundador.");
-    
-//     new ip[16];
-//     if(sscanf(params, "s[16]", ip)) return SendClientMessage(playerid, -1, "Use: /desbanip [IP]");
-    
-//     new str[64];
-//     format(str, "unbanip %s", ip);
-//     SendRconCommand(str);
-//     SendRconCommand("reloadbans");
-    
-//     SendClientMessage(playerid, COLOR_SUCESS, "IP Desbanido.");
-//     return 1;
-// }
-
-// YCMD:soltaroff(playerid, params[], help)
-// {
-//     // Esse comando depende muito de como é seu sistema de salvamento (DOF2)
-//     // Basicamente voce precisa carregar o arquivo, mudar a variavel Preso pra 0 e salvar
-//     if(Player[playerid][pAdmin] < 6) return SendClientMessage(playerid, -1, "Apenas Fundador.");
-    
-//     new nick[24];
-//     if(sscanf(params, "s[24]", nick)) return SendClientMessage(playerid, -1, "Use: /soltarpoff [Nick]");
-    
-//     new file[64];
-//     format(file, sizeof(file), PASTA_CONTAS, nick);
-//     if(DOF2_FileExists(file))
-//     {
-//         DOF2_SetInt(file, "Preso", 0);
-//         DOF2_SaveFile();
-//         SendClientMessage(playerid, COLOR_SUCESS, "Jogador offline solto.");
-//     }
-//     else
-//     {
-//         SendClientMessage(playerid, -1, "Conta nao encontrada.");
-//     }
 //     return 1;
 // }
 
@@ -916,64 +904,5 @@ YCMD:prenderoff(playerid, params[], help)
 //     new msg[128];
 //     format(msg, sizeof(msg), "Org %s (ID %d) criada com sucesso na sua posicao!", name, id);
 //     SendClientMessage(playerid, COLOR_SUCESS, msg);
-//     return 1;
-// }
-
-// YCMD:a(playerid, params[], help)
-// {
-//     if(!Adm::HasPermission(playerid, FLAG_ADM_WORKING | FLAG_ADM_APPRENTICE_HELPER)) return 1;
-
-//     if(strlen(params) <= 0 ||  strlen(params) >= 84)
-//         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /a {ff3333}[ TEXTO ]");
-    
-//     Adm::SendMsgToAllTagged(FLAG_ADM_WORKING | FLAG_ADM_APPRENTICE_HELPER, 0xFFFF33AA, 
-//     "[ ADM CHAT ] %s%s {ffffff}: {ffff33}%s", 
-//     Adm::GetColorString(Admin[playerid][adm::lvl]), GetPlayerNameEx(playerid), params);
-
-//     return 1;
-// }
- 
- // ARRUMAR QUANTO TIVER COMANDO DE VEICULO
-// YCMD:repcar(playerid, params[], help)
-// {
-//     if(!Adm::HasPermission(playerid, FLAG_ADM_WORKING | FLAG_ADM_APPRENTICE_HELPER)) return 1;
-
-//     new vehicleid;
-
-//     if(!IsPlayerInAnyVehicle(playerid)) 
-//         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Se quiser reparar um {ff3333}veículo específico, {ffffff}entre nele!");
-
-//     vehicleid = GetPlayerVehicleID(playerid);
-    
-//     new vehname[32], Float:old_health;
-
-//     GetVehicleNameByModel(GetVehicleModel(vehicleid), vehname, 32);
-//     GetVehicleHealth(vehicleid, old_health);
-//     RepairVehicle(vehicleid);
-
-//     SendClientMessage(playerid, -1, "{ffff33}[ ADM ] {ffffff}Veiculo {ffff33}%s {ffffff}\
-//     [ ID: {ffff33}%d {ffffff}] foi reparado!", vehname, vehicleid);
-//     SendClientMessage(playerid, -1, "{ffff33}[ ADM ] {ffffff}Estava com {ffff33}%.1f {ffffff}de vida", old_health);
-
-//     return 1;
-// }
-
-
-// YCMD:trazer(playerid, params[], help)
-// {
-//     #pragma unused help
-//     new targetid;
-//     if(sscanf(params, "u", targetid)) 
-//         return SendClientMessage(playerid, -1, "Use: /trazer [ID]");
-//     if(!IsValidPlayer(targetid)) 
-//         return SendClientMessage(playerid, -1, "Jogador offline.");
-    
-//     new Float:x, Float:y, Float:z;
-//     GetPlayerPos(playerid, x, y, z);
-//     SetPlayerPos(targetid, x + 1, y, z);
-//     SetPlayerInterior(targetid, GetPlayerInterior(playerid));
-//     SetPlayerVirtualWorld(targetid, GetPlayerVirtualWorld(playerid));
-    
-//     SendClientMessage(targetid, COLOR_SUCESS, "Um Admin puxou voce.");
 //     return 1;
 // }

@@ -12,6 +12,7 @@ hook OnGameModeInit()
         "uid             INTEGER PRIMARY KEY AUTOINCREMENT,\
         name            VARCHAR(24) NOT NULL UNIQUE,\
         pass            VARCHAR(16) NOT NULL,\
+        ip              VARCHAR(16) NOT NULL,\
         payday_tleft    INTEGER,\
         bitcoin         INTEGER,\
         money           FLOAT,\
@@ -27,6 +28,7 @@ hook OnGameModeInit()
         punished_by VARCHAR(24),\
         level       INTEGER,\
         reason      VARCHAR(64),\
+        date        VARCHAR(64),\
         left_tstamp INTEGER");
 
         // DB::CreateTable(db_entity, "vehicles", 
