@@ -75,7 +75,6 @@ public OnGameModeExit()
 
 public e_COMMAND_ERRORS:OnPlayerCommandReceived(playerid, cmdtext[], e_COMMAND_ERRORS:success)
 {
-    printf("%d", success);
     switch(success)
     {
         case COMMAND_UNDEFINED:
@@ -99,7 +98,7 @@ public OnPlayerText(playerid, text[])
         return 0;      
     }
 
-    SendClientMessageToAll(-1, "%s [%d] diz: %s", GetPlayerNameEx(playerid), playerid, text);
+    SendClientMessageToAll(-1, "%s [ %d ] diz: %s", GetPlayerNameEx(playerid), playerid, text);
 
     return 0;
 }

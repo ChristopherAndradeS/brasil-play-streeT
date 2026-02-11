@@ -14,7 +14,6 @@ new MySQL:Conexao;
 // --- LIMITES ---
 #define MAX_GARAGES     30
 #define MAX_PLAYER_VEHICLES 10
-#define MAX_ACESSORIOS  5
 #define MAX_ORGS        30
 #define MAX_DESMANCHES  50
 #define MAX_MECANICAS   50
@@ -44,11 +43,6 @@ new MySQL:Conexao;
 #define PASTA_GARAGENS    "Garagens/Gar_%d.ini"
 #define PASTA_VEICULOS    "Veiculos/%s.ini"
 #define ARQUIVO_CATS      "GPS/Categorias.txt"
-#define PASTA_ADMINS      "Admins/%s.ini"
-#define PASTA_BANIDOS     "Banidos/%s.ini"
-#define PASTA_BANIP       "BanidosIP/%s.ini"
-#define PASTA_PRESOS      "Presos/%s.ini"
-#define PASTA_CONTAS      "Contas/%s.ini" // (Ainda usado p/ backup ou soltar preso off)
 #define PASTA_ORGS        "Orgs/%d.ini"
 #define PASTA_OFICINAS    "Oficinas/Ofi_%d.ini"
 #define ARQUIVO_ORGS      "Lideres.ini"
@@ -64,11 +58,9 @@ enum pInfo
 };
 
 new Player[MAX_PLAYERS][pInfo];
-new bool:IsLogged[MAX_PLAYERS];
 
 // VARIÁVEIS DE SISTEMA
 new bool:Trabalhando[MAX_PLAYERS];
-new bool:AdminTrabalhando[MAX_PLAYERS];
 new InviteOrg[MAX_PLAYERS];
 new TempGPS_Categoria[MAX_PLAYERS][64];
 new CheckpointAtivo[MAX_PLAYERS];
@@ -101,8 +93,6 @@ new GaragePickup[MAX_GARAGES];
 
 enum pVehInfo { pvModelo, pvPreco, pvCor1, pvCor2, pvSpawnadoID, pvNome[32] }
 new PlayerVehicles[MAX_PLAYERS][MAX_PLAYER_VEHICLES][pVehInfo];
-
-new Text3D:TagAdmin[MAX_PLAYERS];
 
 enum oInfo { oTipo, Float:oX, Float:oY, Float:oZ, oCriada }
 new OficinaInfo[MAX_OFICINAS][oInfo];
@@ -156,10 +146,6 @@ new OrgInfo[MAX_ORGS][eOrg];
 #define ITEM_CHASSI 6
 #define ITEM_RODAS 7
 
-// MACROS
-#define VerificarAdmin(%0,%1) if(Player[%0][pAdmin] < %1) return SendClientMessage(%0, COR_ERRO, "Voce nao tem permissao para usar este comando.")
-#define VerificarTra(%0) if(!Trabalhando[%0] && Player[%0][pAdmin] < 6) return SendClientMessage(%0, COR_ERRO, "Voce precisa estar em modo de trabalho! Use /tra.")
-
 // FORWARDS
 forward cmd_mochila(playerid, params[]);
 forward cmd_celular(playerid, params[]);
@@ -167,32 +153,14 @@ forward cmd_tuning(playerid, params[]);
 forward cmd_malas(playerid, params[]);
 forward AtualizarVelocimetroGlobal();
 forward AnimarLockPick(playerid);
-forward FinalizarDesmanche(playerid, vehicleid);
-forward TocarMusicaLogin(playerid);
-forward VerificarConta(playerid);
-forward AoCriarConta(playerid);
-forward FinalizarCarregamento(playerid);
-forward CarregarConta(playerid);
 forward OnDebugSalvar(playerid, slot);
 forward OnAbrirLojaMySQL(playerid);
 forward ForcarSkinCorreta(playerid);
 
-main()
-{
-	print("-----------------------------------");
-	print(" Brasil Play Street - v1.0 COMPLETO");
-	print("-----------------------------------");
-}
-
 public OnGameModeInit()
 {
-    TimerVelocimetro = SetTimer("AtualizarVelocimetroGlobal", 200, true);
-
-    // --- CARREGAR ORGS/FACS (NOVO SISTEMA MYSQL) ---
-    // Substituiu o antigo loop de arquivos "PASTA_ORGS"
     CarregarOrgsMySQL();
 
-    // --- CARREGAR OFICINAS (AINDA EM DOF2) ---
     for(new i=0; i < MAX_OFICINAS; i++)
     {
         new strArq[64];
@@ -215,7 +183,6 @@ public OnGameModeInit()
         }
     }
 
-    // --- CARREGAR GARAGENS (AINDA EM DOF2) ---
     for(new i=0; i < MAX_GARAGES; i++)
     {
         new strArq[64];
@@ -232,7 +199,6 @@ public OnGameModeInit()
         }
     }
 
-    // --- CARREGAR DESMANCHES (AINDA EM DOF2) ---
     new arquivo[64], string[128];
     for(new i=0; i < MAX_DESMANCHES; i++)
     {
@@ -249,7 +215,6 @@ public OnGameModeInit()
         }
     }
 
-    // --- CARREGAR CONCESSIONÁRIA ---
     if(DOF2_FileExists(ARQUIVO_CONCE_LOC))
     {
         ConceX = DOF2_GetFloat(ARQUIVO_CONCE_LOC, "X");
@@ -261,7 +226,6 @@ public OnGameModeInit()
         ConceLabel = Create3DTextLabel("{00FF00}[ CONCESSIONARIA ]", 0xFFFFFFFF, ConceX, ConceY, ConceZ, 20.0, 0, 0);
     }
 
-    // Carregar Estoque
     if(DOF2_FileExists(ARQUIVO_CONCE_STOCK))
     {
         TotalCarrosConce = DOF2_GetInt(ARQUIVO_CONCE_STOCK, "Total");
@@ -275,7 +239,6 @@ public OnGameModeInit()
         }
     }
 
-    // CARREGAR GARAGENS
     for(new i=0; i < MAX_GARAGES; i++)
     {
         new strArq[64];
@@ -292,11 +255,8 @@ public OnGameModeInit()
         }
     }
 
-    // 1. TIMER DO VELOCÍMETRO
     TimerVelocimetro = SetTimer("AtualizarVelocimetroGlobal", 200, true);
 
-    // 2. CARREGAR DESMANCHES
-    // Crie a pasta "Desmanches" nas suas scriptfiles se não tiver!
     for(new i=0; i < MAX_DESMANCHES; i++)
     {
         format(arquivo, sizeof(arquivo), ARQUIVO_DESMANCHE, i);
@@ -311,8 +271,7 @@ public OnGameModeInit()
             DesmancheLabel[i] = Create3DTextLabel(string, 0xFFFFFFFF, DesmancheInfo[i][dsX], DesmancheInfo[i][dsY], DesmancheInfo[i][dsZ], 20.0, 0, 0);
         }
     }
-    
-    // 4. CARREGAR CONCESSIONÁRIA (O Código novo entra aqui!)
+
     if(DOF2_FileExists(ARQUIVO_CONCE_LOC))
     {
         ConceX = DOF2_GetFloat(ARQUIVO_CONCE_LOC, "X");
@@ -344,7 +303,6 @@ public OnGameModeInit()
         printf("[CONCE] Carregados %d veiculos.", TotalCarrosConce);
     }
     
-    // Se não existir arquivo de lideres, cria
     if(!DOF2_FileExists(ARQUIVO_ORGS))
     {
         DOF2_CreateFile(ARQUIVO_ORGS);
@@ -357,42 +315,8 @@ public OnGameModeInit()
 	return 1;
 }
 
-public OnGameModeExit()
-{
-    // Salva e fecha o sistema de arquivos (DOF2)
-    DOF2_Exit();
-
-    // Fecha a conex�o com o Banco de Dados (Evita erros de "Too many connections")
-    if(Conexao != MYSQL_INVALID_HANDLE)
-    {
-        mysql_close(Conexao);
-    }
-
-    // Para o timer global do veloc�metro
-    KillTimer(TimerVelocimetro);
-
-    return 1;
-}
-
 public OnPlayerConnect(playerid)
 {
-    // --- LIMPEZA GERAL (Obrigatório) ---
-    IsLogged[playerid] = false;
-    
-    // Zera o dinheiro visual e da variável
-    ResetPlayerMoney(playerid);
-    Player[playerid][pDinheiro] = 0; 
-
-    // --- ADICIONE ISTO AQUI NO TOPO ---
-    new nome[MAX_PLAYER_NAME];
-    new ip[16];
-    GetPlayerName(playerid, nome, sizeof(nome));
-    GetPlayerIp(playerid, ip, sizeof(ip));
-    ----------------------------------
-    PlayerTextDrawSetString(playerid, Login::PlayerTD[playerid][2], "Registro");
-    PlayerTextDrawSetString(playerid, Login::PlayerTD[playerid][0], "Andrade");
-    PlayerTextDrawSetString(playerid, Login::PlayerTD[playerid][1], "Digite_sua_senha");
-    // Carregar Veículos (Mantido seu código DOF2)
     new arquivo[64];
     format(arquivo, sizeof(arquivo), PASTA_VEICULOS, nome);
     
@@ -422,7 +346,6 @@ public OnPlayerConnect(playerid)
         }
     }
 
-    // Zera Variáveis
     CelularAberto[playerid] = false; 
     BancoAberto[playerid] = false;   
     Player[playerid][pTempo] = 0;    
@@ -431,11 +354,6 @@ public OnPlayerConnect(playerid)
 
     CriarCelular(playerid); 
 
-    for (new i = 0; i < 20; i++) SendClientMessage(playerid, -1, " ");
-    
-    // MOSTRAR TELA DE LOGIN
- 
-    // Ýcones do Mapa
     for(new i=1; i < MAX_ORGS; i++)
     {
         if(OrgInfo[i][oCriada] == 1)
@@ -444,18 +362,6 @@ public OnPlayerConnect(playerid)
         }
     }
 
-    SetTimerEx("TocarMusicaLogin", 2000, false, "i", playerid);
-
-    // === AQUI ESTÝ A MÝGICA: VERIFICAR NO MYSQL ===
-    // Pergunta ao banco se esse nome já existe
-    new query[128];
-    mysql_format(Conexao, query, sizeof(query), "SELECT senha FROM contas WHERE nome = '%e' LIMIT 1", nome);
-    mysql_tquery(Conexao, query, "VerificarConta", "d", playerid);    
-    === REMOÇÃO DE OBJETOS DO MAPA (COMEÇO) ===
-        
-    // 3. Marca como deslogado
-    IsLogged[playerid] = false;
-    
     // Destruir carros do player ao sair
     for(new i=0; i < MAX_PLAYER_VEHICLES; i++)
     {
@@ -467,10 +373,6 @@ public OnPlayerConnect(playerid)
     }
 
     if(IsPicking[playerid]) FecharLockPick(playerid);
-    if(IsLogged[playerid]) SalvarConta(playerid);
-
-    LimparDados(playerid);
-    IsLogged[playerid] = false;
 
     // Esconde nick de admins trabalhando
     for(new i=0; i < MAX_PLAYERS; i++)
@@ -480,17 +382,6 @@ public OnPlayerConnect(playerid)
             ShowPlayerNameTagForPlayer(playerid, i, 0); 
         }
     }
-    
-    format(arqIp, sizeof(arqIp), PASTA_BANIP, ip);
-    if(DOF2_FileExists(arqIp))
-    {
-        SendClientMessage(playerid, 0xFF0000AA, "SEU IP ESTA BANIDO DESTE SERVIDOR!");
-        Kick(playerid);
-        return 0;
-    }
-    
-    // --- LÓGICA DE LOGIN/INTERFACE ---
-    TogglePlayerSpectating(playerid, 1);
 
     // Carregar Veículos (Mantido seu código DOF2)
     new arquivo[64];
@@ -522,7 +413,6 @@ public OnPlayerConnect(playerid)
         }
     }
 
-    // Zera Variáveis
     CelularAberto[playerid] = false; 
     BancoAberto[playerid] = false;   
     Player[playerid][pTempo] = 0;    
@@ -531,11 +421,6 @@ public OnPlayerConnect(playerid)
 
     CriarCelular(playerid); 
 
-    for (new i = 0; i < 20; i++) SendClientMessage(playerid, -1, " ");
-    
-    // MOSTRAR TELA DE LOGIN
- 
-    // Ícones do Mapa
     for(new i=1; i < MAX_ORGS; i++)
     {
         if(OrgInfo[i][oCriada] == 1)
@@ -543,15 +428,6 @@ public OnPlayerConnect(playerid)
             SetPlayerMapIcon(playerid, i, OrgInfo[i][oX], OrgInfo[i][oY], OrgInfo[i][oZ], 31, 0, MAPICON_GLOBAL);
         }
     }
-
-    SetTimerEx("TocarMusicaLogin", 2000, false, "i", playerid);
-
-    // === AQUI ESTÁ A MÁGICA: VERIFICAR NO MYSQL ===
-    // Pergunta ao banco se esse nome já existe
-    new query[128];
-    mysql_format(Conexao, query, sizeof(query), "SELECT senha FROM contas WHERE nome = '%e' LIMIT 1", nome);
-    mysql_tquery(Conexao, query, "VerificarConta", "d", playerid);
-
     return 1;
 }
 
@@ -586,10 +462,6 @@ public OnPlayerClickTextDraw(playerid, Text:clickedid)
     return 0;
 }
 
-// ============================================================
-// 3. AS FUNÇÕES AUXILIARES (AGORA FORA DA PUBLIC, LÁ EMBAIXO)
-// ============================================================
-
 stock FecharEditorMobile(playerid)
 {
     EditorAberto[playerid] = false;
@@ -600,38 +472,8 @@ stock FecharEditorMobile(playerid)
     return 1;
 }
 
-stock IsTextDrawVisibleForPlayer(playerid, Text:td)
-{
-    #pragma unused playerid, td 
-    return 1; 
-}
-
 public OnPlayerDisconnect(playerid, reason)
 {
-    // Deleta a Tag do CPF
-    if(TagCPF[playerid]) 
-    {
-        Delete3DTextLabel(TagCPF[playerid]);
-        TagCPF[playerid] = Text3D:0;
-    }
-
-    if(Player[playerid][pLogado] == true)
-    {
-        SalvarConta(playerid);
-        
-        SalvarInventario(playerid); // <--- ADICIONE ISSO AQUI
-    }
-    
-    // 1. SALVAR TUDO ANTES DE QUALQUER COISA
-    if(IsLogged[playerid])
-    {
-        SalvarConta(playerid); // Salva dinheiro, level, etc.
-    }
-
-    // 3. Marca como deslogado
-    IsLogged[playerid] = false;
-    
-// Destruir carros do player ao sair
     for(new i=0; i < MAX_PLAYER_VEHICLES; i++)
     {
         if(PlayerVehicles[playerid][i][pvSpawnadoID] > 0)
@@ -642,71 +484,12 @@ public OnPlayerDisconnect(playerid, reason)
     }
 
     if(IsPicking[playerid]) FecharLockPick(playerid);
-    if(IsLogged[playerid]) SalvarConta(playerid);
-	return 1;
-}
 
-stock EsconderLogin(playerid)
-{
-    StopAudioStreamForPlayer(playerid);
-    
-    return 1;
+	return 1;
 }
 
 public OnPlayerSpawn(playerid)
 {
-    // --- SISTEMA DE NAMETAG (CPF) ---
-    
-    // 1. TEXTDRAWS (Visual)
-    
-    // 2. SEGURANÇA (Verifica se está logado antes de tudo)
-    // Usamos a variável do MySQL (pLogado) em vez da antiga IsLogged
-    if(Player[playerid][pLogado] == false)
-    {
-        SendClientMessage(playerid, 0xFF0000AA, "Voce nao esta logado e foi kickado.");
-        Kick(playerid);
-        return 1;
-    }
-
-    // 3. SISTEMA DE PRESO (DOF2 - Mantido conforme seu código)
-    new nome[MAX_PLAYER_NAME], arquivo[64];
-    GetPlayerName(playerid, nome, sizeof(nome));
-    format(arquivo, sizeof(arquivo), PASTA_PRESOS, nome);
-    
-    if(DOF2_FileExists(arquivo))
-    {
-        SetPlayerInterior(playerid, 6);
-        SetPlayerPos(playerid, 264.6288, 77.5742, 1001.0391); // Cela
-        SendClientMessage(playerid, 0xFF0000AA, "Voce ainda esta preso! Cumpra sua pena.");
-        // Nota: Se estiver preso, não carregamos o resto para evitar bugar animação ou spawn
-        return 1; 
-    }
-    
-    EsconderLogin(playerid);
-
-    // 4. POSIÇÃO DE SPAWN (LS)
-    SetPlayerPos(playerid, 832.0, -1863.0, 12.9);
-    SetPlayerFacingAngle(playerid, 180.0);
-    SetCameraBehindPlayer(playerid);
-
-    // 5. SKIN (Usa a salva ou a padrão)
-    if(Player[playerid][pSkin] > 0)
-    {
-        SetPlayerSkin(playerid, Player[playerid][pSkin]);
-    }
-    else
-    {
-        SetPlayerSkin(playerid, 154);
-        Player[playerid][pSkin] = 154; 
-    }
-
-    // 6. STATUS (Dinheiro e Score)
-    SetPlayerScore(playerid, Player[playerid][pScore]);
-    
-    // Importante: Resetar antes de dar, para não duplicar o dinheiro se spawnar 2x
-    ResetPlayerMoney(playerid); 
-    GivePlayerMoney(playerid, Player[playerid][pDinheiro]);
- 
     // 7. ANIMAÇÕES (Preload)
     ApplyAnimation(playerid, "BOMBER", "null", 0.0, 0, 0, 0, 0, 0, 0); 
     ApplyAnimation(playerid, "MEDIC", "null", 0.0, 0, 0, 0, 0, 0, 0);
@@ -715,9 +498,6 @@ public OnPlayerSpawn(playerid)
     {
         CarregarInventario(playerid); // <--- ADICIONE ISSO AQUI
     }
-
-    // Chama a função da Tag
-    AtualizarTagCPF(playerid);
 
     return 1;
 }
@@ -1395,26 +1175,6 @@ CMD:mochila(playerid, params[])
         DestruirInventarioGrid(playerid); // Função nova para limpar tudo
         CancelSelectTextDraw(playerid);
     }
-    return 1;
-}
-
-// 6. V (Criar Veículo)
-CMD:v(playerid, params[])
-{
-    if(Player[playerid][pAdmin] < 3 || !AdminTrabalhando[playerid]) return SendClientMessage(playerid, COR_ERRO, "Erro: /trabalhar");
-    
-    new modelo;
-    if(sscanf(params, "i", modelo)) return SendClientMessage(playerid, COR_V_ESCURO, "USE: /v [ID 400-611]");
-    if(modelo < 400 || modelo > 611) return SendClientMessage(playerid, COR_ERRO, "ID Invalido! Use entre 400 e 611.");
-    
-    new Float:x, Float:y, Float:z, Float:a;
-    GetPlayerPos(playerid, x, y, z);
-    GetPlayerFacingAngle(playerid, a);
-    
-    new carro = CreateVehicle(modelo, x, y, z, a, -1, -1, -1);
-    PutPlayerInVehicle(playerid, carro, 0); // Coloca o admin dentro do carro
-    
-    SendClientMessage(playerid, COR_V_CLARO, "Veiculo criado!");
     return 1;
 }
 
@@ -2510,21 +2270,6 @@ stock CriarVenda(playerid)
     return 1;
 }
 
-// Pega o veículo mais perto do jogador (Raio de 3 metros)
-stock GetClosestVehicle(playerid)
-{
-    new Float:x, Float:y, Float:z;
-    GetPlayerPos(playerid, x, y, z);
-    for(new i=1; i < MAX_VEHICLES; i++)
-    {
-        if(GetVehicleModel(i) > 0) // Se o carro existe
-        {
-            if(GetVehicleDistanceFromPoint(i, x, y, z) < 4.0) return i;
-        }
-    }
-    return INVALID_VEHICLE_ID;
-}
-
 stock ColocarNeon(vehicleid, modelo_neon)
 {
     // 1. Remove neon anterior se tiver
@@ -2627,17 +2372,6 @@ stock GetVehicleSpeed(vehicleid)
     new Float:x, Float:y, Float:z;
     GetVehicleVelocity(vehicleid, x, y, z);
     return floatround(floatsqroot(x*x + y*y + z*z) * 180.0); // *180 aprox para KM/H
-}
-
-// Função para pegar o nome do carro
-stock GetVehicleName(vehicleid)
-{
-    new nome[32];
-    // Lista simplificada ou use uma include a_samp se tiver GetVehicleModelInfo
-    // Aqui vou usar um método simples que retorna "Veiculo" se não tiver array de nomes
-    format(nome, 32, "Veiculo ID: %d", GetVehicleModel(vehicleid)); 
-    // OBS: Se você tiver a função ReturnVehicleModelName no seu GM, troque aqui!
-    return nome;
 }
 
 forward AtualizarVelocimetroGlobal();
@@ -2865,51 +2599,6 @@ stock AtualizarGarageUI(playerid)
     return 1;
 }
 
-public OnPlayerText(playerid, text[])
-{
-    new str[144], nome[24];
-    GetPlayerName(playerid, nome, 24);
-
-    // --- SE ESTIVER TRABALHANDO ---
-    if(Trabalhando[playerid])
-    {
-        // Formato: Nome[ID] [CARGO] diz: Texto
-        // Ex: Kong[0] [FUNDADOR] diz: teste
-        format(str, sizeof(str), "%s[%d] {00FF00}[%s]{FFFFFF} diz: %s", nome, playerid, GetCargoAdmin(playerid), text);
-        
-        // Envia para quem está perto (Chat Local)
-        SendClientMessageToAllXYZ(playerid, str); 
-        
-        return 0; // Bloqueia o chat padrão do SAMP para não duplicar
-    }
-
-    // --- SE ESTIVER FORA DE TRABALHO (CIVIL) ---
-    // Formato: Nome[ID] diz: Texto
-    format(str, sizeof(str), "%s[%d] diz: %s", nome, playerid, text);
-    SendClientMessageToAllXYZ(playerid, str);
-
-    return 0; // Retorna 0 para usar nosso sistema de chat e não o do SAMP
-}
-
-// --- FUNÇÃO AUXILIAR PARA MANDAR MENSAGEM SÓ PRA QUEM TÁ PERTO ---
-// (Coloque no final do GM se não tiver)
-stock SendClientMessageToAllXYZ(playerid, text[])
-{
-    new Float:Pos[3];
-    GetPlayerPos(playerid, Pos[0], Pos[1], Pos[2]);
-    for(new i=0; i < MAX_PLAYERS; i++)
-    {
-        if(IsPlayerConnected(i))
-        {
-            if(IsPlayerInRangeOfPoint(i, 20.0, Pos[0], Pos[1], Pos[2])) // 20 metros de distancia
-            {
-                SendClientMessage(i, 0xFFFFFFFF, text);
-            }
-        }
-    }
-    return 1;
-}
-
 public OnPlayerEnterCheckpoint(playerid)
 {
     if(CheckpointAtivo[playerid])
@@ -3070,37 +2759,5 @@ public OnOrgsCarregadas()
         OrgInfo[id][oLabel] = Create3DTextLabel(label, OrgInfo[id][oCor], OrgInfo[id][oX], OrgInfo[id][oY], OrgInfo[id][oZ]+0.5, 20.0, 0, 0);
     }
     printf("[ORGS] %d Organizacoes carregadas do MySQL.", rows);
-    return 1;
-}
-
-// Defina isso lá no topo junto com os outros defines
-#define ITEM_DINHEIRO_SUJO 4 
-
-// Essa função é chamada automaticamente pelo ZCMD quando alguém digita um comando
-public OnPlayerCommandPerformed(playerid, cmdtext[], success)
-{
-    // Se success for falso (0), significa que o comando NÃO existe
-    if(!success)
-    {
-        // 1. Mostra o TextDraw
-        TextDrawShowForPlayer(playerid, TD_ErroComando);
-        
-        // 2. Toca um som de "Erro"
-        PlayerPlaySound(playerid, 1085, 0.0, 0.0, 0.0);
-        
-        // 3. Cria um timer para esconder a mensagem depois de 2 segundos
-        SetTimerEx("EsconderErroCMD", 2000, false, "i", playerid);
-        
-        // Retorna 1 para NÃO aparecer a mensagem padrão branca "SERVER: Unknown command"
-        return 1;
-    }
-    return 1;
-}
-
-// Timer para esconder o texto
-forward EsconderErroCMD(playerid);
-public EsconderErroCMD(playerid)
-{
-    TextDrawHideForPlayer(playerid, TD_ErroComando);
     return 1;
 }
