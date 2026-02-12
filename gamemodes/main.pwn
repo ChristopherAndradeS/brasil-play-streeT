@@ -3,6 +3,7 @@
 #include <open.mp>
 #include <sscanf2>
 #include <streamer>
+#include <ColAndreas>
 #include <PawnPlus>
 
 #define CGEN_MEMORY 20000
@@ -32,6 +33,7 @@
 #include "../gamemodes/modules/Admin/handle.pwn"
 #include "../gamemodes/modules/DB/handle.pwn"
 #include "../gamemodes/modules/Maps/handle.pwn"
+#include "../gamemodes/modules/Vehicle/handle.pwn"
 /*                          SERVER                          */
 #include "../gamemodes/modules/Server/wheather.pwn"
 #include "../gamemodes/modules/Server/players.pwn"
@@ -58,6 +60,27 @@
 /*                          ADMIN                          */
 #include "../gamemodes/modules/Admin/commands.pwn"
 #include "../gamemodes/modules/Admin/panel.pwn"
+/*                          VEHICLE                        */
+#include "../gamemodes/modules/Vehicle/commands.pwn"
+
+main(){}
+
+public OnGameModeInit()
+{
+    CA_Init();
+
+    new Float:pX, Float:pY, Float:pZ;
+
+    for(new i = 0; i < 500; i++)
+    {
+        pX = Float:RandomFloatMinMax(0, 3000.0);
+        pY = Float:RandomFloatMinMax(0, 3000.0);
+        CA_FindZ_For2DCoord(pX, pY, pZ);
+        CreateVehicle(RandomMinMax(400, 600), pX, pY, pZ + 1.0,  0.0, RandomMinMax(0, 10), RandomMinMax(0, 10), -1); 
+    }
+
+    return 1;
+}
 
 public OnGameModeExit()
 {
@@ -140,4 +163,65 @@ hook function SendClientMessageToAll(colour, const msg[], GLOBAL_TAG_TYPES:...)
     va_format(fixed_msg, 144, msg, ___(2));
     RemoveGraphicAccent(fixed_msg);
     return continue(colour, fixed_msg);
+}
+
+hook SetPlayerCheckpoint(playerid, Float:x, Float:y, Float:z, Float:size)
+{
+    SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_CHECKPOINT);
+    PlayerPlaySound(playerid, 1056, 0.0, 0.0, 0.0);
+    return continue(playerid, Float:x, Float:y, Float:z, Float:size);
+}
+
+public OnPlayerEnterCheckpoint(playerid)
+{
+    if(IsPlayerCheckpointActive(playerid))
+    {
+        ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_CHECKPOINT);
+        DisablePlayerCheckpoint(playerid);
+        SendClientMessage(playerid, -1, "{33ff33}[ GPS ] {ffffff}Você chegou ao seu destino!");
+        PlayerPlaySound(playerid, 1058, 0.0, 0.0, 0.0); 
+        return 1;
+    }
+    
+    return 1;
+}
+
+YCMD:veh(playerid, params[], help)
+{
+    new modelid;
+
+    if(sscanf(params, "i", modelid)) return 1;
+
+    new Float:pX, Float:pY, Float:pZ;
+    GetPlayerPos(playerid, pX, pY, pZ);
+
+    new vehicleid = CreateVehicle(modelid, pX, pY, pZ, 0.0, RandomMinMax(0, 10), RandomMinMax(0, 10), -1);
+    PutPlayerInVehicle(playerid, vehicleid, 0);
+
+    new regionid = Vehicle[vehicleid][veh::regionid];
+
+    new count = linked_list_size(veh::gRegion[regionid]);
+
+    new str[128];
+    format(str, 128, "Veiculo: {33ff33}%d {ffffff}| Regiao: {33ff33}%d {ffffff}| QTR: {33ff33}%d", vehicleid, regionid, count);
+
+    Vehicle[vehicleid][veh::tex3did] = CreateDynamic3DTextLabel(str, -1, pX, pY, pZ, 50.0, .attachedplayer = INVALID_PLAYER_ID, .attachedvehicle = vehicleid);
+
+    return 1;
+}
+
+YCMD:close(playerid, params[], help)
+{
+    new Float:pX, Float:pY, Float:pZ, Float:dist;
+    GetPlayerPos(playerid, pX, pY, pZ);
+    new vehicleid = Veh::GetClosest(pX, pY, pZ, dist);
+    GetVehiclePos(vehicleid, pX, pY, pZ);
+    
+    if(dist != FLOAT_INFINITY)
+    {
+        SetPlayerCheckpoint(playerid, pX, pY, pZ, 5.0);
+        SendClientMessage(playerid, 0xFF33FF33, "Veiculo mais proximo a voce: %.2f unidades de distancia", dist);
+    }
+
+    return 1;
 }

@@ -1,268 +1,159 @@
-#include <YSI\YSI_Coding\y_hooks>
+#define REGION_GRID_SIZE        (8)
+#define REGION_COUNT            (64)
+#define REGION_SIZE             (750.0)
+#define WORLD_MIN               (-3000.0)
+#define WORLD_MAX               (3000.0)
+#define INVALID_REGION_ID       (-1)
 
-#define VEHICLE_REGION_GRID_SIZE        (8)
-#define VEHICLE_REGION_COUNT            (64)
-#define VEHICLE_REGION_SIZE             (750.0)
-#define VEHICLE_WORLD_MIN               (-3000.0)
-#define VEHICLE_WORLD_MAX               (3000.0)
-#define INVALID_VEHICLE_REGION          (-1)
+new LinkedList:veh::gRegion[REGION_COUNT];
 
-new LinkedList:veh::RegionVehicles[VEHICLE_REGION_COUNT];
-new STREAMER_TAG_AREA:veh::RegionAreas[VEHICLE_REGION_COUNT];
-new veh::VehicleRegion[MAX_VEHICLES] = {INVALID_VEHICLE_REGION, ...};
-new bool:veh::IsOpen[MAX_VEHICLES];
+new STREAMER_TAG_AREA:veh::gAreas[REGION_COUNT];
 
-stock Vehicle::GetRegionFromXY(Float:x, Float:y)
+enum (<<= 1)
 {
-    if(x < VEHICLE_WORLD_MIN || x > VEHICLE_WORLD_MAX || y < VEHICLE_WORLD_MIN || y > VEHICLE_WORLD_MAX)
-        return INVALID_VEHICLE_REGION;
-
-    new col = floatround((x - VEHICLE_WORLD_MIN) / VEHICLE_REGION_SIZE, floatround_floor);
-    new row = floatround((y - VEHICLE_WORLD_MIN) / VEHICLE_REGION_SIZE, floatround_floor);
-
-    if(col >= VEHICLE_REGION_GRID_SIZE)
-        col = VEHICLE_REGION_GRID_SIZE - 1;
-
-    if(row >= VEHICLE_REGION_GRID_SIZE)
-        row = VEHICLE_REGION_GRID_SIZE - 1;
-
-    return (row * VEHICLE_REGION_GRID_SIZE) + col;
+    FLAG_VEH_OPENED = 1,
 }
 
-stock Vehicle::GetRegionByArea(STREAMER_TAG_AREA:areaid)
+enum (<<= 1)
 {
-    for(new region = 0; region < VEHICLE_REGION_COUNT; region++)
-    {
-        if(veh::RegionAreas[region] == areaid)
+    FLAG_PARAM_ENGINE = 1,
+    FLAG_PARAM_LIGHTS,
+    FLAG_PARAM_ALARM,
+    FLAG_PARAM_DOORS,
+    FLAG_PARAM_BONNET,
+    FLAG_PARAM_BOOT,
+    FLAG_PARAM_OBJECTIVE,
+}
+
+enum E_VEHICLES
+{
+    veh::regionid,
+    veh::flags,
+    veh::params,
+    STREAMER_TAG_3D_TEXT_LABEL:veh::tex3did
+}
+
+new Vehicle[MAX_VEHICLES][E_VEHICLES];
+
+forward OnVehicleCreate(vehicleid, modelid, regionid, Float:x, Float:y, Float:z);
+
+stock GetRegionFromXY(Float:x, Float:y)
+{
+    if(x < WORLD_MIN || x > WORLD_MAX || y < WORLD_MIN || y > WORLD_MAX)
+        return INVALID_REGION_ID;
+
+    new col = floatround((x - WORLD_MIN) / REGION_SIZE, floatround_floor);
+    new row = floatround((y - WORLD_MIN) / REGION_SIZE, floatround_floor);
+
+    if(col >= REGION_GRID_SIZE) col = REGION_GRID_SIZE - 1;
+    if(row >= REGION_GRID_SIZE) row = REGION_GRID_SIZE - 1;
+
+    return (row * REGION_GRID_SIZE) + col;
+}
+
+stock GetRegionByArea(STREAMER_TAG_AREA:areaid)
+{
+    for(new region = 0; region < REGION_COUNT; region++)
+        if(veh::gAreas[region] == areaid)
             return region;
-    }
 
-    return INVALID_VEHICLE_REGION;
+    return INVALID_REGION_ID;
 }
 
-stock Vehicle::GetRegionCellX(region)
-    return (region % VEHICLE_REGION_GRID_SIZE);
+stock GetRegionCellX(region)
+    return (region % REGION_GRID_SIZE);
 
-stock Vehicle::GetRegionCellY(region)
-    return (region / VEHICLE_REGION_GRID_SIZE);
+stock GetRegionCellY(region)
+    return (region / REGION_GRID_SIZE);
 
-stock bool:Vehicle::RemoveFromRegion(vehicleid, region = INVALID_VEHICLE_REGION)
+stock Veh::RemoveFromRegion(vehicleid)
 {
-    if(region == INVALID_VEHICLE_REGION)
-        region = veh::VehicleRegion[vehicleid];
+    new regionid = Vehicle[vehicleid][veh::regionid];
 
-    if(region < 0 || region >= VEHICLE_REGION_COUNT)
-        return false;
+    if(regionid < 0 || regionid >= REGION_COUNT) return 0;
 
-    new count = linked_list_size(veh::RegionVehicles[region]);
-    for(new index = 0; index < count; index++)
+    new count = linked_list_size(veh::gRegion[regionid]);
+
+    for(new i = 0; i < count; i++)
     {
-        if(linked_list_get(veh::RegionVehicles[region], index) == vehicleid)
+        if(linked_list_get(veh::gRegion[regionid], i) == vehicleid)
         {
-            linked_list_remove(veh::RegionVehicles[region], index);
+            linked_list_remove(veh::gRegion[regionid], i);
+            Vehicle[vehicleid][veh::regionid] = INVALID_REGION_ID;
             break;
         }
     }
 
-    if(veh::VehicleRegion[vehicleid] == region)
-        veh::VehicleRegion[vehicleid] = INVALID_VEHICLE_REGION;
-
-    return true;
+    return 1;
 }
 
-stock bool:Vehicle::AddToRegion(vehicleid, region)
+stock Veh::AddToRegion(vehicleid, regionid)
 {
-    if(veh::VehicleRegion[vehicleid] == region)
-        return true;
+    if(Vehicle[vehicleid][veh::regionid] == regionid) return 1;
 
-    Vehicle::RemoveFromRegion(vehicleid);
+    Veh::RemoveFromRegion(vehicleid);
 
-    if(region < 0 || region >= VEHICLE_REGION_COUNT)
-        return false;
+    if(regionid < 0 || regionid >= REGION_COUNT) return 0;
 
-    linked_list_add(veh::RegionVehicles[region], vehicleid);
-    veh::VehicleRegion[vehicleid] = region;
-    return true;
+    linked_list_add(veh::gRegion[regionid], vehicleid);
+    Vehicle[vehicleid][veh::regionid] = regionid;
+
+    return 1;
 }
 
-stock bool:Vehicle::UpdateRegionByPosition(vehicleid)
+stock Veh::UpdateRegionByPosition(vehicleid)
 {
-    if(!IsValidVehicle(vehicleid))
-        return false;
+    if(!IsValidVehicle(vehicleid)) return 0;
 
     new Float:x, Float:y, Float:z;
     GetVehiclePos(vehicleid, x, y, z);
+    
+    new regionid = GetRegionFromXY(x, y);
+    new count = linked_list_size(veh::gRegion[regionid]);
 
-    return Vehicle::AddToRegion(vehicleid, Vehicle::GetRegionFromXY(x, y));
+    new str[128];
+    format(str, 128, "Veiculo: {33ff33}%d {ffffff}| Regiao: {33ff33}%d {ffffff}| QTR: {33ff33}%d", vehicleid, regionid, count);
+
+    Veh::AddToRegion(vehicleid, regionid);
+
+    UpdateDynamic3DTextLabelText(Vehicle[vehicleid][veh::tex3did], -1, str);
+
+    return 1;
 }
 
-stock GetClosestVehicle(Float:x, Float:y, Float:z)
+stock Veh::GetClosest(Float:x, Float:y, Float:z, &Float:min_dist_sq)
 {
-    new center_region = Vehicle::GetRegionFromXY(x, y);
-    if(center_region == INVALID_VEHICLE_REGION)
-        return INVALID_VEHICLE_ID;
+    new regionid = GetRegionFromXY(x, y);
 
-    new center_x = Vehicle::GetRegionCellX(center_region);
-    new center_y = Vehicle::GetRegionCellY(center_region);
+    min_dist_sq = FLOAT_INFINITY;
 
-    new closest_vehicle = INVALID_VEHICLE_ID;
-    new Float:min_dist_sq = 99999999.0;
+    if(regionid == INVALID_REGION_ID) return INVALID_VEHICLE_ID;
 
-    for(new off_y = -1; off_y <= 1; off_y++)
+    new closest_vehicle   = INVALID_VEHICLE_ID;
+    new count = linked_list_size(veh::gRegion[regionid]);
+
+    for(new i = 0; i < count; i++)
     {
-        for(new off_x = -1; off_x <= 1; off_x++)
+        new vehicleid = linked_list_get(veh::gRegion[regionid], i);
+
+        if(!IsValidVehicle(vehicleid)) continue;
+        
+        new Float:dist = GetVehicleDistanceFromPoint(vehicleid, x, y, z);
+
+        if(dist < min_dist_sq)
         {
-            new cell_x = center_x + off_x;
-            new cell_y = center_y + off_y;
-
-            if(cell_x < 0 || cell_x >= VEHICLE_REGION_GRID_SIZE || cell_y < 0 || cell_y >= VEHICLE_REGION_GRID_SIZE)
-                continue;
-
-            new region = (cell_y * VEHICLE_REGION_GRID_SIZE) + cell_x;
-            new count = linked_list_size(veh::RegionVehicles[region]);
-
-            for(new index = 0; index < count; index++)
-            {
-                new vehicleid = linked_list_get(veh::RegionVehicles[region], index);
-                if(!IsValidVehicle(vehicleid))
-                    continue;
-
-                new Float:veh_x, Float:veh_y, Float:veh_z;
-                GetVehiclePos(vehicleid, veh_x, veh_y, veh_z);
-
-                new Float:dx = veh_x - x;
-                new Float:dy = veh_y - y;
-                new Float:dz = veh_z - z;
-                new Float:dist_sq = (dx * dx) + (dy * dy) + (dz * dz);
-
-                if(dist_sq < min_dist_sq)
-                {
-                    min_dist_sq = dist_sq;
-                    closest_vehicle = vehicleid;
-                }
-            }
+            min_dist_sq = dist;
+            closest_vehicle = vehicleid;
         }
     }
 
     return closest_vehicle;
 }
 
-stock bool:IsVehicleOpened(vehicleid)
-    return (IsValidVehicle(vehicleid) && veh::IsOpen[vehicleid]);
-
-stock bool:IsVehicleClosed(vehicleid)
-    return (IsValidVehicle(vehicleid) && !veh::IsOpen[vehicleid]);
-
-stock Veh::Open(vehicleid)
+stock GetClosestVehicle(playerid, &Float:distance = 0.0)
 {
-    if(!IsValidVehicle(vehicleid))
-        return 0;
-
-    veh::IsOpen[vehicleid] = true;
-    return 1;
-}
-
-stock Veh::Close(vehicleid)
-{
-    if(!IsValidVehicle(vehicleid))
-        return 0;
-
-    veh::IsOpen[vehicleid] = false;
-    return 1;
-}
-
-hook OnGameModeInit()
-{
-    for(new row = 0; row < VEHICLE_REGION_GRID_SIZE; row++)
-    {
-        for(new col = 0; col < VEHICLE_REGION_GRID_SIZE; col++)
-        {
-            new region = (row * VEHICLE_REGION_GRID_SIZE) + col;
-
-            veh::RegionVehicles[region] = linked_list_new();
-
-            new Float:min_x = VEHICLE_WORLD_MIN + (float(col) * VEHICLE_REGION_SIZE);
-            new Float:min_y = VEHICLE_WORLD_MIN + (float(row) * VEHICLE_REGION_SIZE);
-            new Float:max_x = min_x + VEHICLE_REGION_SIZE;
-            new Float:max_y = min_y + VEHICLE_REGION_SIZE;
-
-            veh::RegionAreas[region] = CreateDynamicRectangle(min_x, min_y, max_x, max_y);
-        }
-    }
-
-    return 1;
-}
-
-hook OnGameModeExit()
-{
-    for(new region = 0; region < VEHICLE_REGION_COUNT; region++)
-    {
-        if(linked_list_valid(veh::RegionVehicles[region]))
-            linked_list_delete(veh::RegionVehicles[region]);
-
-        if(IsValidDynamicArea(veh::RegionAreas[region]))
-            DestroyDynamicArea(veh::RegionAreas[region]);
-    }
-
-    return 1;
-}
-
-hook function CreateVehicle(modelid, Float:x, Float:y, Float:z, Float:rotation, colour1, colour2, respawn_delay, bool:add_siren = false)
-{
-    new spawn_region = Vehicle::GetRegionFromXY(x, y);
-    new vehicleid = continue(modelid, x, y, z, rotation, colour1, colour2, respawn_delay, add_siren);
-
-    if(vehicleid != INVALID_VEHICLE_ID)
-    {
-        veh::IsOpen[vehicleid] = false;
-
-        if(spawn_region != INVALID_VEHICLE_REGION)
-            Vehicle::AddToRegion(vehicleid, spawn_region);
-    }
-
-    return vehicleid;
-}
-
-hook function DestroyVehicle(vehicleid)
-{
-    Vehicle::RemoveFromRegion(vehicleid);
-    veh::IsOpen[vehicleid] = false;
-    return continue(vehicleid);
-}
-
-hook OnPlayerEnterDynamicArea(playerid, STREAMER_TAG_AREA:areaid)
-{
-    if(!IsPlayerInAnyVehicle(playerid))
-        return 1;
-
-    new region = Vehicle::GetRegionByArea(areaid);
-    if(region == INVALID_VEHICLE_REGION)
-        return 1;
-
-    new vehicleid = GetPlayerVehicleID(playerid);
-    if(vehicleid == INVALID_VEHICLE_ID)
-        return 1;
-
-    Vehicle::AddToRegion(vehicleid, region);
-    return 1;
-}
-
-hook OnPlayerLeaveDynamicArea(playerid, STREAMER_TAG_AREA:areaid)
-{
-    if(!IsPlayerInAnyVehicle(playerid))
-        return 1;
-
-    new region = Vehicle::GetRegionByArea(areaid);
-    if(region == INVALID_VEHICLE_REGION)
-        return 1;
-
-    new vehicleid = GetPlayerVehicleID(playerid);
-    if(vehicleid == INVALID_VEHICLE_ID)
-        return 1;
-
-    if(veh::VehicleRegion[vehicleid] == region)
-        Vehicle::RemoveFromRegion(vehicleid, region);
-
-    Vehicle::UpdateRegionByPosition(vehicleid);
-    return 1;
+    new Float:pX, Float:pY, Float:pZ;
+    GetPlayerPos(playerid, pX, pY, pZ);
+    
+    return Veh::GetClosest(pX, pY, pZ, distance);
 }

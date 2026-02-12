@@ -1,4 +1,4 @@
-new const Float:gJailBounds[4] = { 845.668, -3326.000, 1066.149, -3094.155 };
+//new const Float:gJailBounds[4] = { 845.668, -3326.000, 1066.149, -3094.155 };
 
 forward OnJailFinish(playerid);
 

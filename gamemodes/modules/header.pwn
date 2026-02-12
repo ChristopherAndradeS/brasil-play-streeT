@@ -14,7 +14,7 @@
 #define adm::               adm_
 #define Garage::            GRG_
 #define grg::               grg_
-#define Vehicle::           VEH_
+#define Veh::               VEH_
 #define veh::               veh_
 #define Org::               ORG_ 
 #define org::               org_

@@ -102,7 +102,7 @@
     },
     "password": "",
     "pawn": {
-        "legacy_plugins": ["streamer", "PawnPlus"],
+        "legacy_plugins": ["streamer", "PawnPlus", "ColAndreas"],
         "main_scripts": [
             "main 1"
         ],

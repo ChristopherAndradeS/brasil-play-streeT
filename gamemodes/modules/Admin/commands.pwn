@@ -744,69 +744,119 @@ YCMD:remadm(playerid, params[], help)
     return 1;
 }
 
-// YCMD:criargps(playerid, params[], help)
-// {
-//     // Verifica se é Admin (Ajuste conforme seu sistema)
-//     if(Player[playerid][pAdmin] < 4) return SendClientMessage(playerid, -1, "Voce nao tem permissao.");
+YCMD:cgps(playerid, params[], help)
+{
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Cria uma localização no GPS Global.");
+        return 1;
+    }    
 
-//     new categoria[30], name[30];
-//     if(sscanf(params, "s[30]S[30]", categoria, name)) 
-//         return SendClientMessage(playerid, -1, "Use: /criargps [Categoria] [NomeLocal] (Ex: /criargps Garagens Detran)");
+    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER)) return 1;
 
-//     new Float:x, Float:y, Float:z;
-//     GetPlayerPos(playerid, x, y, z);
+    new name[32], category[32], msg[512], count = 1;
+    new DBResult:result = DB_ExecuteQuery(db_stock, "SELECT COUNT(DISTINCT category) FROM locations;");
 
-//     // 1. ADICIONA A CATEGORIA NA LISTA (SE NÃO EXISTIR)
-//     new File:fCat = fopen(ARQUIVO_CATS, io_read);
-//     new bool:existe = false;
-//     new string[128];
+    do
+    {
+        DB_GetFieldStringByName(result, "category", category);
+        format(msg, 512, "%s{ff5555}%d. {ffffff}%s\n", msg, count, category);
+        count++;
+    }
 
-//     // Verifica se a categoria já está escrita no arquivo mestre
-//     if(fCat)
-//     {
-//         while(fread(fCat, string))
-//         {
-//             // Remove a quebra de linha para comparar
-//             if(string[strlen(string)-2] == '\r') string[strlen(string)-2] = '\0';
-//             else if(string[strlen(string)-1] == '\n') string[strlen(string)-1] = '\0';
-            
-//             if(strcmp(string, categoria, true) == 0) existe = true;
-//         }
-//         fclose(fCat);
-//     }
+    while (DB_SelectNextRow(result));
 
-//     // Se não existe, escreve a nova categoria
-//     if(!existe)
-//     {
-//         fCat = fopen(ARQUIVO_CATS, io_append); // Modo Append (Adicionar no final)
-//         format(string, sizeof(string), "%s\r\n", categoria);
-//         fwrite(fCat, string);
-//         fclose(fCat);
-//     }
+    format(msg, 512, "%s{ff5555}%d. {ffffff}CRIAR CATEGORIA NOVA", msg, count);
 
-//     // 2. SALVA O LOCAL DENTRO DO ARQUIVO DA CATEGORIA
-//     // O arquivo terá o name da categoria. Ex: GPS/Garagens.txt
-//     new caminho[64];
-//     format(caminho, sizeof(caminho), "GPS/%s.txt", categoria);
+    inline create_gps_name_dialog(playerid1, dialogid, response, listitem, string:inputtext[])
+    {
+        #pragma unused playerid1, dialogid, listitem
+        if(!response) return 1;
 
-//     new File:fLoc = fopen(caminho, io_append);
-//     if(fLoc)
-//     {
-//         // Formato: Nome|X|Y|Z
-//         format(string, sizeof(string), "%s|%.2f|%.2f|%.2f\r\n", name, x, y, z);
-//         fwrite(fLoc, string);
-//         fclose(fLoc);
+        if(!isnull(inputtext)) 
+                return SendClientMessage(playerid, -1, "{ff3333}[ GPS ] {ffffff}Você deve inserir um nome válido");
 
-//         SendClientMessage(playerid, COLOR_SUCESS, "GPS: Local Criado com Sucesso!");
-//         format(string, sizeof(string), "Categoria: %s | Local: %s", categoria, name);
-//         SendClientMessage(playerid, -1, string);
-//     }
-//     else
-//     {
-//         SendClientMessage(playerid, -1, "ERRO: Falha ao criar arquivo. Verifique a pasta 'scriptfiles/GPS'.");
-//     }
-//     return 1;
-// }
+        if(sscanf(inputtext, "s[32]", name)) 
+            return SendClientMessage(playerid, -1, "{ff3333}[ GPS ] {ffffff}Você deve inserir um nome válido");
+
+        inline select_gps_cat_dialog(playerid2, dialogid2, response2, listitem2, string:inputtext2[])
+        {
+            #pragma unused playerid2, dialogid2, listitem2
+            if(!response2)
+            {
+                Dialog_ShowCallback(playerid, using inline create_gps_name_dialog, DIALOG_STYLE_INPUT, 
+                "{ff5555}>> {ffffff}Digite o nome do local que deseja criar no GPS global\n\
+                {ffff33}[ i ] {ffffff}Certifique-se de estar {ff3333}posicionado corretamente!", 
+                "Selecionar", "Voltar");
+                return 1;
+            }
+
+            new start = strfind(inputtext2, "f}", true);
+            printf("%s > %d", category, start);
+            strdel(category, start, strlen(category));
+
+            new admin[MAX_PLAYER_NAME];
+            GetPlayerName(playerid, admin);
+
+            if(!strcmp(category, "CRIAR CATEGORIA NOVA", true))
+            {
+                inline create_gps_cat_dialog(playerid3, dialogid3, response3, listitem3, string:inputtext3[]) 
+                {
+                    #pragma unused playerid3, dialogid3, listitem3
+                    if(!response3)
+                    {
+                        Dialog_ShowCallback(playerid, using inline select_gps_cat_dialog, DIALOG_STYLE_LIST, msg, "Selecionar", "Voltar");
+                        return 1;
+                    }
+
+                    if(!isnull(inputtext3)) 
+                        return SendClientMessage(playerid, -1, "{ff3333}[ GPS ] {ffffff}Você deve inserir um nome válido");
+
+                    if(sscanf(inputtext3, "s[32]", category)) 
+                        return SendClientMessage(playerid, -1, "{ff3333}[ GPS ] {ffffff}Você deve inserir um nome válido");
+
+                    Adm::CreateLocation(playerid, name, category, admin);
+                    return 1;
+                }
+
+                Dialog_ShowCallback(playerid, using inline create_gps_cat_dialog, DIALOG_STYLE_INPUT,
+                "{ff5555}>> {ffffff}Digite o nome da {ff5555}nova categoria:\n\n", "Criar", "Voltar");            
+            }
+
+            else
+                Adm::CreateLocation(playerid, name, category, admin);
+            return 1;
+        }
+        
+        return 1;
+    }
+    
+    Dialog_ShowCallback(playerid, using inline create_gps_name_dialog, DIALOG_STYLE_LIST,
+    "{ff5555}>> {ffffff}Digite o nome do local que deseja criar no GPS global\n\
+    {ffff33}[ i ] {ffffff}Certifique-se de estar {ff3333}posicionado corretamente!", 
+   "Avançar", "Voltar");
+
+    return 1;
+}
+
+stock Adm::CreateLocation(playerid, const name[], const category[], const admin[])
+{
+    if(DB::Exists(db_stock, "locations", "name, category", "name = '%q' AND category = '%q'", name, category))
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ GPS ] {ffffff}Esse o nome '%s', já existe na categoria \"%s\"", name, category);
+        return 1;
+    }
+
+    new Float:pX, Float:pY, Float:pZ;
+    GetPlayerPos(playerid, pX, pY, pZ);
+
+    DB::Insert(db_stock, "locations", "name, category, creator, pX, pY, pZ", "'%q', '%q', '%q', %f, %f, %f", 
+    name, category, admin, pX, pY, pZ);
+
+    printf("[ GPS ] O Admin %s criou uma nova localização: name: %s categoria: %s", admin, name, category);
+
+    return 1;
+}
 
 // YCMD:criarfac(playerid, params[], help)
 // {
