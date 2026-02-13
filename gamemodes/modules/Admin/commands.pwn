@@ -754,30 +754,34 @@ YCMD:cgps(playerid, params[], help)
 
     if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER)) return 1;
 
-    new name[32], category[32], msg[512], count = 1;
-    new DBResult:result = DB_ExecuteQuery(db_stock, "SELECT COUNT(DISTINCT category) FROM locations;");
-
-    do
-    {
-        DB_GetFieldStringByName(result, "category", category);
-        format(msg, 512, "%s{ff5555}%d. {ffffff}%s\n", msg, count, category);
-        count++;
-    }
-
-    while (DB_SelectNextRow(result));
-
-    format(msg, 512, "%s{ff5555}%d. {ffffff}CRIAR CATEGORIA NOVA", msg, count);
+    new name[32], category[32], msg[512];
 
     inline create_gps_name_dialog(playerid1, dialogid, response, listitem, string:inputtext[])
     {
         #pragma unused playerid1, dialogid, listitem
         if(!response) return 1;
 
-        if(!isnull(inputtext)) 
-                return SendClientMessage(playerid, -1, "{ff3333}[ GPS ] {ffffff}Você deve inserir um nome válido");
+        if(isnull(inputtext)) 
+            return SendClientMessage(playerid, -1, "{ff3333}[ GPS ] {ffffff}Você deve inserir um nome válido");
 
         if(sscanf(inputtext, "s[32]", name)) 
             return SendClientMessage(playerid, -1, "{ff3333}[ GPS ] {ffffff}Você deve inserir um nome válido");
+
+        new DBResult:result = DB_ExecuteQuery(db_stock, "SELECT DISTINCT category FROM locations ORDER BY category ASC;");
+
+        if(result)
+        {
+            do
+            {
+                DB_GetFieldStringByName(result, "category", category);
+                format(msg, sizeof(msg), "%s%s\n", msg, category);
+            }
+            while (DB_SelectNextRow(result));
+
+            DB_FreeResultSet(result);
+        }
+
+        format(msg, sizeof(msg), "%sCRIAR CATEGORIA NOVA", msg);
 
         inline select_gps_cat_dialog(playerid2, dialogid2, response2, listitem2, string:inputtext2[])
         {
@@ -786,14 +790,13 @@ YCMD:cgps(playerid, params[], help)
             {
                 Dialog_ShowCallback(playerid, using inline create_gps_name_dialog, DIALOG_STYLE_INPUT, 
                 "{ff5555}>> {ffffff}Digite o nome do local que deseja criar no GPS global\n\
-                {ffff33}[ i ] {ffffff}Certifique-se de estar {ff3333}posicionado corretamente!", 
-                "Selecionar", "Voltar");
+                {ffff33}[ i ] {ffffff}Certifique-se de estar {ff3333}posicionado corretamente!", "", 
+                "Avançar", "Voltar");
                 return 1;
             }
 
-            new start = strfind(inputtext2, "f}", true);
-            printf("%s > %d", category, start);
-            strdel(category, start, strlen(category));
+            if(sscanf(inputtext2, "s[32]", category))
+                return SendClientMessage(playerid, -1, "{ff3333}[ GPS ] {ffffff}Você deve selecionar uma categoria válida");
 
             new admin[MAX_PLAYER_NAME];
             GetPlayerName(playerid, admin);
@@ -805,11 +808,11 @@ YCMD:cgps(playerid, params[], help)
                     #pragma unused playerid3, dialogid3, listitem3
                     if(!response3)
                     {
-                        Dialog_ShowCallback(playerid, using inline select_gps_cat_dialog, DIALOG_STYLE_LIST, msg, "Selecionar", "Voltar");
+                        Dialog_ShowCallback(playerid, using inline select_gps_cat_dialog, DIALOG_STYLE_LIST, "{00FF00}GPS - Escolha a Categoria", msg, "Selecionar", "Voltar");
                         return 1;
                     }
 
-                    if(!isnull(inputtext3)) 
+                    if(isnull(inputtext3)) 
                         return SendClientMessage(playerid, -1, "{ff3333}[ GPS ] {ffffff}Você deve inserir um nome válido");
 
                     if(sscanf(inputtext3, "s[32]", category)) 
@@ -820,21 +823,24 @@ YCMD:cgps(playerid, params[], help)
                 }
 
                 Dialog_ShowCallback(playerid, using inline create_gps_cat_dialog, DIALOG_STYLE_INPUT,
-                "{ff5555}>> {ffffff}Digite o nome da {ff5555}nova categoria:\n\n", "Criar", "Voltar");            
+                "{ff5555}>> {ffffff}Digite o nome da {ff5555}nova categoria:\n\n", "", "Criar", "Voltar");            
             }
 
             else
                 Adm::CreateLocation(playerid, name, category, admin);
             return 1;
         }
+
+        Dialog_ShowCallback(playerid, using inline select_gps_cat_dialog, DIALOG_STYLE_LIST,
+        "{00FF00}GPS - Escolha a Categoria", msg, "Selecionar", "Voltar");
         
         return 1;
     }
     
-    Dialog_ShowCallback(playerid, using inline create_gps_name_dialog, DIALOG_STYLE_LIST,
+    Dialog_ShowCallback(playerid, using inline create_gps_name_dialog, DIALOG_STYLE_INPUT,
     "{ff5555}>> {ffffff}Digite o nome do local que deseja criar no GPS global\n\
-    {ffff33}[ i ] {ffffff}Certifique-se de estar {ff3333}posicionado corretamente!", 
-   "Avançar", "Voltar");
+    {ffff33}[ i ] {ffffff}Certifique-se de estar {ff3333}posicionado corretamente!", "", 
+    "Avançar", "Voltar");
 
     return 1;
 }
