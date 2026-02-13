@@ -60,7 +60,7 @@ hook OnPlayerDisconnect(playerid, reason)
     /* JOGADOR É VÁLIDO / LOGOU / ESTÁ PRESO */
     if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL))
     {
-        if(DB::Exists(db_entity, "punishments", "name, level", "name = '%q' AND level = 1", name))
+        if(DB::Exists(db_entity, "punishments", "name = '%q' AND level = 1", name))
         {
             new left_time = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_JAIL]);
             DB::SetDataInt(db_entity, "punishments", "left_tstamp", left_time, "name = '%q' AND level = 1", name);

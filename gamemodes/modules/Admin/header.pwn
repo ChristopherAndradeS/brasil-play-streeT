@@ -91,7 +91,7 @@ stock Adm::GetColorString(level)
 
 stock Adm::Exists(const name[], &level = INVALID_ADM_LEVEL)
 {
-    if(DB::Exists(db_entity, "admins", "name", "name = '%q'", name))
+    if(DB::Exists(db_entity, "admins", "name = '%q'", name))
         return DB::GetDataInt(db_entity, "admins", "level", level, "name = '%q'", name);
     
     level = INVALID_ADM_LEVEL;

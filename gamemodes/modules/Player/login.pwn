@@ -148,7 +148,7 @@ stock Login::SetPlayer(playerid)
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 
-    if(!DB::Exists(db_entity, "players", "name", "name = '%q'", name))
+    if(!DB::Exists(db_entity, "players", "name = '%q'", name))
     {
         SendClientMessage(playerid, COLOR_THEME_BPS, "[ BPS ] {ffffff}Parece que voce e {33ff33}novo aqui!{ffffff}, faca o registro para poder jogar!");
         SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_IN_REGISTER);

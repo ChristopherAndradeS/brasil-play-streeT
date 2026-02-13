@@ -4,8 +4,10 @@ stock Veh::UpdatePTDBar(playerid, textid, Float:barsize, Float:percent)
 	PlayerTextDrawShow(playerid, Veh::PlayerTD[playerid][textid]); 
 }
 
-stock Veh::UpdateTextDraw(playerid, targetid)
+stock Veh::UpdateTextDrawColor(playerid, textid, color)
 {
+	PlayerTextDrawColour(playerid, Veh::PlayerTD[playerid][textid], color);
+	PlayerTextDrawShow(playerid, Veh::PlayerTD[playerid][textid]); 
     return 1;
 }
 
@@ -29,7 +31,8 @@ stock Veh::ShowTDForPlayer(playerid)
     new vehicleid = GetPlayerVehicleID(playerid), vehname[64];
     GetVehicleNameByModel(GetVehicleModel(vehicleid), vehname);
     Veh::UpdateTDForPlayer(playerid, PTD_VEH_TXT_SPEED, "0");
-    Veh::UpdateTDForPlayer(playerid, PTD_VEH_TXT_NAME, "Veiculo: ~g~~h~%s", vehname);
+    Veh::UpdateTDForPlayer(playerid, PTD_VEH_TXT_NAME, "Veiculo: ~g~~h~~h~%s", vehname);
+	Veh::UpdatePTDBar(playerid, PTD_VEH_BAR_FUEL, 100.0, 100.0);
 }
 
 stock Veh::HideTDForPlayer(playerid)
@@ -81,8 +84,8 @@ stock Veh::CreatePublicTD()
 	TextDrawSetProportional(Veh::PublicTD[1], true);
 	TextDrawSetSelectable(Veh::PublicTD[1], false);
 
-	Veh::PublicTD[2] = TextDrawCreate(215.000000, 444.000000, "ld_dual:white");
-	TextDrawFont(Veh::PublicTD[2], TEXT_DRAW_FONT:4);
+	Veh::PublicTD[2] = TextDrawCreate(215.000000, 444.000000, "");//"ld_dual:white");
+	TextDrawFont(Veh::PublicTD[2], TEXT_DRAW_FONT:1);
 	TextDrawLetterSize(Veh::PublicTD[2], 0.600000, 2.000000);
 	TextDrawTextSize(Veh::PublicTD[2], 210.000000, 4.000000);
 	TextDrawSetOutline(Veh::PublicTD[2], true);
@@ -448,7 +451,7 @@ stock Veh::CreatePlayerTD(playerid)
 	PlayerTextDrawSetProportional(playerid, Veh::PlayerTD[playerid][16], true);
 	PlayerTextDrawSetSelectable(playerid, Veh::PlayerTD[playerid][16], false);
 
-	Veh::PlayerTD[playerid][17] = CreatePlayerTextDraw(playerid, 343.000000, 391.000000, "<VEHICLE_NAME>");
+	Veh::PlayerTD[playerid][17] = CreatePlayerTextDraw(playerid, 343.000000, 387.500000, "<VEHICLE_NAME>");
 	PlayerTextDrawFont(playerid, Veh::PlayerTD[playerid][17], TEXT_DRAW_FONT:2);
 	PlayerTextDrawLetterSize(playerid, Veh::PlayerTD[playerid][17], 0.200000, 1.200000);
 	PlayerTextDrawTextSize(playerid, Veh::PlayerTD[playerid][17], 400.000000, 145.500000);

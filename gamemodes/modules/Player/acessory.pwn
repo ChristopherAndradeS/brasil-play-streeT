@@ -55,7 +55,7 @@ hook OnPlayerSpawn(playerid)
     GetPlayerName(playerid, name);
 
     for(new i = 0; i < MAX_PLAYER_ACESSORYS; i++)
-        if(DB::Exists(db_entity, "acessorys", "owner, slotid, flags", "owner = '%q' AND slotid = %d AND flags = 1", name, i))
+        if(DB::Exists(db_entity, "acessorys", "owner = '%q' AND slotid = %d AND flags = 1", name, i))
             Acessory::LoadOnPlayer(playerid, i);
 
     return 1;
@@ -67,7 +67,7 @@ hook OnPlayerDisconnect(playerid, reason)
     GetPlayerName(playerid, name);
 
     for(new i = 0; i < MAX_PLAYER_ACESSORYS; i++)
-        if(DB::Exists(db_entity, "acessorys", "owner, slotid", "owner = '%q' AND slotid = %d", name, i))
+        if(DB::Exists(db_entity, "acessorys", "owner = '%q' AND slotid = %d", name, i))
             DB::SetDataInt(db_entity, "acessorys", "flags", IsPlayerAttachedObjectSlotUsed(playerid, i), 
             "owner = '%q' AND slotid = %d", name, i);
     
@@ -510,7 +510,7 @@ public Response_ACC_MENU(playerid, dialogid, response, listitem, string:inputtex
 
     if((listitem + 1) <= MAX_PLAYER_ACESSORYS)
     {              
-        if(!DB::Exists(db_entity, "acessorys", "owner, slotid", "owner = '%q' AND slotid = %d", name, listitem))
+        if(!DB::Exists(db_entity, "acessorys", "owner = '%q' AND slotid = %d", name, listitem))
         {
             Response_ACC_MENU(playerid, dialogid, response, MAX_PLAYER_ACESSORYS, inputtext);
             return 1;
@@ -552,7 +552,7 @@ public Response_ACC_MENU(playerid, dialogid, response, listitem, string:inputtex
         
         for(new i = 1; i <= MAX_STOCK_ACESSORYS; i++)
         {  
-            if(DB::Exists(db_stock, "acessorys", "uid", "uid = %d", i))
+            if(DB::Exists(db_stock, "acessorys", "uid = %d", i))
             {
 
                 DB::GetDataString(db_stock, "acessorys", "name", acs_name, 64, "uid = %d", i);
@@ -726,7 +726,7 @@ stock Acessory::GetFreeSlot(playerid)
     GetPlayerName(playerid, name);
 
     for(new i = 0; i < MAX_PLAYER_ACESSORYS; i++)
-        if(!DB::Exists(db_entity, "acessorys", "owner, slotid", "owner = '%q' AND slotid = %d", name, i))
+        if(!DB::Exists(db_entity, "acessorys", "owner = '%q' AND slotid = %d", name, i))
             return i;
     
     return -1;
@@ -737,7 +737,7 @@ stock Acessory::SaveData(playerid, slotid)
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 
-    if(!DB::Exists(db_entity, "acessorys", "owner, slotid", "owner = '%q' AND slotid = %d", name, slotid))
+    if(!DB::Exists(db_entity, "acessorys", "owner = '%q' AND slotid = %d", name, slotid))
         return 0;
 
     if(!IsPlayerAttachedObjectSlotUsed(playerid, slotid))
@@ -953,7 +953,7 @@ YCMD:acessorios(playerid, params[], help)
 
     for(new i = 0; i < MAX_PLAYER_ACESSORYS; i++)
     {
-        if(DB::Exists(db_entity, "acessorys", "owner, slotid", "owner = '%q' AND slotid = %d", name, i))
+        if(DB::Exists(db_entity, "acessorys", "owner = '%q' AND slotid = %d", name, i))
         {
             DB::GetDataInt(db_entity, "acessorys", "modelid", modelid, "owner = '%q' AND slotid = %d", name, i);
 

@@ -673,7 +673,7 @@ YCMD:desban(playerid, params[], help)
 
     if(!Adm::IsValidTargetName(playerid, admin_name, name)) return 1;
     
-    if(!DB::Exists(db_entity, "punishments", "name", "name = '%q' AND level = 2", name))
+    if(!DB::Exists(db_entity, "punishments", "name = '%q' AND level = 2", name))
     {
         SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Não foi possível desbanir o jogador {ff3333}%s{ffffff}, pois ele não está banido!", name);
         return 1;
@@ -849,7 +849,7 @@ YCMD:cgps(playerid, params[], help)
 
 stock Adm::CreateLocation(playerid, const name[], const category[], const admin[])
 {
-    if(DB::Exists(db_stock, "locations", "name, category", "name = '%q' AND category = '%q'", name, category))
+    if(DB::Exists(db_stock, "locations", "name = '%q' AND category = '%q'", name, category))
     {
         SendClientMessage(playerid, -1, "{ff3333}[ GPS ] {ffffff}Esse o nome '%s', já existe na categoria \"%s\"", name, category);
         return 1;

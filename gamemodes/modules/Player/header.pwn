@@ -313,7 +313,7 @@ stock Player::Spawn(playerid)
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 
-    if(!DB::Exists(db_entity, "players", "name", "name = '%q'", name))
+    if(!DB::Exists(db_entity, "players", "name = '%q'", name))
     {
         SendClientMessage(playerid, -1, "{ff3333}[ ERRO FATAL ] {ffffff}Sua conta {ff3333}nao esta registrada {ffffff}houve um erro grave ao spawnar, avise um {ff3333}moderador!");
         Kick(playerid);

@@ -1,7 +1,3 @@
-// =============================================================================
-//       BRASIL PLAY STREET (BPS) - VERSÃO HÍBRIDA (MySQL + DOF2)
-//       DC (DISCORD) @Koongg444 Wpp (WhatsApp) 81985089075
-// =============================================================================
 #include <a_samp>
 #include <DOF2>
 #include <zcmd>
@@ -11,7 +7,6 @@
 
 new MySQL:Conexao;
 
-// --- LIMITES ---
 #define MAX_GARAGES     30
 #define MAX_PLAYER_VEHICLES 10
 #define MAX_ORGS        30
@@ -22,7 +17,6 @@ new MySQL:Conexao;
 #define MAX_VEHICLE_SLOTS 3
 #define MAX_CARROS_CONCE 50
 
-// --- IDs DE DIALOGS ---
 #define DIALOG_CMDS 3
 #define DIALOG_ORGS 4
 #define DIALOG_PIX_ID 10
@@ -39,7 +33,6 @@ new MySQL:Conexao;
 #define DIALOG_GPS_LOC 7702
 #define ITEM_DINHEIRO_SUJO 4
 
-// --- CAMINHOS DE ARQUIVOS (DOF2) ---
 #define PASTA_GARAGENS    "Garagens/Gar_%d.ini"
 #define PASTA_VEICULOS    "Veiculos/%s.ini"
 #define ARQUIVO_CATS      "GPS/Categorias.txt"
@@ -64,7 +57,6 @@ new bool:Trabalhando[MAX_PLAYERS];
 new InviteOrg[MAX_PLAYERS];
 new TempGPS_Categoria[MAX_PLAYERS][64];
 new CheckpointAtivo[MAX_PLAYERS];
-new TimerVelocimetro;
 new PixDestino[MAX_PLAYERS];
 new bool:InvAberto[MAX_PLAYERS];
 new InvItem[MAX_PLAYERS][MAX_INV_SLOTS];
@@ -151,7 +143,6 @@ forward cmd_mochila(playerid, params[]);
 forward cmd_celular(playerid, params[]);
 forward cmd_tuning(playerid, params[]);
 forward cmd_malas(playerid, params[]);
-forward AtualizarVelocimetroGlobal();
 forward AnimarLockPick(playerid);
 forward OnDebugSalvar(playerid, slot);
 forward OnAbrirLojaMySQL(playerid);
@@ -254,8 +245,6 @@ public OnGameModeInit()
             GarageLabel[i] = Create3DTextLabel("{00BFFF}[ GARAGEM PUBLIC ]\n{FFFFFF}Aperte 'H' ou /garagem", 0xFFFFFFFF, GarageInfo[i][gX], GarageInfo[i][gY], GarageInfo[i][gZ], 20.0, 0, 0);
         }
     }
-
-    TimerVelocimetro = SetTimer("AtualizarVelocimetroGlobal", 200, true);
 
     for(new i=0; i < MAX_DESMANCHES; i++)
     {
@@ -2250,55 +2239,6 @@ stock AddItemMochila(playerid, itemid, quantidade)
         }
     }
     return 0; // Mochila cheia
-}
-
-// Função para pegar a velocidade em KM/H
-stock GetVehicleSpeed(vehicleid)
-{
-    new Float:x, Float:y, Float:z;
-    GetVehicleVelocity(vehicleid, x, y, z);
-    return floatround(floatsqroot(x*x + y*y + z*z) * 180.0); // *180 aprox para KM/H
-}
-
-forward AtualizarVelocimetroGlobal();
-public AtualizarVelocimetroGlobal()
-{
-    for(new i=0; i < MAX_PLAYERS; i++)
-    {
-        if(IsPlayerConnected(i) && IsPlayerInAnyVehicle(i))
-        {
-            new veiculo = GetPlayerVehicleID(i);
-            new vel = GetVehicleSpeed(veiculo);
-            new Float:vida;
-            GetVehicleHealth(veiculo, vida);
-            
-            // ATUALIZA NOME (Opcional, se quiser tirar pra ficar mais leve pode)
-            // PlayerTextDrawSetString(i, TD_Velocimetro[i][0], GetVehicleName(veiculo));
-
-            // ATUALIZA VELOCIDADE (ID 1)
-            new strVel[10];
-            format(strVel, sizeof(strVel), "%d", vel);
-            PlayerTextDrawSetString(i, TD_Velocimetro[i][1], strVel);
-            
-            // ATUALIZA BARRA DE VIDA (ID 3)
-            // A barra começa no X=270. O tamanho total é 100.
-            new Float:tamanhoBarra = (vida - 250.0) / 7.5; 
-            if(tamanhoBarra < 0) tamanhoBarra = 0;
-            if(tamanhoBarra > 100) tamanhoBarra = 100.0;
-            
-            // 270.0 é o ponto inicial da esquerda. Somamos a vida para crescer p/ direita.
-            PlayerTextDrawTextSize(i, TD_Velocimetro[i][3], 270.0 + tamanhoBarra, 0.0);
-            
-            // Muda cor
-            if(vida > 700) PlayerTextDrawBoxColor(i, TD_Velocimetro[i][3], 0x00FF00FF); // Verde
-            else if(vida > 400) PlayerTextDrawBoxColor(i, TD_Velocimetro[i][3], 0xFFFF00FF); // Amarelo
-            else PlayerTextDrawBoxColor(i, TD_Velocimetro[i][3], 0xFF0000FF); // Vermelho
-            
-            PlayerTextDrawShow(i, TD_Velocimetro[i][1]); // Atualiza numero
-            PlayerTextDrawShow(i, TD_Velocimetro[i][3]); // Atualiza barra
-        }
-    }
-    return 1;
 }
 
 // --- CRIA O VISUAL DO MINIGAME ---

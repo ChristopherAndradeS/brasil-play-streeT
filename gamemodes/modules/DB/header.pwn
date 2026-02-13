@@ -21,35 +21,35 @@ stock DB::CreateTable(DB:db, const table[], const definition[])
     return 1;
 }
 
-stock DB::GetCount(DB:db, const table[], const field[], const where[], OPEN_MP_TAGS:...)
+stock DB::GetCount(DB:db, const table[], const where[], OPEN_MP_TAGS:...)
 {
     new DBResult:result;
 
     if(isnull(where))
     {
-        result = DB_ExecuteQuery(db, "SELECT %q FROM %q", field, table);
+        result = DB_ExecuteQuery(db, "SELECT COUNT(*) FROM %q", table);
     }
 
     else
     {
         new str[128];
-        va_format(str, 128, where, ___(4));
-        result = DB_ExecuteQuery(db, "SELECT %q FROM %q WHERE %s;", field, table, str);
-        //printf("SELECT %q FROM %q WHERE %s;", field, table, str);
+        va_format(str, 128, where, ___(3));
+        result = DB_ExecuteQuery(db, "SELECT COUNT(*) FROM %q WHERE %s;", table, str);
+        //printf("SELECT COUNT(*) FROM %q WHERE %s;", table, str);
     }
 
     if(!result)
         return 0;
     
-    new count = DB_GetRowCount(result);
+    new count = DB_GetFieldInt(result);
 
     DB_FreeResultSet(result);
 
     return count;
 }
 
-stock DB::Exists(DB:db, const table[], const field[], const where[] = "", OPEN_MP_TAGS:...)
-    return (DB::GetCount(db, table, field, where, ___(4)) >= 1);
+stock DB::Exists(DB:db, const table[], const where[] = "", OPEN_MP_TAGS:...)
+    return (DB::GetCount(db, table, where, ___(3)) >= 1);
 
 stock DB::Insert(DB:db, const table[], const fields[], const values[], OPEN_MP_TAGS:...)
 {

@@ -15,7 +15,7 @@ stock Punish::VerifyPlayer(playerid)
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
     
-    if(DB::Exists(db_entity, "punishments", "name", "name = '%q' AND level = 2", name))
+    if(DB::Exists(db_entity, "punishments", "name = '%q' AND level = 2", name))
     {
         new left_time;
 
@@ -69,7 +69,7 @@ stock Punish::VerifyPlayer(playerid)
         return 0;
     }
 
-    else if(DB::Exists(db_entity, "punishments", "name", "name = '%q' AND level = 1", name))
+    else if(DB::Exists(db_entity, "punishments", "name = '%q' AND level = 1", name))
     {
         new left_time;
 
@@ -134,9 +134,9 @@ stock Punish::SendPlayerToJail(playerid, time)
 
 stock Punish::SetJail(const name[], const admin[], const reason[], time)
 {
-    if(!DB::Exists(db_entity, "players", "name", "name = '%q'", name)) return 0;
+    if(!DB::Exists(db_entity, "players", "name = '%q'", name)) return 0;
     
-    if(DB::Exists(db_entity, "punishments", "name, level", "name = '%q' AND level = 1", name))
+    if(DB::Exists(db_entity, "punishments", "name = '%q' AND level = 1", name))
     {
         new t_left;
 
@@ -170,7 +170,7 @@ stock Punish::SetJail(const name[], const admin[], const reason[], time)
 
 stock Punish::SetBan(const admin[], const name[], days, const reason[])
 {    
-    if(DB::Exists(db_entity, "punishments", "name, level", "name = '%q' AND level = 2", name))
+    if(DB::Exists(db_entity, "punishments", "name = '%q' AND level = 2", name))
     {
         new date_left;
 
@@ -202,7 +202,7 @@ stock Punish::SetBan(const admin[], const name[], days, const reason[])
 
     else
     {
-        if(!DB::Exists(db_entity, "players", "name", "name = '%q'", name)) return 0;
+        if(!DB::Exists(db_entity, "players", "name = '%q'", name)) return 0;
 
         new ip[16], date[64], time = (days * 86400) + gettime();
 
@@ -221,7 +221,7 @@ stock Punish::SetBan(const admin[], const name[], days, const reason[])
 
 stock Punish::SetPermaban(const admin[], const name[], const reason[])
 {
-    if(DB::Exists(db_entity, "punishments", "name, level", "name = '%q' AND level = 2", name))
+    if(DB::Exists(db_entity, "punishments", "name = '%q' AND level = 2", name))
     {
         new date_left;
 
@@ -239,7 +239,7 @@ stock Punish::SetPermaban(const admin[], const name[], const reason[])
 
     else
     {
-        if(!DB::Exists(db_entity, "players", "name", "name = '%q'", name)) return 0;
+        if(!DB::Exists(db_entity, "players", "name = '%q'", name)) return 0;
 
         new ip[16];
 

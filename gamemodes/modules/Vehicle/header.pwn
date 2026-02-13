@@ -11,7 +11,7 @@ new STREAMER_TAG_AREA:veh::gAreas[REGION_COUNT];
 
 enum (<<= 1)
 {
-    FLAG_VEH_OPENED = 1,
+    FLAG_VEH_IS_DEAD = 1,
 }
 
 enum (<<= 1)
@@ -30,6 +30,7 @@ enum E_VEHICLES
     veh::regionid,
     veh::flags,
     veh::params,
+    Float:veh::health,
     Float:veh::oX, Float:veh::oY, Float:veh::oZ,
     STREAMER_TAG_3D_TEXT_LABEL:veh::tex3did
 }

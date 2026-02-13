@@ -16,6 +16,7 @@ new Server[E_SERVER];
 
 enum E_SERVER_TIMER
 {
+    srv::TIMER_ON_UPDATE_MILIS,
     srv::TIMER_ON_UPDATE_SEC,
     srv::TIMER_ON_UPDATE_MIN,
     srv::TIMER_COUNT_DOWN

@@ -109,9 +109,9 @@ enum _:E_PTD_ADMIN
 
 enum _:E_PTD_VEH
 {
-    PlayerText:PTD_VEH_BAR_LIFE,
-    PlayerText:PTD_VEH_TXT_SPEED,
     PlayerText:PTD_VEH_BAR_FUEL,
+    PlayerText:PTD_VEH_TXT_SPEED,
+    PlayerText:PTD_VEH_BAR_HEALTH,
     PlayerText:PTD_VEH_BAR_ARMOUR,
     PlayerText:PTD_VEH_FIRST_DOT = 4,
     PlayerText:PTD_VEH_LAST_DOT  = 16,

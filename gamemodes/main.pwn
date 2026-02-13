@@ -63,7 +63,10 @@
 /*                          VEHICLE                        */
 #include "../gamemodes/modules/Vehicle/commands.pwn"
 
-main() {}
+main() 
+{
+
+}
 
 public OnGameModeInit()
 {
@@ -198,6 +201,8 @@ YCMD:veh(playerid, params[], help)
     new vehicleid = CreateVehicle(modelid, pX, pY, pZ, 0.0, RandomMinMax(0, 10), RandomMinMax(0, 10), -1);
     PutPlayerInVehicle(playerid, vehicleid, 0);
 
+    LinkVehicleToInterior(vehicleid, GetPlayerInterior(playerid));
+
     new regionid = Vehicle[vehicleid][veh::regionid];
 
     new count = linked_list_size(veh::gRegion[regionid]);
@@ -210,42 +215,10 @@ YCMD:veh(playerid, params[], help)
     return 1;
 }
 
-YCMD:close(playerid, params[], help)
+YCMD:teste(playerid, params[], help)
 {
-    new Float:pX, Float:pY, Float:pZ, Float:dist;
-    GetPlayerPos(playerid, pX, pY, pZ);
-    new vehicleid = Veh::GetClosest(pX, pY, pZ, dist);
-    GetVehiclePos(vehicleid, pX, pY, pZ);
-    
-    if(dist != FLOAT_INFINITY)
-    {
-        SetPlayerCheckpoint(playerid, pX, pY, pZ, 5.0);
-        SendClientMessage(playerid, 0xFF33FF33, "Veiculo mais proximo a voce: %.2f unidades de distancia", dist);
-    }
-
+    SetPlayerPos(playerid, -1403.0116, -250.4526, 1043.5341);
+    SetPlayerInterior(playerid, 7);
+    PlayerPlaySound(playerid, 1);
     return 1;
 }
-
-
-// YCMD:teste(playerid, params[], help)
-// {
-//     for(new PlayerText:i = PlayerText:0; i < MAX_PLAYER_TEXT_DRAWS; i++)
-//     {
-//         if(IsValidPlayerTextDraw(playerid, i))
-//         {
-//             printf("PlayerTextDraw %d is valid", i);
-//             //PlayerTextDrawShow(playerid, i);
-//         }
-//     }
-
-//     for(new Text:i = Text:0; i < MAX_TEXT_DRAWS; i++)
-//     {
-//         if(IsValidTextDraw(i))
-//         {
-//             printf("TextDraw %d is valid", i);
-//             //PlayerTextDrawShow(playerid, i);
-//         }
-//     }
-
-//     return 1;
-// }

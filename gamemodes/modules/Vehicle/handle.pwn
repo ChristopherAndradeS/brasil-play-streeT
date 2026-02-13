@@ -51,11 +51,29 @@ hook OnPlayerStateChange(playerid, PLAYER_STATE:newstate, PLAYER_STATE:oldstate)
     {
         Veh::HideTDForPlayer(playerid);
         Baseboard::ShowTDForPlayer(playerid);
-
         Player::KillTimer(playerid, pyr::TIMER_SPEEDOMETER);
     }
 
     return 1;
+}
+
+hook OnVehicleHealthChance(vehicleid, Float:new_health, Float:old_health)
+{
+    if((!IsFlagSet(Vehicle[vehicleid][veh::flags], FLAG_VEH_IS_DEAD)) && new_health <= 250.0)
+    {
+        SetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_IS_DEAD);
+        
+        Veh::UpdateParams(vehicleid, FLAG_PARAM_ENGINE, 0);
+
+        SetVehicleHealth(vehicleid, 390);
+        SetVehicleVelocity(vehicleid, 0.0, 0.0, 0.0);
+
+        foreach (new i : VehicleOccupant[vehicleid])
+        {
+            SendClientMessage(i, -1, "{ff9933}[ ! ] {ffffff}Este veículo está quebrado! Chame um mecânico");
+            RemovePlayerFromVehicle(i);
+        }
+    }
 }
 
 public OnSpeedOMeterUpdate(playerid)
@@ -64,9 +82,36 @@ public OnSpeedOMeterUpdate(playerid)
 
     new vehicleid = GetPlayerVehicleID(playerid);
 
-    new speed = GetVehicleSpeed(vehicleid);
+    if(IsFlagSet(Vehicle[vehicleid][veh::flags], FLAG_VEH_IS_DEAD))
+    {
+        Player::KillTimer(playerid, pyr::TIMER_SPEEDOMETER);
+        return 1;
+    }
+
+    new 
+        speed = GetVehicleSpeed(vehicleid),
+        Float:health
+    ; 
+
+    new fully_dots = floatround(speed / 20) + PTD_VEH_FIRST_DOT;
+
+    if(fully_dots > PTD_VEH_LAST_DOT) fully_dots = PTD_VEH_LAST_DOT;
+
+    for(new i = PTD_VEH_FIRST_DOT; i < fully_dots; i++)
+        Veh::UpdateTextDrawColor(playerid, i, -1);
     
+    new color_level = clamp(floatround((speed % 20) * 13.42), 0, 255);
+    Veh::UpdateTextDrawColor(playerid, fully_dots, (color_level * 0x01010100) | 0xFF);
+
+    for(new i = fully_dots + 1; i <= PTD_VEH_LAST_DOT; i++)
+        Veh::UpdateTextDrawColor(playerid, i, 0 | 0xFF);
+    
+    GetVehicleHealth(vehicleid, health);
+
+    Veh::UpdatePTDBar(playerid, PTD_VEH_BAR_HEALTH, 100.0, floatclamp(health - 250.0, 0.0, 750.0)/7.5);
+    Veh::UpdatePTDBar(playerid, PTD_VEH_BAR_ARMOUR, 100.0, floatclamp(health - 1000.0, 0.0, 1000.0)/10.0);
     Veh::UpdateTDForPlayer(playerid, PTD_VEH_TXT_SPEED, "%d", speed);
+
     return 1;
 }
 
@@ -88,11 +133,17 @@ stock GetVehicleSpeed(vehicleid)
 
 hook OnPlayerKeyStateChange(playerid, KEY:newkeys, KEY:oldkeys)
 {
-    if(newkeys == KEY_CTRL_BACK)
+    if(newkeys == KEY_NO)
     {
         if(!IsPlayerInAnyVehicle(playerid)) return 1;
         
         new vehicleid = GetPlayerVehicleID(playerid);
+
+        if(IsFlagSet(Vehicle[vehicleid][veh::flags], FLAG_VEH_IS_DEAD))
+        {
+            SendClientMessage(playerid, -1, "{ff9933}[ ! ] {ffffff}Este veículo está quebrado! Chame um mecânico");
+            return 1;
+        }
 
         if(GetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_ENGINE))
         {
@@ -184,7 +235,7 @@ hook function CreateVehicle(modelid, Float:x, Float:y, Float:z, Float:rotation, 
         if(regionid != INVALID_REGION_ID) 
             Veh::AddToRegion(vehicleid, regionid);
 
-        SetVehicleParamsEx(vehicleid, 1, 0, 0, 1, 0, 0, 0);
+        SetVehicleParamsEx(vehicleid, 0, 0, 0, 1, 0, 0, 0);
         SetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_DOORS);
         ResetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_ENGINE);
         ResetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_LIGHTS);
