@@ -2,29 +2,32 @@
 
 YCMD:trancar(playerid, params[], help)
 {
-    new vehicleid = GetClosestVehicle(playerid, _);
+    new Float:distance;
+    new vehicleid = GetClosestVehicle(playerid, distance);
     
-    if(vehicleid == INVALID_VEHICLE_ID) 
+    if(vehicleid == INVALID_VEHICLE_ID || distance > 2.0) 
         return SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Chegue perto de um veiculo!");
 
     Veh::UpdateParams(vehicleid, FLAG_PARAM_DOORS, 1);
     
     GameTextForPlayer(playerid, "~r~~h~Trancado", 2000, 3);
-    PlayerPlaySound(playerid, 1145, 0.0, 0.0, 0.0);
+    PlayerPlaySound(playerid, 21001, 0.0, 0.0, 0.0);
 
     return 1;
 }
 
 YCMD:abrir(playerid, params[], help)
 {
-    new vehicleid = GetClosestVehicle(playerid, _);
-    if(vehicleid == INVALID_VEHICLE_ID) 
+    new Float:distance;
+    new vehicleid = GetClosestVehicle(playerid, distance);
+
+    if(vehicleid == INVALID_VEHICLE_ID || distance > 2.0) 
         return SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Chegue perto de um veiculo!");
 
     Veh::UpdateParams(vehicleid, FLAG_PARAM_DOORS, 0);
     
     GameTextForPlayer(playerid, "~g~~h~Aberto", 2000, 3);
-    PlayerPlaySound(playerid, 1145, 0.0, 0.0, 0.0);
+    PlayerPlaySound(playerid, 21000, 0.0, 0.0, 0.0);
 
     return 1;
 }
@@ -33,9 +36,11 @@ YCMD:gps(playerid, params[], help)
 {
     new category[32], name[32], msg[512];
 
-    new DBResult:result = DB_ExecuteQuery(db_stock, "SELECT DISTINCT category FROM locations ORDER BY category ASC;");
-    if(!result)
+    new DBResult:result = DB_ExecuteQuery(db_stock, "SELECT EXISTS (SELECT 1 FROM locations LIMIT 1);");
+    if(!DB_GetFieldInt(result))
         return SendClientMessage(playerid, -1, "{ff3333}[ GPS ] {ffffff}O GPS está desativado no momento!");
+
+    result = DB_ExecuteQuery(db_stock, "SELECT category FROM locations GROUP BY category ORDER BY category ASC;");
 
     do
     {
@@ -55,19 +60,19 @@ YCMD:gps(playerid, params[], help)
             return SendClientMessage(playerid, -1, "{ff3333}[ GPS ] {ffffff}Você deve selecionar uma categoria válida");
 
         new msg_name[512];
-        new DBResult:result_name = DB_ExecuteQuery(db_stock, "SELECT name FROM locations WHERE category = '%q' ORDER BY name ASC;", category);
+        result = DB_ExecuteQuery(db_stock, "SELECT name FROM locations WHERE category = '%q' ORDER BY name ASC;", category);
 
-        if(!result_name)
+        if(!result)
             return SendClientMessage(playerid, -1, "{ff3333}[ GPS ] {ffffff}Essa categoria está vazia!");
 
         do
         {
-            DB_GetFieldStringByName(result_name, "name", name);
+            DB_GetFieldStringByName(result, "name", name);
             format(msg_name, sizeof(msg_name), "%s%s\n", msg_name, name);
         }
-        while(DB_SelectNextRow(result_name));
+        while(DB_SelectNextRow(result));
 
-        DB_FreeResultSet(result_name);
+        DB_FreeResultSet(result);
 
         inline select_gps_name_dialog(playerid2, dialogid2, response2, listitem2, string:inputtext2[])
         {

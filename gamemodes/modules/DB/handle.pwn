@@ -81,8 +81,7 @@ hook OnGameModeInit()
         color1 INTEGER, color2 INTEGER");
 
         DB::CreateTable(db_stock, "locations", 
-        "uid INT NOT NULL UNIQUE,\
-        name VARCHAR(32),\
+        "name VARCHAR(32),\
         category VARCHAR(32),\
         creator VARCHAR(24),\
         pX FLOAT, pY FLOAT, pZ FLOAT");

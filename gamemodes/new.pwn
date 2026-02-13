@@ -1072,69 +1072,6 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
     return 0;
 }
     
-// --- TRANCAR O VEÍCULO ---
-CMD:trancar(playerid)
-{
-    new vehicleid = GetClosestVehicle(playerid);
-    if(vehicleid == INVALID_VEHICLE_ID) return SendClientMessage(playerid, COR_ERRO, "Chegue perto de um veiculo!");
-
-    new engine, lights, alarm, doors, bonnet, boot, objective;
-    GetVehicleParamsEx(vehicleid, engine, lights, alarm, doors, bonnet, boot, objective);
-
-    SetVehicleParamsEx(vehicleid, engine, lights, alarm, 1, bonnet, boot, objective); // 1 = Trancado
-    
-    GameTextForPlayer(playerid, "~r~Trancado", 2000, 3);
-    PlayerPlaySound(playerid, 1145, 0.0, 0.0, 0.0);
-    return 1;
-}
-
-CMD:gps(playerid)
-{
-    // Abre o arquivo de categorias e lista no Dialog
-    new File:f = fopen(ARQUIVO_CATS, io_read);
-    if(!f) return SendClientMessage(playerid, COR_ERRO, "Nenhum local de GPS configurado ainda.");
-
-    new string[128], lista[2000];
-    lista[0] = '\0';
-
-    while(fread(f, string))
-    {
-        strcat(lista, string); // Adiciona a categoria na lista do dialog
-    }
-    fclose(f);
-
-    if(strlen(lista) < 2) return SendClientMessage(playerid, COR_ERRO, "A lista de categorias está vazia.");
-
-    ShowPlayerDialog(playerid, DIALOG_GPS_CAT, DIALOG_STYLE_LIST, "{00FF00}GPS - Escolha a Categoria", lista, "Abrir", "Fechar");
-    return 1;
-}
-
-CMD:cancelargps(playerid)
-{
-    if(!CheckpointAtivo[playerid]) return SendClientMessage(playerid, COR_ERRO, "Voce nao tem nenhum GPS ativo.");
-    
-    DisablePlayerCheckpoint(playerid);
-    CheckpointAtivo[playerid] = 0;
-    SendClientMessage(playerid, COR_V_CLARO, "GPS desligado.");
-    return 1;
-}
-
-// --- ABRIR O VEÍCULO ---
-CMD:abrir(playerid)
-{
-    new vehicleid = GetClosestVehicle(playerid);
-    if(vehicleid == INVALID_VEHICLE_ID) return SendClientMessage(playerid, COR_ERRO, "Chegue perto de um veiculo!");
-
-    new engine, lights, alarm, doors, bonnet, boot, objective;
-    GetVehicleParamsEx(vehicleid, engine, lights, alarm, doors, bonnet, boot, objective);
-
-    SetVehicleParamsEx(vehicleid, engine, lights, alarm, 0, bonnet, boot, objective); // 0 = Aberto
-    
-    GameTextForPlayer(playerid, "~g~Aberto", 2000, 3);
-    PlayerPlaySound(playerid, 1145, 0.0, 0.0, 0.0);
-    return 1;
-}
-
 // --- ROUBAR O VEÍCULO (LOCK PICK) ---
 CMD:lockpick(playerid)
 {
@@ -2315,57 +2252,6 @@ stock AddItemMochila(playerid, itemid, quantidade)
     return 0; // Mochila cheia
 }
 
-public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
-{
-// Tecla H (Garagem)
-    if(newkeys == KEY_CROUCH)
-    {
-        // Verifica se está a pé e perto de uma garagem
-        if(!IsPlayerInAnyVehicle(playerid))
-        {
-            cmd_garagem(playerid, "");
-        }
-    }
-
-    // Tecla H (Geralmente é KEY_CROUCH a pé ou KEY_CTRL_BACK)
-    if(newkeys == KEY_CROUCH) 
-    {
-        // Verifica se está perto de um carro (mas fora dele)
-        new vehicleid = GetClosestVehicle(playerid); // Usando a stock que criamos antes
-        if(vehicleid != INVALID_VEHICLE_ID)
-        {
-            // Pega o estado da porta
-            new engine, lights, alarm, doors, bonnet, boot, objective;
-            GetVehicleParamsEx(vehicleid, engine, lights, alarm, doors, bonnet, boot, objective);
-
-            if(doors == 1) // 1 = TRANCADO
-            {
-                // Inicia o Minigame para tentar abrir
-                SendClientMessage(playerid, COR_V_CLARO, "Iniciando Lockpick... Acerte o alvo!");
-                ApplyAnimation(playerid, "BOMBER", "BOM_Plant", 4.1, 1, 0, 0, 0, 0, 0); // Animação
-                IniciarLockPick(playerid, vehicleid);
-            }
-            else // 0 = DESTRANCADO
-            {
-                // Tranca o carro (Para teste ou dono)
-                SetVehicleParamsEx(vehicleid, engine, lights, alarm, 1, bonnet, boot, objective);
-                GameTextForPlayer(playerid, "~r~Trancado", 2000, 3);
-                PlayerPlaySound(playerid, 1145, 0.0, 0.0, 0.0);
-            }
-        }
-    }
-    // Tecla N (KEY_NO) para abrir a Mochila
-    if(newkeys == KEY_NO)
-    {
-        // Verifica se não está dirigindo (pra não abrir sem querer)
-        if(!IsPlayerInAnyVehicle(playerid)) 
-        {
-            cmd_mochila(playerid, ""); // Chama o comando
-        }
-    }
-    return 1;
-}
-
 // Função para pegar a velocidade em KM/H
 stock GetVehicleSpeed(vehicleid)
 {
@@ -2412,36 +2298,6 @@ public AtualizarVelocimetroGlobal()
             PlayerTextDrawShow(i, TD_Velocimetro[i][3]); // Atualiza barra
         }
     }
-    return 1;
-}
-
-public OnPlayerStateChange(playerid, newstate, oldstate)
-{
-    // ENTROU NO CARRO (Como Motorista ou Passageiro)
-    if(newstate == PLAYER_STATE_DRIVER || newstate == PLAYER_STATE_PASSENGER)
-    {
-        // 1. Cria
-        CriarVelocimetro(playerid);
-        
-        // 2. Define o nome do carro antes de mostrar
-        // Se você tiver uma função que pega nome real, use aqui. Senão vai mostrar ID.
-        // PlayerTextDrawSetString(playerid, TD_Velocimetro[playerid][1], NomeDoCarro(veiculo));
-        
-        // 3. Mostra tudo
-        for(new i=0; i < 4; i++) PlayerTextDrawShow(playerid, TD_Velocimetro[playerid][i]);
-    }
-    
-    // SAIU DO CARRO (Ou foi a pé)
-    if(oldstate == PLAYER_STATE_DRIVER || oldstate == PLAYER_STATE_PASSENGER)
-    {
-        // Esconde e Destroi para liberar memória
-        for(new i=0; i < 5; i++) 
-        {
-            PlayerTextDrawHide(playerid, TD_Velocimetro[playerid][i]);
-            PlayerTextDrawDestroy(playerid, TD_Velocimetro[playerid][i]);
-        }
-    }
-    
     return 1;
 }
 
@@ -2596,21 +2452,6 @@ stock AtualizarGarageUI(playerid)
     PlayerTextDrawShow(playerid, TD_Gar_BtnSpawn);
     PlayerTextDrawShow(playerid, TD_Gar_BtnStore);
     PlayerTextDrawShow(playerid, TD_Gar_BtnSair);
-    return 1;
-}
-
-public OnPlayerEnterCheckpoint(playerid)
-{
-    if(CheckpointAtivo[playerid])
-    {
-        DisablePlayerCheckpoint(playerid);
-        CheckpointAtivo[playerid] = 0;
-        SendClientMessage(playerid, COR_VERDE_NEON, "GPS: Voce chegou ao seu destino!");
-        PlayerPlaySound(playerid, 1058, 0.0, 0.0, 0.0); // Som de chegada
-        return 1;
-    }
-    
-    // ... Seus outros códigos de checkpoint (missões, etc) ...
     return 1;
 }
 

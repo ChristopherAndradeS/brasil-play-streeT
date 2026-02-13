@@ -1,5 +1,7 @@
 #include <YSI\YSI_Coding\y_hooks>
 
+forward OnSpeedOMeterUpdate(playerid);
+
 hook OnGameModeInit()
 {
     for(new row = 0; row < REGION_GRID_SIZE; row++)
@@ -31,6 +33,108 @@ hook OnGameModeExit()
 
         if(IsValidDynamicArea(veh::gAreas[region]))
             DestroyDynamicArea(veh::gAreas[region]);
+    }
+
+    return 1;
+}
+
+hook OnPlayerStateChange(playerid, PLAYER_STATE:newstate, PLAYER_STATE:oldstate)
+{
+    if(newstate == PLAYER_STATE_DRIVER || newstate == PLAYER_STATE_PASSENGER)
+    {
+        Baseboard::HideTDForPlayer(playerid);
+        Veh::ShowTDForPlayer(playerid);
+        Player::CreateTimer(playerid, pyr::TIMER_SPEEDOMETER, "OnSpeedOMeterUpdate", 32, true, "i", playerid);
+    }
+
+    else if(oldstate == PLAYER_STATE_DRIVER || oldstate == PLAYER_STATE_PASSENGER)
+    {
+        Veh::HideTDForPlayer(playerid);
+        Baseboard::ShowTDForPlayer(playerid);
+
+        Player::KillTimer(playerid, pyr::TIMER_SPEEDOMETER);
+    }
+
+    return 1;
+}
+
+public OnSpeedOMeterUpdate(playerid)
+{
+    if(!Veh::IsVisibleTDForPlayer(playerid) || !IsPlayerInAnyVehicle(playerid)) return 1;
+
+    new vehicleid = GetPlayerVehicleID(playerid);
+
+    new speed = GetVehicleSpeed(vehicleid);
+    
+    Veh::UpdateTDForPlayer(playerid, PTD_VEH_TXT_SPEED, "%d", speed);
+    return 1;
+}
+
+stock GetVehicleSpeed(vehicleid)
+{
+    new Float:vX, Float:vY, Float:vZ;
+    GetVehicleVelocity(vehicleid, vX, vY, vZ);
+
+    new Float:speed =
+        floatsqroot(
+            floatpower(vX, 2) +
+            floatpower(vY, 2) +
+            floatpower(vZ, 2)
+        );
+    
+    //195.121948
+    return floatround(speed * Float:0x43431F38); 
+}
+
+hook OnPlayerKeyStateChange(playerid, KEY:newkeys, KEY:oldkeys)
+{
+    if(newkeys == KEY_CTRL_BACK)
+    {
+        if(!IsPlayerInAnyVehicle(playerid)) return 1;
+        
+        new vehicleid = GetPlayerVehicleID(playerid);
+
+        if(GetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_ENGINE))
+        {
+            Veh::UpdateParams(vehicleid, FLAG_PARAM_ENGINE, 0);
+            GameTextForPlayer(playerid, "~r~~h~Motor OFF", 1500, 3);
+            PlayerPlaySound(playerid, 21000, 0.0, 0.0, 0.0);
+        }
+
+        else
+        {
+            Veh::UpdateParams(vehicleid, FLAG_PARAM_ENGINE, 1);
+            GameTextForPlayer(playerid, "~g~~h~Motor ON", 1500, 3);
+            PlayerPlaySound(playerid, 21001, 0.0, 0.0, 0.0);
+        } 
+
+        return 1;
+    }
+
+    if(newkeys == KEY_YES) 
+    {
+        if(IsPlayerInAnyVehicle(playerid)) return 1;
+
+        new Float:distance;
+        new vehicleid = GetClosestVehicle(playerid, distance);
+
+        if(vehicleid == INVALID_VEHICLE_ID || distance > 2.0) return 1;
+        
+        if(GetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_DOORS))
+        {
+            Veh::UpdateParams(vehicleid, FLAG_PARAM_DOORS, 0);
+            GameTextForPlayer(playerid, "~g~~h~Aberto", 2000, 3);
+            PlayerPlaySound(playerid, 21000, 0.0, 0.0, 0.0);
+        }
+
+        else
+        {
+            Veh::UpdateParams(vehicleid, FLAG_PARAM_DOORS, 1);
+            GameTextForPlayer(playerid, "~r~~h~Trancado", 2000, 3);
+            PlayerPlaySound(playerid, 21001, 0.0, 0.0, 0.0);
+        }
+
+        return 1;
     }
 
     return 1;
@@ -79,6 +183,16 @@ hook function CreateVehicle(modelid, Float:x, Float:y, Float:z, Float:rotation, 
         
         if(regionid != INVALID_REGION_ID) 
             Veh::AddToRegion(vehicleid, regionid);
+
+        SetVehicleParamsEx(vehicleid, 1, 0, 0, 1, 0, 0, 0);
+        SetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_DOORS);
+        ResetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_ENGINE);
+        ResetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_LIGHTS);
+        ResetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_ALARM);
+        ResetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_BONNET);
+        ResetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_BOOT);
+        ResetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_OBJECTIVE);
+
     }
 
     return vehicleid;
@@ -98,11 +212,13 @@ stock Veh::UpdateParams(vehicleid, params, status)
     else
         ResetFlag(Vehicle[vehicleid][veh::params], params);
 
-    SetVehicleParamsEx(
-    Vehicle[vehicleid][veh::params] & FLAG_PARAM_ENGINE, 
-    Vehicle[vehicleid][veh::params] & FLAG_PARAM_LIGHTS, 
-    Vehicle[vehicleid][veh::params] & FLAG_PARAM_ALARM, 
-    Vehicle[vehicleid][veh::params] & FLAG_PARAM_BONNET, 
-    Vehicle[vehicleid][veh::params] & FLAG_PARAM_BOOT, 
-    Vehicle[vehicleid][veh::params] & FLAG_PARAM_OBJECTIVE);
+    SetVehicleParamsEx(vehicleid,
+    GetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_ENGINE), 
+    GetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_LIGHTS),
+    GetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_ALARM),
+    GetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_DOORS),
+    GetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_BONNET), 
+    GetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_BOOT),
+    GetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_OBJECTIVE) 
+    );
 }

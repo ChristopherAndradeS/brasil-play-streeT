@@ -3,7 +3,6 @@
 #include <open.mp>
 #include <sscanf2>
 #include <streamer>
-#include <ColAndreas>
 #include <PawnPlus>
 
 #define CGEN_MEMORY 20000
@@ -52,6 +51,7 @@
 #include "../gamemodes/modules/TextDraws/gui/acs_editor.pwn"
 #include "../gamemodes/modules/TextDraws/gui/admin.pwn"
 #include "../gamemodes/modules/TextDraws/hud/baseboard.pwn"
+#include "../gamemodes/modules/TextDraws/hud/velocimeter.pwn"
 /*                          PLAYER                          */
 #include "../gamemodes/modules/Player/punishment.pwn"
 #include "../gamemodes/modules/Player/login.pwn"
@@ -63,21 +63,21 @@
 /*                          VEHICLE                        */
 #include "../gamemodes/modules/Vehicle/commands.pwn"
 
-main(){}
+main() {}
 
 public OnGameModeInit()
 {
-    CA_Init();
+    // CA_Init();
 
-    new Float:pX, Float:pY, Float:pZ;
+    // new Float:pX, Float:pY, Float:pZ;
 
-    for(new i = 0; i < 500; i++)
-    {
-        pX = Float:RandomFloatMinMax(0, 3000.0);
-        pY = Float:RandomFloatMinMax(0, 3000.0);
-        CA_FindZ_For2DCoord(pX, pY, pZ);
-        CreateVehicle(RandomMinMax(400, 600), pX, pY, pZ + 1.0,  0.0, RandomMinMax(0, 10), RandomMinMax(0, 10), -1); 
-    }
+    // for(new i = 0; i < 500; i++)
+    // {
+    //     pX = Float:RandomFloatMinMax(0, 3000.0);
+    //     pY = Float:RandomFloatMinMax(0, 3000.0);
+    //     CA_FindZ_For2DCoord(pX, pY, pZ);
+    //     CreateVehicle(RandomMinMax(400, 600), pX, pY, pZ + 1.0,  0.0, RandomMinMax(0, 10), RandomMinMax(0, 10), -1); 
+    // }
 
     return 1;
 }
@@ -225,3 +225,27 @@ YCMD:close(playerid, params[], help)
 
     return 1;
 }
+
+
+// YCMD:teste(playerid, params[], help)
+// {
+//     for(new PlayerText:i = PlayerText:0; i < MAX_PLAYER_TEXT_DRAWS; i++)
+//     {
+//         if(IsValidPlayerTextDraw(playerid, i))
+//         {
+//             printf("PlayerTextDraw %d is valid", i);
+//             //PlayerTextDrawShow(playerid, i);
+//         }
+//     }
+
+//     for(new Text:i = Text:0; i < MAX_TEXT_DRAWS; i++)
+//     {
+//         if(IsValidTextDraw(i))
+//         {
+//             printf("TextDraw %d is valid", i);
+//             //PlayerTextDrawShow(playerid, i);
+//         }
+//     }
+
+//     return 1;
+// }

@@ -41,6 +41,7 @@ stock Baseboard::DestroyPlayerTD(playerid)
 		Baseboard::PlayerTD[playerid][i] = INVALID_PLAYER_TEXT_DRAW;
 	}
 }
+
 stock Baseboard::CreatePublicTD()
 {
 	Baseboard::PublicTD[0] = TextDrawCreate(341.000000, 415.500000, "ld_beat:chit");

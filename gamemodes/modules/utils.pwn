@@ -14,6 +14,9 @@ stock ClearChat(playerid, cells = 15)
 stock SetFlag(&flag, tag_binary) 
     flag |= tag_binary;
 
+stock GetFlag(flag, tag_binary) 
+    return (flag & tag_binary) ? 1 : 0;
+
 stock ResetFlag(&flag, tag_binary) 
     flag &= ~tag_binary;
 

@@ -34,7 +34,7 @@
         "use_chat_radius": false,
         "use_entry_exit_markers": false,
         "use_instagib": false,
-        "use_manual_engine_and_lights": false,
+        "use_manual_engine_and_lights": true,
         "use_nametag_los": true,
         "use_nametags": true,
         "use_player_marker_draw_radius": false,
@@ -102,7 +102,7 @@
     },
     "password": "",
     "pawn": {
-        "legacy_plugins": ["streamer", "PawnPlus", "ColAndreas"],
+        "legacy_plugins": ["streamer", "PawnPlus"],
         "main_scripts": [
             "main 1"
         ],

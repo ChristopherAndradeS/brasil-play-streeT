@@ -12,6 +12,10 @@ new PlayerText:Acessory::PlayerTD[MAX_PLAYERS][14];
 new Text:Adm::PublicTD[14];
 new PlayerText:Adm::PlayerTD[MAX_PLAYERS][9];
 
+new Text:Veh::PublicTD[11];
+new PlayerText:Veh::PlayerTD[MAX_PLAYERS][18];
+
+
 /*  LOGIN  */
 enum _:E_TD_LOGIN
 {
@@ -77,6 +81,8 @@ enum _:E_PTD_ACESSORY
     PlayerText:PTD_ACS_SCL_AXIS,
 }
 
+/*  Admin  */
+
 enum _:E_TD_ADMIN
 {
     Text:TD_ADM_BTN_LEFT = 2,
@@ -99,6 +105,18 @@ enum _:E_PTD_ADMIN
     PlayerText:PTD_ADM_TXT_ORGNAME,
 }
 
+/*  Velocimetro  */
+
+enum _:E_PTD_VEH
+{
+    PlayerText:PTD_VEH_BAR_LIFE,
+    PlayerText:PTD_VEH_TXT_SPEED,
+    PlayerText:PTD_VEH_BAR_FUEL,
+    PlayerText:PTD_VEH_BAR_ARMOUR,
+    PlayerText:PTD_VEH_FIRST_DOT = 4,
+    PlayerText:PTD_VEH_LAST_DOT  = 16,
+    PlayerText:PTD_VEH_TXT_NAME = 17,
+}
 hook OnGameModeInit()
 {
     Login::CreatePublicTD();
@@ -112,6 +130,10 @@ hook OnGameModeInit()
 
     Adm::CreatePublicTD();
     printf("[ TEXTDRAW ] TextDraw: Administração\n");
+
+    Veh::CreatePublicTD();
+    printf("[ TEXTDRAW ] TextDraw: Velocimetro\n");
+
     return 1;
 }
 
@@ -121,6 +143,7 @@ hook OnPlayerDisconnect(playerid, reason)
     Baseboard::HideTDForPlayer(playerid);
     Acessory::HideTDForPlayer(playerid);
     Adm::HideTDForPlayer(playerid);
+    Veh::HideTDForPlayer(playerid);
 
     return 1;
 }

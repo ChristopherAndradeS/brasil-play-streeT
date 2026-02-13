@@ -30,6 +30,7 @@ enum E_VEHICLES
     veh::regionid,
     veh::flags,
     veh::params,
+    Float:veh::oX, Float:veh::oY, Float:veh::oZ,
     STREAMER_TAG_3D_TEXT_LABEL:veh::tex3did
 }
 

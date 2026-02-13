@@ -41,6 +41,7 @@ enum _:E_PLAYER_TIMERS
     pyr::TIMER_LOGIN_KICK,
     pyr::TIMER_PAYDAY,
     pyr::TIMER_JAIL,
+    pyr::TIMER_SPEEDOMETER,
 }
 
 new pyr::Timer[MAX_PLAYERS][E_PLAYER_TIMERS];
@@ -232,8 +233,12 @@ stock Player::RemoveMoney(playerid, Float:price, bool:takeout = true)
 
         Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_MONEY, "~g~~h~~h~R$: %2.f", Player[playerid][pyr::money]);
 
+        PlayerPlaySound(playerid, 1053, 0.0, 0.0, 0.0);
+
         return 1;
     }
+
+    PlayerPlaySound(playerid, 1085, 0.0, 0.0, 0.0);
 
     return 0;
 }

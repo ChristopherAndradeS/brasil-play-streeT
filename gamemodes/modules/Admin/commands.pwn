@@ -752,7 +752,7 @@ YCMD:cgps(playerid, params[], help)
         return 1;
     }    
 
-    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER)) return 1;
+    //if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER)) return 1;
 
     new name[32], category[32], msg[512];
 
@@ -781,13 +781,14 @@ YCMD:cgps(playerid, params[], help)
             DB_FreeResultSet(result);
         }
 
-        format(msg, sizeof(msg), "%sCRIAR CATEGORIA NOVA", msg);
+        format(msg, sizeof(msg), "%sCRIAR CATEGORIA NOVA", isnull(msg) ? "" : msg);
 
         inline select_gps_cat_dialog(playerid2, dialogid2, response2, listitem2, string:inputtext2[])
         {
             #pragma unused playerid2, dialogid2, listitem2
             if(!response2)
             {
+                msg[0] = EOS;
                 Dialog_ShowCallback(playerid, using inline create_gps_name_dialog, DIALOG_STYLE_INPUT, 
                 "{ff5555}>> {ffffff}Digite o nome do local que deseja criar no GPS global\n\
                 {ffff33}[ i ] {ffffff}Certifique-se de estar {ff3333}posicionado corretamente!", "", 
@@ -808,6 +809,7 @@ YCMD:cgps(playerid, params[], help)
                     #pragma unused playerid3, dialogid3, listitem3
                     if(!response3)
                     {
+                        msg[0] = EOS;
                         Dialog_ShowCallback(playerid, using inline select_gps_cat_dialog, DIALOG_STYLE_LIST, "{00FF00}GPS - Escolha a Categoria", msg, "Selecionar", "Voltar");
                         return 1;
                     }
