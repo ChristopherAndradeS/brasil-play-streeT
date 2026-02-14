@@ -1,37 +1,66 @@
 #include <YSI\YSI_Coding\y_hooks>
 
-
 hook OnPlayerEnterCheckpoint(playerid)
 {
-    if(!GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING))return 1;
+    if(!GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING))
+        return 1;
 
-    new check = race::Player[playerid][race::checkid], lap = race::Player[playerid][race::lap];
+    new gameid = game::Player[playerid][pyr::gameid];
+    new raceid = game::Player[playerid][pyr::raceid];
 
-    if(check == 0)
+    if(gameid == INVALID_GAME_ID || raceid == INVALID_RACE_ID)
+        return 1;
+
+    new check = race::Player[playerid][race::checkid];
+    new lap = race::Player[playerid][race::lap];
+
+    check++;
+
+    if(check >= sizeof(Race::gCheckpoints))
     {
-        if(lap <= MAX_LAPS) lap++;
-        else
-        {
-            //
-        }
+        check = 0;
+        lap++;
     }
 
-    check += 1;
+    if(lap > MAX_LAPS)
+    {
+        DisablePlayerCheckpoint(playerid);
+        ResetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING);
+        SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED);
+        Race::RemPodium(playerid, raceid, 0);
+        Race::AddPodium(playerid, raceid);
 
-    if(check >= sizeof(gCheckpoints))
-        check = 0;
+        RemovePlayerFromVehicle(playerid);
+        SetPlayerInterior(playerid, 0);
+        SetPlayerVirtualWorld(playerid, 0);
+        Player::Spawn(playerid);
 
-    Race::UpdatePlayerCheck(playerid, laps, checkid);
+        new place = Race::GetPodiumPlace(raceid, playerid);
 
-    race::Player[playerid][race::checkid] = check;
+        if(place >= 1 && place <= 3)
+            SendClientMessage(playerid, -1, "{44ff66}[ CORRIDA ] {ffffff}Parabéns você terminou em {44ff66}%dº lugar{ffffff}, aguarde a corrida para receber seu prêmio.", place);
+        else
+            SendClientMessage(playerid, -1, "{ff5533}[ CORRIDA ] {ffffff}Infelizmente você não se classificou :( tente novamente para receber prêmios!");
 
-    /* 
+        if(Game[gameid][game::players_count] > 0)
+        {
+            new finished;
 
-    Aqui deve fazer a logica de update dos checkpoint. Quando o jogador terminar antes da
-    maquina de estados finalizar o game, deve remover o jogador do veículo, dar um Player::Spawn.
-    
-    Se o jogador terminar em 1, 2 ou 3, lugar enviar uma mensagem "Parabens voce terminou em Xº lugar, Aguarde a corrida para receber seu premio"
-    Se não envie "Infelizmente voce nao se classificou :(, tente novamente para receber premios!"
-    
-    */
+            for(new i = 0; i < Game[gameid][game::max_players]; i++)
+            {
+                new targetid = Game[gameid][game::players][i];
+
+                if(targetid != INVALID_PLAYER_ID && GetFlag(game::Player[targetid][pyr::flags], FLAG_PLAYER_FINISHED))
+                    finished++;
+            }
+
+            if(finished >= Game[gameid][game::players_count])
+                Game[gameid][game::start_time] = 0;
+        }
+
+        return 1;
+    }
+
+    Race::UpdatePlayerCheck(playerid, lap, check);
+    return 1;
 }
