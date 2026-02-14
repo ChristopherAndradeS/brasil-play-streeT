@@ -193,7 +193,82 @@ stock Race::UpdatePlayerCheck(playerid, lap, checkid)
 
 stock Race::UpdatePodium(gameid)
 {
-    #pragma unused gameid
+    new raceid = Race::GetIDByGameID(gameid);
+
+    if(raceid == INVALID_RACE_ID || !list_valid(game::Race[raceid][race::podium]))
+        return 0;
+
+    new players[MAX_GAME_PARTICIPANTS];
+    new progress[MAX_GAME_PARTICIPANTS];
+    new old_pos[MAX_PLAYERS];
+    new count;
+
+    for(new i = 0; i < MAX_PLAYERS; i++)
+        old_pos[i] = -1;
+
+    new old_len = list_size(game::Race[raceid][race::podium]);
+
+    for(new i = 0; i < old_len; i++)
+    {
+        new playerid = list_get(game::Race[raceid][race::podium], i);
+
+        if(playerid != INVALID_PLAYER_ID)
+            old_pos[playerid] = i;
+    }
+
+    for(new i = 0; i < Game[gameid][game::max_players]; i++)
+    {
+        new playerid = Game[gameid][game::players][i];
+
+        if(playerid == INVALID_PLAYER_ID)
+            continue;
+
+        players[count] = playerid;
+        progress[count] = (race::Player[playerid][race::lap] * sizeof(Race::gCheckpoints)) + race::Player[playerid][race::checkid];
+        count++;
+    }
+
+    if(count <= 1)
+        return 1;
+
+    for(new i = 0; i < count - 1; i++)
+    {
+        for(new j = i + 1; j < count; j++)
+        {
+            if(progress[j] > progress[i])
+            {
+                new tmp_progress = progress[i];
+                progress[i] = progress[j];
+                progress[j] = tmp_progress;
+
+                new tmp_playerid = players[i];
+                players[i] = players[j];
+                players[j] = tmp_playerid;
+            }
+        }
+    }
+
+    for(new i = 1; i < count; i++)
+    {
+        new front = players[i - 1];
+        new back = players[i];
+
+        if(old_pos[front] != -1 && old_pos[back] != -1 && old_pos[front] > old_pos[back])
+        {
+            new front_name[MAX_PLAYER_NAME], back_name[MAX_PLAYER_NAME];
+            GetPlayerName(front, front_name, MAX_PLAYER_NAME);
+            GetPlayerName(back, back_name, MAX_PLAYER_NAME);
+
+            Game::SendMessageToAll(gameid, "{44ff66}[ CORRIDA ] {ffffff}%s ultrapassou %s.", front_name, back_name);
+        }
+    }
+
+    list_destroy(game::Race[raceid][race::podium]);
+    game::Race[raceid][race::podium] = list_new();
+
+    for(new i = 0; i < count; i++)
+        list_add(game::Race[raceid][race::podium], players[i]);
+
     return 1;
 }
 

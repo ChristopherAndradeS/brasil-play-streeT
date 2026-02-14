@@ -27,8 +27,9 @@ hook OnPlayerEnterCheckpoint(playerid)
         DisablePlayerCheckpoint(playerid);
         ResetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING);
         SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED);
-        Race::RemPodium(playerid, raceid, 0);
-        Race::AddPodium(playerid, raceid);
+        race::Player[playerid][race::lap] = (MAX_LAPS + 1);
+        race::Player[playerid][race::checkid] = 0;
+        Race::UpdatePodium(gameid);
 
         RemovePlayerFromVehicle(playerid);
         SetPlayerInterior(playerid, 0);
