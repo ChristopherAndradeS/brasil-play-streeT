@@ -24,20 +24,6 @@ hook OnGameModeInit()
     return 1;
 }
 
-hook OnGameModeExit()
-{
-    for(new region = 0; region < REGION_COUNT; region++)
-    {
-        if(linked_list_valid(veh::gRegion[region]))
-            linked_list_delete(veh::gRegion[region]);
-
-        if(IsValidDynamicArea(veh::gAreas[region]))
-            DestroyDynamicArea(veh::gAreas[region]);
-    }
-
-    return 1;
-}
-
 hook OnPlayerStateChange(playerid, PLAYER_STATE:newstate, PLAYER_STATE:oldstate)
 {
     if(newstate == PLAYER_STATE_DRIVER || newstate == PLAYER_STATE_PASSENGER)

@@ -57,6 +57,13 @@ hook OnPlayerDisconnect(playerid, reason)
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 
+    if(IsValidTimer(pyr::Timer[playerid][pyr::TIMER_PAYDAY]))
+    {
+        new t_left = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_PAYDAY]);
+        DB::SetDataInt(db_entity, "players", "payday_tleft", t_left, "name = '%q'", name);
+        Player::KillTimer(playerid, pyr::TIMER_PAYDAY);
+    }
+
     /* JOGADOR É VÁLIDO / LOGOU / ESTÁ PRESO */
     if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL))
     {
@@ -69,7 +76,7 @@ hook OnPlayerDisconnect(playerid, reason)
         Player::KillTimer(playerid, pyr::TIMER_JAIL); 
     }
 
-    else if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME))
+    if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME))
     {
         SetPlayerInterior(playerid, 0);
         SetPlayerVirtualWorld(playerid, 0);
@@ -84,13 +91,10 @@ hook OnPlayerDisconnect(playerid, reason)
         GetPlayerName(playerid, name);
         GetPlayerPos(playerid, pX, pY, pZ);
         GetPlayerFacingAngle(playerid, pA);
-        new t_left = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_PAYDAY]);
-
+    
         DB::Update(db_entity, "players", 
-        "pX = %f, pY = %f, pZ = %f, pA = %f, payday_tleft = %i WHERE name = '%q'",
-        pX, pY, pZ, pA, t_left, name);
-
-        Player::KillTimer(playerid, pyr::TIMER_PAYDAY);
+        "pX = %f, pY = %f, pZ = %f, pA = %f WHERE name = '%q'",
+        pX, pY, pZ, pA, name);
     }
 
     Player::DestroyCpfTag(playerid);

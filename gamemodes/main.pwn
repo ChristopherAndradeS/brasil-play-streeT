@@ -71,7 +71,17 @@
 // -- HANDLES
 //#include "../gamemodes/modules/Games/Race/handle.pwn"
 
-main() {}
+main()
+{
+    // Avoid amx_FindPublic collisions on some plugin stacks during GMX/unload.
+    pp_use_funcidx(true);
+}
+
+public pp_on_error(source[], message[], error_level:level, &retval)
+{
+    printf("[ PawnPlus ] %s | nivel: %d | %s", source, _:level, message);
+    return 0;
+}
 
 public OnGameModeExit()
 {
@@ -84,6 +94,20 @@ public OnGameModeExit()
     	db_stock = DB:0;
 
     printf("[ DATABASE ] Conexão com o banco de dados de ESTOQUES encerrada com suceso!\n");
+
+    new count;
+    for(new region = 0; region < REGION_COUNT; region++)
+    {
+        if(linked_list_valid(veh::gRegion[region]))
+            linked_list_delete(veh::gRegion[region]);
+        
+        if(IsValidDynamicArea(veh::gAreas[region]))
+            DestroyDynamicArea(veh::gAreas[region]);
+        
+        count++;
+    }
+
+    printf("[ LISTAS ] %d Lista Encadeada de Veículos e Áreas Dinâmicas destruídas com sucesso!\n", count);
 
     return 1;
 }

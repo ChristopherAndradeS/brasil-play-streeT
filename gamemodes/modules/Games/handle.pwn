@@ -14,10 +14,7 @@ hook OnGameModeInit()
 hook OnGameModeExit()
 {
     for(new i = 0; i < MAX_GAMES; i++)
-    {   
-        printf("[ EVENTO ] Evento %s destruido com sucesso", Game[i][game::name]);
         Game::Destroy(i);
-    }
-
+    
     return 1;
 }
