@@ -55,6 +55,14 @@ hook OnServerUpdateSeconds()
 
     SetWorldTime(Server[srv::hour]);
 
+    for(new gameid = 0; gameid < MAX_GAMES; gameid++)
+    {
+        if(!GetFlag(Game[gameid][game::flags], FLAG_GAME_CREATED))
+            continue;
+
+        Game_Update(gameid);
+    }
+
     return 1;
 }
 

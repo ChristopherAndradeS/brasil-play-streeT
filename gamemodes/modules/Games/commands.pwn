@@ -21,7 +21,7 @@ YCMD:evento(playerid, params[], help)
 
         format(msg, 512, "%s{ff5533}%d.\t{ffffff}%s\t%s\t{55ff55}%d{ffffff}/{55ff55}%d\t{cdcdcd}CLIQUE AQUI PARA ENTRAR\n", msg,
         idx, Game[i][game::name], 
-        GetFlag(Game[i][game::flags], FLAG_GAME_WAIT_FILL) ? "{99ff99}Aguardando" : "{ffff99}Em andamento", 
+        Game[i][game_state] <= GAME_STATE_STARTING ? "{99ff99}Aguardando" : "{ffff99}Em andamento", 
         Game::GetPlayerCount(i), Game[i][game::max_players]);
 
         idx++;
@@ -33,7 +33,9 @@ YCMD:evento(playerid, params[], help)
 
         if(!response) return 1;
 
-        if(!Game::HandlePlayer(playerid, listitem))
+        new gameid = Game::GetIDByListIndex(listitem);
+
+        if(gameid == INVALID_GAME_ID || !Game::HandlePlayer(playerid, gameid))
         {
             SendClientMessage(playerid, -1, "{ff5533}[ EVENTO ] {ffffff}Não foi possível entrar no evento.");
         }

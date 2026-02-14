@@ -185,12 +185,7 @@ stock Game::GetCount()
 
 stock Game::GetPlayerCount(gameid)
 {
-    new count;
-    for(new i = 0; i < Game[gameid][game::max_players]; i++)
-        if(Game[gameid][game::players][i] != INVALID_PLAYER_ID)
-            count++;
-    
-    return count;
+    return Game[gameid][game::players_count];
 }
 
 stock Game::InsertPlayer(gameid, playerid)
@@ -237,6 +232,7 @@ stock Game::ClearPlayer(playerid)
 {
     game::Player[playerid][pyr::seat]   = INVALID_SEAT_ID;
     game::Player[playerid][pyr::gameid] = INVALID_GAME_ID;
+    game::Player[playerid][pyr::raceid] = -1;
     game::Player[playerid][pyr::flags]  = 0;
 }
 
@@ -244,11 +240,36 @@ stock Game::ClearPlayers(gameid, lenght)
 {
     for(new i = 0; i < lenght; i++)
     {
+        new playerid = Game[gameid][game::players][i];
+
+        if(playerid != INVALID_PLAYER_ID)
+            Game::ClearPlayer(playerid);
+
         Game[gameid][game::players][i] = INVALID_PLAYER_ID;
-        Game::ClearPlayer(i);
     }
     
     Game[gameid][game::players_count] = 0;
+}
+
+
+stock Game::GetIDByListIndex(listitem)
+{
+    if(listitem < 0) return INVALID_GAME_ID;
+
+    new idx;
+
+    for(new i = 0; i < MAX_GAMES; i++)
+    {
+        if(!GetFlag(Game[i][game::flags], FLAG_GAME_CREATED))
+            continue;
+
+        if(idx == listitem)
+            return i;
+
+        idx++;
+    }
+
+    return INVALID_GAME_ID;
 }
 
 stock Game::GetFreeSlotID()
