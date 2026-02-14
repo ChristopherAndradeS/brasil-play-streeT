@@ -141,7 +141,7 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
         {ffff33}3. {ffffff}Disfarcar de jogador\n\
         {ffff33}4. {ffffff}Se revelar como admin\n\
         {ffff33}5. {ffffff}Executar comandos globais\n\
-        {ffff33}6. {ffffff}Abrir modo de edicao\n", GetPlayerNameEx(Admin[playerid][adm::spectateid]));
+        {ffff33}6. {ffffff}Abrir modo de edicao\n", GetPlayerNameStr(Admin[playerid][adm::spectateid]));
 
         Dialog_ShowCallback(playerid, using public Response_ADM_PANEL<iiiis>, DIALOG_STYLE_LIST, msg, "Selecionar", "Fechar");
 

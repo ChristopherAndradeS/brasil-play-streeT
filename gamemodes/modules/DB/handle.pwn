@@ -55,7 +55,7 @@ hook OnGameModeInit()
         DB::CreateTable(db_entity, "admins", 
         "name        VARCHAR(24),\
         level        INTEGER,\
-        promoter     INTEGER,\
+        promoter     VARCHAR(24),\
         promote_date VARCHAR(32)\
         ");
     }

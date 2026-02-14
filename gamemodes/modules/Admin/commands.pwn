@@ -34,7 +34,7 @@ public ban_input_dialog(playerid, dialogid, response, listitem, string:inputtext
         SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Você baniu {33ff33}%s \
         {ffffff}por {33ff33}%s", name, msg);
     
-        SendClientMessageToAll(-1, "{ff3399}[ ADM PUNICAO ] {ffffff}%s {ff3399}baniu {ffffff}%s por {ff3399}%s.", GetPlayerNameEx(playerid), name, msg);
+        SendClientMessageToAll(-1, "{ff3399}[ ADM PUNICAO ] {ffffff}%s {ff3399}baniu {ffffff}%s por {ff3399}%s.", GetPlayerNameStr(playerid), name, msg);
         SendClientMessageToAll(-1, "{ff3399}[ ADM PUNICAO ] {ff3399}Motivo: {ffffff}%s", reason);
 
         new targetid = GetPlayerIDByName(name);
@@ -153,7 +153,7 @@ YCMD:ir(playerid, params[], help)
     if(!Adm::SpectatePlayer(playerid, targetid))
         return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Nao foi possivel espectar!");
 
-    SendClientMessage(playerid, -1, "{ffff33}[ ADM ] {ffffff}Espectando jogador %s ID: %d!", GetPlayerNameEx(targetid), targetid);
+    SendClientMessage(playerid, -1, "{ffff33}[ ADM ] {ffffff}Espectando jogador %s ID: %d!", GetPlayerNameStr(targetid), targetid);
 
     return 1;
 }
@@ -179,7 +179,7 @@ YCMD:verid(playerid, params[], help)
 
     SendClientMessage(playerid, -1, 
     "{ffff33}[ ADM ] {ffffff}O jogador {ffff33}%s {ffffff}possui ID: {ffff33}%d", 
-    GetPlayerNameEx(targetid), targetid);
+    GetPlayerNameStr(targetid), targetid);
 
     return 1;
 }
@@ -226,13 +226,13 @@ YCMD:congelar(playerid, params[], help)
     if(!IsPlayerControllable(targetid))
     {
         SendClientMessage(playerid, -1, "{ff9933}[ ADM ] {ffffff}O jogador {ff9933}%s \
-        {ffffff}ja esta congelado.", GetPlayerNameEx(targetid));
+        {ffffff}ja esta congelado.", GetPlayerNameStr(targetid));
     }
     else
     {
         TogglePlayerControllable(targetid, false);
         SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}O jogador {33ff33}%s \
-        {ffffff}foi congelado!", GetPlayerNameEx(targetid));
+        {ffffff}foi congelado!", GetPlayerNameStr(targetid));
         SendClientMessage(targetid, -1, "{ff9933}[ AVISO ] {ffffff}Voce foi congelado por um adm");
     }
 
@@ -258,14 +258,14 @@ YCMD:descongelar(playerid, params[], help)
     if(IsPlayerControllable(targetid))
     {
         SendClientMessage(playerid, -1, "{ff9933}[ ADM ] {ffffff}O jogador {ff9933}%s \
-        {ffffff}ja esta descongelado.", GetPlayerNameEx(targetid));
+        {ffffff}ja esta descongelado.", GetPlayerNameStr(targetid));
     }
 
     else
     {
-        TogglePlayerControllable(targetid, false);
+        TogglePlayerControllable(targetid, true);
         SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}O jogador {33ff33}%s \
-        {ffffff}foi descongelado!", GetPlayerNameEx(targetid));
+        {ffffff}foi descongelado!", GetPlayerNameStr(targetid));
         SendClientMessage(targetid, -1, "{ff9933}[ AVISO ] {ffffff}Voce foi descongelado por um admin");
     }
 
@@ -444,13 +444,13 @@ YCMD:soltar(playerid, params[], help)
 
     else if(result == -1)
     {
-        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Erro ao remover jogador %s da cadeia staff!", GetPlayerNameEx(targetid));
+        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Erro ao remover jogador %s da cadeia staff!", GetPlayerNameStr(targetid));
         SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Reporte esse erro à um programador imediatamente!");
         return 1;
     }
 
-    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce soltou {33ff33}%s {ffffff}com sucesso.", GetPlayerNameEx(targetid));
-    SendClientMessageToAll(-1, "{ff3399}[ ILHA ] O jogador {ff3399}%s foi {ffffff}perdoado e foi embora da ilha", GetPlayerNameEx(targetid));
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce soltou {33ff33}%s {ffffff}com sucesso.", GetPlayerNameStr(targetid));
+    SendClientMessageToAll(-1, "{ff3399}[ ILHA ] O jogador {ff3399}%s foi {ffffff}perdoado e foi embora da ilha", GetPlayerNameStr(targetid));
     return 1;
 }
 
@@ -479,7 +479,7 @@ YCMD:prenderoff(playerid, params[], help)
     if(targetid != INVALID_PLAYER_ID)
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] Jogador %s está online! {ffffff}Seu ID é {ff3333}%d", name, targetid);
 
-    if(!Punish::SetJail(name, GetPlayerNameEx(playerid), reason, clamp(minutes * 60000, 180000, 18000000)))
+    if(!Punish::SetJail(name, GetPlayerNameStr(playerid), reason, clamp(minutes * 60000, 180000, 18000000)))
         return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Houve um erro. Provalmente o jogador não existe nos dados!");
   
     SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce definiu {33ff33}%d {ffffff}minutos de cadeia para {33ff33}%s {ffffff}com sucesso.", minutes, name);
@@ -579,7 +579,7 @@ YCMD:setarskin(playerid, params[], help)
     SetPlayerSkin(targetid, skinid);
 
     SendClientMessage(targetid, -1, "{ff9933}[ AVISO ] {ffffff}Um admin alterou sua skin.");
-    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Você alterou a {33ff33}skin {ffffff}de %s. skinid : %d ", GetPlayerNameEx(targetid), skinid);
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Você alterou a {33ff33}skin {ffffff}de %s. skinid : %d ", GetPlayerNameStr(targetid), skinid);
  
     return 1;
 }
@@ -604,7 +604,7 @@ YCMD:setarvida(playerid, params[], help)
     SetPlayerHealth(targetid, health);
 
     SendClientMessage(targetid, -1, "{ff9933}[ AVISO ] {ffffff}Um admin alterou sua vida para %.1f%%.", health);
-    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce alterou a {33ff33}vida {ffffff}de %s para %.1f%%.", GetPlayerNameEx(targetid), health);
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce alterou a {33ff33}vida {ffffff}de %s para %.1f%%.", GetPlayerNameStr(targetid), health);
 
     return 1;
 }
@@ -629,7 +629,7 @@ YCMD:setarcolete(playerid, params[], help)
     SetPlayerArmour(targetid, floatclamp(armour, 0.0, 100.0));
 
     SendClientMessage(targetid, -1, "{ff9933}[ AVISO ] {ffffff}Um admin alterou seu colete para %.1f%%.", armour);
-    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce alterou o {33ff33}colete {ffffff}de %s para %.1f%%.", GetPlayerNameEx(targetid), armour);
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce alterou o {33ff33}colete {ffffff}de %s para %.1f%%.", GetPlayerNameStr(targetid), armour);
 
     return 1;
 }
@@ -709,8 +709,6 @@ YCMD:setadm(playerid, params[], help)
     if(!Adm::Set(name, admin_name, level))
         return SendClientMessage(playerid, COLOR_ERRO, "[ ADM ] {ffffff}Erro Fatal ao setar voce como fundador, procure um programador!");
 
-    Adm::Load(playerid);
-
     SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce promoveu {33ff33}%s {ffffff}com sucesso.", name);
     SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Cargo de promoção: %s%s", Adm::GetColorString(level), Adm::gRoleNames[level]);
     return 1;
@@ -752,7 +750,7 @@ YCMD:cgps(playerid, params[], help)
         return 1;
     }    
 
-    //if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER)) return 1;
+    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER)) return 1;
 
     new name[32], category[32], msg[512];
 

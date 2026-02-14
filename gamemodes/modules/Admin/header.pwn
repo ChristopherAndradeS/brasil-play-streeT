@@ -160,12 +160,15 @@ stock Adm::Set(const name[], const promoter[], level)
         "'%q', %i, '%q', '%q'", name, level, promoter, timestr);
 
         if(sucess)
-        {
-            SendClientMessage(targetid, COLOR_SUCESS,  "[ ADM ] {ffffff}Parabens! Voce faz parte da {33ff33}STAFF BPS");
-            SendClientMessage(targetid, COLOR_WARNING, "[ ADM ] {ffffff}Voce se tornou um {ff9933}admin! \
-            Cargo: %s%s",  Adm::GetColorString(level), Adm::gRoleNames[level]);
+        {  
+            if(targetid != INVALID_PLAYER_ID)
+            {
+                SendClientMessage(targetid, -1,  "{33ff33}[ ADM ] {ffffff}Parabens! Voce faz parte da {33ff33}STAFF BPS");
+                SendClientMessage(targetid, -1, "{ff9933}[ ADM ] {ffffff}Voce se tornou um {ff9933}admin! \
+                Cargo: %s%s",  Adm::GetColorString(level), Adm::gRoleNames[level]);
 
-            Adm::UpdateLevel(targetid, level);
+                Adm::Load(targetid);
+            }
 
             printf("[ ADMIN ] O jogador %s tornou-se admin. Nível: %d. Promotor: %s\n", name, level, promoter);
         }
@@ -184,7 +187,7 @@ stock Adm::Load(playerid)
 {
     new level;
 
-    if(!Adm::Exists(GetPlayerNameEx(playerid), level)) return 0;
+    if(!Adm::Exists(GetPlayerNameStr(playerid), level)) return 0;
     
     SetFlag(Admin[playerid][adm::flags], FLAG_IS_ADMIN);
     Admin[playerid][adm::lvl] = level;

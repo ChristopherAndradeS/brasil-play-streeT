@@ -30,9 +30,8 @@ stock Punish::VerifyPlayer(playerid)
             return 1;
         }
 
-        new ip[16], reason[64], admin_name[MAX_PLAYER_NAME], date[64], level;
+        new reason[64], admin_name[MAX_PLAYER_NAME], date[64], level;
 
-        DB::GetDataString(db_entity, "punishments", "name", ip, 16, "name = '%q' AND level = 2", name);
         DB::GetDataString(db_entity, "punishments", "reason", reason, 64, "name = '%q' AND level = 2", name);
         DB::GetDataString(db_entity, "punishments", "punished_by", admin_name, 24, "name = '%q' AND level = 2", name);
         DB::GetDataString(db_entity, "punishments", "date", date, 64, "name = '%q' AND level = 2", name);
@@ -259,9 +258,9 @@ stock Punish::UnsetJail(playerid)
 {
     if(!IsValidPlayer(playerid)) return 0;
 
-    if(!DB::Delete(db_entity, "punishments", "name = '%q' AND level = 1", GetPlayerNameEx(playerid)))
+    if(!DB::Delete(db_entity, "punishments", "name = '%q' AND level = 1", GetPlayerNameStr(playerid)))
     {
-        printf("[ DB (ERRO) ] Erro ao remover cadeia de %s", GetPlayerNameEx(playerid));
+        printf("[ DB (ERRO) ] Erro ao remover cadeia de %s", GetPlayerNameStr(playerid));
         return -1;
     }
 
@@ -272,7 +271,7 @@ stock Punish::UnsetJail(playerid)
     
     ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL);
 
-    printf("[ ILHA ] O jogador %s foi perdoado da cadeia staff", GetPlayerNameEx(playerid));
+    printf("[ ILHA ] O jogador %s foi perdoado da cadeia staff", GetPlayerNameStr(playerid));
 
     Login::SetPlayer(playerid);
 

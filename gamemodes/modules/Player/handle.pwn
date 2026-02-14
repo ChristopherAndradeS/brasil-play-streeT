@@ -97,7 +97,7 @@ hook OnPlayerLogin(playerid)
     if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL))
     {
         new time;
-        DB::GetDataInt(db_entity, "punishments", "left_tstamp", time, "name = '%q' AND level = 1", GetPlayerNameEx(playerid));
+        DB::GetDataInt(db_entity, "punishments", "left_tstamp", time, "name = '%q' AND level = 1", GetPlayerNameStr(playerid));
         
         Punish::SendPlayerToJail(playerid, time);
         SendClientMessage(playerid, -1, "{ff3399}[ PUNICAO ADM ] {ffffff}Voce ainda precisa cumprir sua pena aqui na ilha!");

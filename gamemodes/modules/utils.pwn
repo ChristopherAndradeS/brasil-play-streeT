@@ -198,7 +198,7 @@ stock GetVehicleNameByModel(modelid, vehname[], len = sizeof(vehname))
         format(vehname, len, "%s", g_arrVehicleNames[modelid - 400]);
 }
 
-stock GetPlayerNameEx(playerid)
+stock GetPlayerNameStr(playerid)
 {
 	new
 		name[MAX_PLAYER_NAME];

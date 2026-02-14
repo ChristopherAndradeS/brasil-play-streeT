@@ -11,7 +11,7 @@ stock Adm::UpdatePTDBar(playerid, textid, Float:barsize, Float:percent)
 
 stock Adm::UpdateTextDraw(playerid, targetid)
 {
-	Adm::UpdatePTDText(playerid, PTD_ADM_TXT_NAME, "JOGADOR: %s", GetPlayerNameEx(targetid));
+	Adm::UpdatePTDText(playerid, PTD_ADM_TXT_NAME, "JOGADOR: %s", GetPlayerNameStr(targetid));
 	Adm::UpdatePTDText(playerid, PTD_ADM_TXT_ID, "ID: %d", targetid);
 	Adm::UpdatePTDText(playerid, PTD_ADM_TXT_PING, "Ping: %d", GetPlayerPing(targetid));
 	Adm::UpdatePTDText(playerid, PTD_ADM_TXT_WORLD, "int: %d VW: %d", GetPlayerInterior(targetid), GetPlayerVirtualWorld(targetid));

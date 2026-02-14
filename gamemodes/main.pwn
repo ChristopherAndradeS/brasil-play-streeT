@@ -63,10 +63,7 @@
 /*                          VEHICLE                        */
 #include "../gamemodes/modules/Vehicle/commands.pwn"
 
-main() 
-{
-
-}
+main() {}
 
 public OnGameModeInit()
 {
@@ -120,12 +117,12 @@ public OnPlayerText(playerid, text[])
     {      
         Adm::SendMsgToAllTagged(FLAG_ADM_WORKING | FLAG_IS_ADMIN, 0xFFFF33AA, 
         "[ ADM CHAT ] %s%s {ffffff}: {ffff33}%s", 
-        Adm::GetColorString(Admin[playerid][adm::lvl]), GetPlayerNameEx(playerid), text);  
+        Adm::GetColorString(Admin[playerid][adm::lvl]), GetPlayerNameStr(playerid), text);  
 
         return 0;      
     }
 
-    SendClientMessageToAll(-1, "%s [ %d ] diz: %s", GetPlayerNameEx(playerid), playerid, text);
+    SendClientMessageToAll(-1, "%s [ %d ] diz: %s", GetPlayerNameStr(playerid), playerid, text);
 
     return 0;
 }
