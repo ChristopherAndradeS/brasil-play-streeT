@@ -10,6 +10,8 @@ stock Baseboard::IsVisibleTDForPlayer(playerid)
 
 stock Baseboard::ShowTDForPlayer(playerid)
 {
+	if(Baseboard::IsVisibleTDForPlayer(playerid)) return;
+
 	Baseboard::CreatePlayerTD(playerid);
 	
 	for(new i = 0; i < 13; i++)

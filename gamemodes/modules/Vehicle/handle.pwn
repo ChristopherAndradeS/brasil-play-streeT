@@ -127,7 +127,7 @@ stock GetVehicleSpeed(vehicleid)
             floatpower(vZ, 2)
         );
     
-    //195.121948
+    // Float:0x43431F38 = 195.121948
     return floatround(speed * Float:0x43431F38); 
 }
 
@@ -222,6 +222,25 @@ hook OnPlayerLeaveDynamicArea(playerid, STREAMER_TAG_AREA:areaid)
     return 1;
 }
 
+stock Veh::Create(modelid, Float:x, Float:y, Float:z, Float:rotation, c1, c2, interiorid, vw, flags)
+{
+    new vehicleid = CreateVehicle(modelid, x, y, z, rotation, c1, c2, -1);
+
+    Veh::UpdateParams(vehicleid, FLAG_PARAM_ENGINE, flags & FLAG_PARAM_ENGINE);
+    Veh::UpdateParams(vehicleid, FLAG_PARAM_LIGHTS, flags & FLAG_PARAM_LIGHTS);
+    Veh::UpdateParams(vehicleid, FLAG_PARAM_ALARM, flags & FLAG_PARAM_ALARM);
+    Veh::UpdateParams(vehicleid, FLAG_PARAM_DOORS, flags & FLAG_PARAM_DOORS);
+    Veh::UpdateParams(vehicleid, FLAG_PARAM_BONNET, flags & FLAG_PARAM_BONNET);
+    Veh::UpdateParams(vehicleid, FLAG_PARAM_BOOT, flags & FLAG_PARAM_BOOT);
+    Veh::UpdateParams(vehicleid, FLAG_PARAM_OBJECTIVE, flags & FLAG_PARAM_OBJECTIVE);
+
+    LinkVehicleToInterior(vehicleid, interiorid);
+
+    SetVehicleVirtualWorld(vehicleid, vw);
+
+    return vehicleid;
+}
+
 hook function CreateVehicle(modelid, Float:x, Float:y, Float:z, Float:rotation, colour1, colour2, respawn_delay, bool:add_siren = false)
 {
     new regionid = GetRegionFromXY(x, y);
@@ -234,19 +253,15 @@ hook function CreateVehicle(modelid, Float:x, Float:y, Float:z, Float:rotation, 
         
         if(regionid != INVALID_REGION_ID) 
             Veh::AddToRegion(vehicleid, regionid);
-
-        SetVehicleParamsEx(vehicleid, 0, 0, 0, 1, 0, 0, 0);
-        SetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_DOORS);
-        ResetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_ENGINE);
-        ResetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_LIGHTS);
-        ResetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_ALARM);
-        ResetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_BONNET);
-        ResetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_BOOT);
-        ResetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_OBJECTIVE);
-
     }
 
     return vehicleid;
+}
+
+stock Veh::Destroy(&vehicleid)
+{
+    DestroyVehicle(vehicleid);
+    vehicleid = INVALID_VEHICLE_ID;
 }
 
 hook function DestroyVehicle(vehicleid)

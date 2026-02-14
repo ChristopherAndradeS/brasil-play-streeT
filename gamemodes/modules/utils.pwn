@@ -1,5 +1,3 @@
-#include <YSI\YSI_Coding\y_hooks>
-
 #define abs(%0)                                 (((%0) < 0)?(-(%0)):((%0)))
 
 stock ClearChat(playerid, cells = 15)

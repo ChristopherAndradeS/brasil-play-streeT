@@ -69,6 +69,14 @@ hook OnPlayerDisconnect(playerid, reason)
         Player::KillTimer(playerid, pyr::TIMER_JAIL); 
     }
 
+    else if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME))
+    {
+        SetPlayerInterior(playerid, 0);
+        SetPlayerVirtualWorld(playerid, 0);
+        Game::RemovePlayer(game::Player[playerid][pyr::gameid], playerid);
+        Game::ClearPlayer(playerid);
+    }
+
     else
     {
         new Float:pX, Float:pY, Float:pZ, Float:pA;

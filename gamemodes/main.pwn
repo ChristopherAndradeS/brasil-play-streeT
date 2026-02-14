@@ -20,19 +20,21 @@
 #include "../gamemodes/modules/utils.pwn"
 /*                          HEADERS                        */
 #include "../gamemodes/modules/DB/header.pwn"
+#include "../gamemodes/modules/Vehicle/header.pwn"
 #include "../gamemodes/modules/Server/header.pwn" 
 #include "../gamemodes/modules/TextDraws/header.pwn"
 #include "../gamemodes/modules/Player/header.pwn"
 #include "../gamemodes/modules/Admin/header.pwn"
 #include "../gamemodes/modules/Maps/header.pwn"
-#include "../gamemodes/modules/Vehicle/header.pwn"
+#include "../gamemodes/modules/Games/header.pwn"
 /*                          HANDLE                          */
 #include "../gamemodes/modules/Server/handle.pwn"
+#include "../gamemodes/modules/Vehicle/handle.pwn"
 #include "../gamemodes/modules/Player/handle.pwn"
 #include "../gamemodes/modules/Admin/handle.pwn"
 #include "../gamemodes/modules/DB/handle.pwn"
 #include "../gamemodes/modules/Maps/handle.pwn"
-#include "../gamemodes/modules/Vehicle/handle.pwn"
+#include "../gamemodes/modules/Games/handle.pwn"
 /*                          SERVER                          */
 #include "../gamemodes/modules/Server/wheather.pwn"
 #include "../gamemodes/modules/Server/players.pwn"
@@ -62,25 +64,14 @@
 #include "../gamemodes/modules/Admin/panel.pwn"
 /*                          VEHICLE                        */
 #include "../gamemodes/modules/Vehicle/commands.pwn"
+/*                          GAME                        */
+#include "../gamemodes/modules/Games/commands.pwn"
+// -- HEADERS 
+#include "../gamemodes/modules/Games/Race/header.pwn"
+// -- HANDLES
+//#include "../gamemodes/modules/Games/Race/handle.pwn"
 
 main() {}
-
-public OnGameModeInit()
-{
-    // CA_Init();
-
-    // new Float:pX, Float:pY, Float:pZ;
-
-    // for(new i = 0; i < 500; i++)
-    // {
-    //     pX = Float:RandomFloatMinMax(0, 3000.0);
-    //     pY = Float:RandomFloatMinMax(0, 3000.0);
-    //     CA_FindZ_For2DCoord(pX, pY, pZ);
-    //     CreateVehicle(RandomMinMax(400, 600), pX, pY, pZ + 1.0,  0.0, RandomMinMax(0, 10), RandomMinMax(0, 10), -1); 
-    // }
-
-    return 1;
-}
 
 public OnGameModeExit()
 {
@@ -214,8 +205,30 @@ YCMD:veh(playerid, params[], help)
 
 YCMD:teste(playerid, params[], help)
 {
-    SetPlayerPos(playerid, -1403.0116, -250.4526, 1043.5341);
-    SetPlayerInterior(playerid, 7);
-    PlayerPlaySound(playerid, 1);
+    SendClientMessage(playerid, -1, "%d veiculos", GetVehicleModelCount(571));
+    SendClientMessage(playerid, -1, "%d seat", game::Player[playerid][pyr::seat]);
+    SendClientMessage(playerid, -1, "%d gameid", game::Player[playerid][pyr::gameid]);
+    SendClientMessage(playerid, -1, "%d vw", GetPlayerVirtualWorld(playerid));
+    SendClientMessage(playerid, -1, "0x%08x flags", game::Player[playerid][pyr::flags]);
+    return 1;
+}
+
+YCMD:games(playerid, params[], help)
+{
+
+    new gameid = strval(params);
+ 
+    //GAME_STATES:game_state,
+
+    SendClientMessage(playerid, -1, "%s nome", Game[gameid][game::name]);
+    SendClientMessage(playerid, -1, "%d tipo", _:Game[gameid][game::type]);
+    SendClientMessage(playerid, -1, "%d vw", Game[gameid][game::vw]);
+    SendClientMessage(playerid, -1, "%d star_time", Game[gameid][game::start_time]);
+    SendClientMessage(playerid, -1, "%d min_player", Game[gameid][game::min_players]);
+    SendClientMessage(playerid, -1, "%d max_playes", Game[gameid][game::max_players]);
+    SendClientMessage(playerid, -1, "%d playes count", Game[gameid][game::players_count]);
+    SendClientMessage(playerid, -1, "%d state", _:Game[gameid][game_state]);
+    SendClientMessage(playerid, -1, "0x%08x flags", Game[gameid][game::flags]);
+
     return 1;
 }

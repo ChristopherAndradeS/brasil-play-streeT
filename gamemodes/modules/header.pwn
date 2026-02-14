@@ -38,6 +38,10 @@
 #define Baseboard::         bboard_
 #define Group::             GP_
 #define Prision::           PRS_
+#define Game::              Game_
+#define game::              game_
+#define Race::              Race_
+#define race::              race_
 
 /*          DEFINES          */
 #define DISCORD_LINK        "https://discord.gg/Czq6DWDvcB"

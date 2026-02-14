@@ -37,6 +37,8 @@ stock Adm::IsVisibleTDForPlayer(playerid)
 
 stock Adm::ShowTDForPlayer(playerid)
 { 
+	if(Adm::IsVisibleTDForPlayer(playerid)) return;
+
 	Adm::CreatePlayerTD(playerid);
 
     for(new i = 0; i < 14; i++)

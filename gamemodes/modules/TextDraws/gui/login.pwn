@@ -2,6 +2,8 @@
 
 stock Login::ShowTDForPlayer(playerid, bool:in_login)
 { 
+	if(Login::IsVisibleTDForPlayer(playerid)) return;
+
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 

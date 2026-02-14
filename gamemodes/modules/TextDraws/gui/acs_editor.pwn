@@ -14,6 +14,8 @@ stock Acessory::IsVisibleTDForPlayer(playerid)
 
 stock Acessory::ShowTDForPlayer(playerid)
 { 
+	if(Acessory::IsVisibleTDForPlayer(playerid)) return;
+	
 	Acessory::CreatePlayerTD(playerid);
 
     for(new i = 0; i < 21; i++)

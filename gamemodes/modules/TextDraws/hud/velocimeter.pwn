@@ -21,6 +21,8 @@ stock Veh::IsVisibleTDForPlayer(playerid)
 
 stock Veh::ShowTDForPlayer(playerid)
 {
+	if(Baseboard::IsVisibleTDForPlayer(playerid)) return;
+	
 	Veh::CreatePlayerTD(playerid);
 	
 	for(new i = 0; i < 11; i++)

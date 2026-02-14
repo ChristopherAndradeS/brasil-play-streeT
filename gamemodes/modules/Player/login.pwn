@@ -65,7 +65,7 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
                 return 1;
             }
             
-            format(Player[playerid][pyr::pass], 16, stext);
+            format(Player[playerid][pyr::pass], 16, "%s", stext);
 
             Login::RegisterPlayer(playerid);
 

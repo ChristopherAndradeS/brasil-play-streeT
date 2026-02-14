@@ -32,8 +32,6 @@ hook OnServerUpdateMilis()
     {
         if(IsFlagSet(Vehicle[i][veh::flags], FLAG_VEH_IS_DEAD)) continue;
         
-        printf("teste");
-        
         GetVehicleHealth(i, health);
         if(Vehicle[i][veh::health] != health)
         {
