@@ -1,6 +1,7 @@
 #define MAX_RACE_VEHICLES       (5)
 #define MAX_RACE_PARTICIPANTS   (5)
 #define MAX_GAME_RACES          (5)
+#define MAX_LAPS                (3)
 #define INVALID_RACE_ID         (-1)
 
 /* ------------------- Tabelas globais da corrida -------------------- */
@@ -15,7 +16,7 @@ new const Float:Race::gVehicleSpawns[][4] =
 };
 
 // Checkpoints sequenciais (X, Y, Z)
-stock const Float:Race::gCheckpoints[][3] =
+new const Float:Race::gCheckpoints[][3] =
 {
     {-1395.7150, -216.3227, 1042.4036}, // check1
     {-1407.3843, -150.4694, 1043.2502}, // check2
@@ -31,7 +32,7 @@ enum E_GAME_RACE
 {
     race::gameid,
     race::flags,
-    List:podium[MAX_RACE_PARTICIPANTS],
+    List:podium,
     race::vehicleid[MAX_RACE_VEHICLES],
 }
 
@@ -42,8 +43,8 @@ enum E_RACE_PART
 }
 
 new game::Race[MAX_GAME_RACES][E_GAME_RACE];
-
-new race::Player[MAX_RACE_PARTICIPANTS][]
+new race::Player[MAX_PLAYERS][E_RACE_PART];
+new Race::IndexByGameID[MAX_GAMES] = {INVALID_RACE_ID, ...};
 
 enum (<<= 1)
 {
@@ -53,18 +54,17 @@ enum (<<= 1)
 stock Race::Create(gameid, notify = false)
 {
     new raceid = Race::GetFreeSlotID();
-
     if(raceid == INVALID_RACE_ID) return 0;
 
     game::Race[raceid][race::podium] = list_new();
-
     game::Race[raceid][race::gameid] = gameid;
     SetFlag(game::Race[raceid][race::flags], FLAG_RACE_CREATED);
+    Race::IndexByGameID[gameid] = raceid;
 
     for(new i = 0; i < MAX_RACE_VEHICLES; i++)
     {
-        game::Race[raceid][race::vehicleid][i] = Veh::Create(571, 
-        Race::gVehicleSpawns[i][0], Race::gVehicleSpawns[i][1], Race::gVehicleSpawns[i][2], 
+        game::Race[raceid][race::vehicleid][i] = Veh::Create(571,
+        Race::gVehicleSpawns[i][0], Race::gVehicleSpawns[i][1], Race::gVehicleSpawns[i][2],
         Race::gVehicleSpawns[i][3], RandomMinMax(3, 12), RandomMinMax(3, 12), 7, Game[gameid][game::vw], 0);
     }
 
@@ -72,30 +72,29 @@ stock Race::Create(gameid, notify = false)
         SendClientMessageToAll(-1, "{ff5533}[ CORRIDA KART ] {ffffff}Um novo evento foi criado. Digite {ff5533}/evento {ffffff}para conferir");
 
     printf("[ CORRIDA ] Corrida %d criada com sucesso\n", raceid);
-    
     return 1;
 }
 
 stock Race::Destroy(gameid, const name[])
 {
     new raceid = Race::GetIDByGameID(gameid);
-
     if(raceid == INVALID_RACE_ID) return 0;
 
     for(new i = 0; i < MAX_RACE_VEHICLES; i++)
         Veh::Destroy(game::Race[raceid][race::vehicleid][i]);
-    
-    list_destroy(game::Race[raceid][race::podium]);
+
+    if(list_valid(game::Race[raceid][race::podium]))
+        list_destroy(game::Race[raceid][race::podium]);
 
     game::Race[raceid][race::gameid] = INVALID_GAME_ID;
     game::Race[raceid][race::flags] = 0;
+    Race::IndexByGameID[gameid] = INVALID_RACE_ID;
 
     printf("[ EVENTO ] Evento %s destruido com sucesso\n", name);
-    
     return 1;
 }
 
-stock Race::AddPodium(playerid, raceid)   
+stock Race::AddPodium(playerid, raceid)
 {
     if(!list_valid(game::Race[raceid][race::podium])) return 0;
 
@@ -108,12 +107,13 @@ stock Race::AddPodium(playerid, raceid)
     return 0;
 }
 
-stock Race::RemPodium(playerid, raceid, reason)   
-{   
+stock Race::RemPodium(playerid, raceid, reason)
+{
+    #pragma unused reason
+
     if(!list_valid(game::Race[raceid][race::podium])) return 0;
 
     new idx = list_find(game::Race[raceid][race::podium], playerid);
-
     if(idx != -1)
     {
         list_remove(game::Race[raceid][race::podium], idx);
@@ -125,10 +125,23 @@ stock Race::RemPodium(playerid, raceid, reason)
 
 stock Race::GetIDByGameID(gameid)
 {
+    if(gameid < 0 || gameid >= MAX_GAMES)
+        return INVALID_RACE_ID;
+
+    new raceid = Race::IndexByGameID[gameid];
+
+    if(raceid >= 0 && raceid < MAX_GAME_RACES && GetFlag(game::Race[raceid][race::flags], FLAG_RACE_CREATED))
+        return raceid;
+
     for(new i = 0; i < MAX_GAME_RACES; i++)
-        if(game::Race[i][race::gameid] == gameid)
+    {
+        if(game::Race[i][race::gameid] == gameid && GetFlag(game::Race[i][race::flags], FLAG_RACE_CREATED))
+        {
+            Race::IndexByGameID[gameid] = i;
             return i;
-    
+        }
+    }
+
     return INVALID_RACE_ID;
 }
 
@@ -137,72 +150,77 @@ stock Race::GetFreeSlotID()
     for(new i = 0; i < MAX_GAME_RACES; i++)
         if(!GetFlag(game::Race[i][race::flags], FLAG_RACE_CREATED))
             return i;
-    
+
     return INVALID_RACE_ID;
 }
 
 stock Race::GetPodiumPlace(raceid, playerid)
 {
     if(!list_valid(game::Race[raceid][race::podium])) return 0;
-    return (list_find(game::Race[raceid][race::podium], playerid) + 1);   
+    return (list_find(game::Race[raceid][race::podium], playerid) + 1);
 }
 
 stock Race::SendPlayer(playerid, gameid)
 {
-    game::Player[playerid][pyr::raceid] =  Race::GetIDByGameID(gameid);
+    game::Player[playerid][pyr::raceid] = Race::GetIDByGameID(gameid);
     SetPlayerPos(playerid, -1403.0116, -250.4526, 1043.5341);
     SetPlayerInterior(playerid, 7);
     SetPlayerVirtualWorld(playerid, Game[gameid][game::vw]);
     SendClientMessage(playerid, -1, "{ff5533}[ EVENTO ] {ffffff}Você entrou no evento {ff5533}%s.", Game[gameid][game::name]);
 }
 
-stock Race::UpdatePlayerCheck(playerid, laps, checkid)
+stock Race::UpdatePlayerCheck(playerid, lap, checkid)
 {
     new raceid = game::Player[playerid][pyr::raceid];
-    new len = list_size(game::Race[raceid][race::podium]);
 
-    SetPlayerCheckpoint(playerid, 
+    if(raceid == INVALID_RACE_ID || !list_valid(game::Race[raceid][race::podium]))
+        return 0;
+
+    SetPlayerCheckpoint(playerid,
     Race::gCheckpoints[checkid][0], Race::gCheckpoints[checkid][1], Race::gCheckpoints[checkid][2], 2.5);
 
-    race::Player[playerid][race::checkid] = check;
-    race::Player[playerid][race::lap] = laps;
+    race::Player[playerid][race::checkid] = checkid;
+    race::Player[playerid][race::lap] = lap;
 
     new place = Race::GetPodiumPlace(raceid, playerid);
+    new len = list_size(game::Race[raceid][race::podium]);
 
     SendClientMessage(playerid, -1, "{44ff66}[ CORRIDA ] {ffffff}Checkpoint {44ff66}%d/%d {ffffff}| Volta: {44ff66}%d/%d {ffffff}| Posição: {44ff66}%dº Lugar",
-    checkid + 1, sizeof(gCheckpoints), laps, MAX_LAPS, place, len);
+    checkid + 1, sizeof(Race::gCheckpoints), lap, MAX_LAPS, place, len);
+
+    return 1;
 }
 
 stock Race::UpdatePodium(gameid)
 {
-    new raceid = Race::GetIDByGameID(gameid);
-    
-    new len = list_size(game::Race[raceid][race::podium]);
-
-    for(new i )
+    #pragma unused gameid
+    return 1;
 }
 
 stock Race::Ready(gameid)
 {
     new raceid = Race::GetIDByGameID(gameid);
+    if(raceid == INVALID_RACE_ID) return 0;
 
-    for(new i = 0; i < Game[gameid][game::players_count]; i++)
+    for(new i = 0; i < Game[gameid][game::max_players]; i++)
     {
         new playerid = Game[gameid][game::players][i];
 
         if(playerid != INVALID_PLAYER_ID)
         {
-            Race::AddPodium(playerid, raceid); 
-        
+            Race::AddPodium(playerid, raceid);
+
             ResetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_WAITING);
             SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING);
 
-            PutPlayerInVehicle(game::Race[raceid][race::vehicleid][i]);
+            PutPlayerInVehicle(playerid, game::Race[raceid][race::vehicleid][i], 0);
             TogglePlayerControllable(playerid, false);
             Veh::UpdateParams(game::Race[raceid][race::vehicleid][i], FLAG_PARAMS_ENGINE, 1);
         }
         else
+        {
             Veh::Destroy(game::Race[raceid][race::vehicleid][i]);
+        }
     }
 
     return 1;
@@ -210,50 +228,72 @@ stock Race::Ready(gameid)
 
 stock Race::Start(gameid)
 {
-    new raceid = Race::GetIDByGameID(gameid);
-
-    for(new i = 0; i < Game[gameid][game::players_count]; i++)
+    for(new i = 0; i < Game[gameid][game::max_players]; i++)
     {
         new playerid = Game[gameid][game::players][i];
 
         if(playerid != INVALID_PLAYER_ID)
         {
-            race::Player[i][race::checkid] = 0;
-            race::Player[i][race::laps]    = 0;
-
-            Race::UpdateCheck(playerid, 0, 0);
+            Race::UpdatePlayerCheck(playerid, 1, 0);
             TogglePlayerControllable(playerid, true);
-            Race::UpdateCheck(playerid, i, race::Player[i][race::checkid]);
         }
     }
-    
+
     return 1;
 }
 
 stock Race::Update(gameid)
 {
     Race::UpdatePodium(gameid);
-
-    //AQUI VÃO FUNÇÕES QUE EXECUTARAM DE 1 EM 1segundo para atualizar a corrida
     return 1;
 }
 
 stock Race::Finish(gameid)
 {
-    /* Aqui deve remover todos os jogadores do veículo que ainda estiverem na corrida e executar Player::Spawn(playerid)
-    e tocar o soundid 31202 */
+    for(new i = 0; i < Game[gameid][game::max_players]; i++)
+    {
+        new playerid = Game[gameid][game::players][i];
+
+        if(playerid == INVALID_PLAYER_ID) continue;
+
+        DisablePlayerCheckpoint(playerid);
+        RemovePlayerFromVehicle(playerid);
+        SetPlayerInterior(playerid, 0);
+        SetPlayerVirtualWorld(playerid, 0);
+        Player::Spawn(playerid);
+        PlayerPlaySound(playerid, 31202, 0.0, 0.0, 0.0);
+    }
 
     return 1;
 }
 
 stock Race::GiveRewards(gameid)
 {
-    /* Aqui deve enviar uma mensagem personalizada de bonificação para os 3 melhores colocados:
-    
-    1º 350.0 / 2º 200.0 / 3º 150.0 
-    
-    Use a função Player::GiveMoney(playerid, Float:price) para isso
+    new raceid = Race::GetIDByGameID(gameid);
+    if(raceid == INVALID_RACE_ID || !list_valid(game::Race[raceid][race::podium])) return 0;
 
-    */
+    new len = list_size(game::Race[raceid][race::podium]);
+
+    for(new i = 0; i < len; i++)
+    {
+        new playerid = list_get(game::Race[raceid][race::podium], i);
+        if(playerid == INVALID_PLAYER_ID || !IsPlayerConnected(playerid)) continue;
+
+        new Float:reward = 0.0;
+
+        switch(i)
+        {
+            case 0: reward = 350.0;
+            case 1: reward = 200.0;
+            case 2: reward = 150.0;
+        }
+
+        if(reward > 0.0)
+        {
+            Player::GiveMoney(playerid, reward);
+            SendClientMessage(playerid, -1, "{44ff66}[ CORRIDA ] {ffffff}Premiação da corrida: {44ff66}R$ %.2f{ffffff} por terminar em {44ff66}%dº{ffffff}.", reward, i + 1);
+        }
+    }
+
     return 1;
 }
