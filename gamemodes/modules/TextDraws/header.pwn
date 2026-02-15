@@ -144,6 +144,6 @@ hook OnPlayerDisconnect(playerid, reason)
     Acessory::HideTDForPlayer(playerid);
     Adm::HideTDForPlayer(playerid);
     Veh::HideTDForPlayer(playerid);
-
+    
     return 1;
 }

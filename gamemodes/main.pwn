@@ -239,7 +239,6 @@ YCMD:teste(playerid, params[], help)
 
 YCMD:games(playerid, params[], help)
 {
-
     new gameid = strval(params);
 
     SendClientMessage(playerid, -1, "%s nome", Game[gameid][game::name]);
@@ -251,6 +250,35 @@ YCMD:games(playerid, params[], help)
     SendClientMessage(playerid, -1, "%d playes count", Game[gameid][game::players_count]);
     SendClientMessage(playerid, -1, "%d state", _:Game[gameid][game_state]);
     SendClientMessage(playerid, -1, "0x%08x flags", Game[gameid][game::flags]);
+
+    return 1;
+}
+
+YCMD:kill(playerid, params[], help)
+{
+    SetPlayerHealth(playerid, 0);
+    return 1;
+}
+
+YCMD:teste2(playerid, params[], help)
+{
+    for(new PlayerText:i = PlayerText:0; i < MAX_PLAYER_TEXT_DRAWS; i++)
+    {
+        if(IsValidPlayerTextDraw(playerid, i))
+        {
+            printf("PlayerTextDraw %d is valid", i);
+            //PlayerTextDrawShow(playerid, i);
+        }
+    }
+
+    for(new Text:i = Text:0; i < MAX_TEXT_DRAWS; i++)
+    {
+        if(IsValidTextDraw(i))
+        {
+            printf("TextDraw %d is valid", i);
+            //PlayerTextDrawShow(playerid, i);
+        }
+    }
 
     return 1;
 }

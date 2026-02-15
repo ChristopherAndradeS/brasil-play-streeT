@@ -53,7 +53,14 @@ hook OnPlayerDisconnect(playerid, reason)
     {
         return -1;
     }
-
+    
+    if(IsValidTimer(pyr::Timer[playerid][pyr::TIMER_SPEEDOMETER]) || Veh::IsVisibleTDForPlayer(playerid))
+    {
+        printf("entrou");
+        Player::KillTimer(playerid, pyr::TIMER_SPEEDOMETER);
+        Veh::HideTDForPlayer(playerid);
+    }
+    
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 
@@ -76,19 +83,20 @@ hook OnPlayerDisconnect(playerid, reason)
         Player::KillTimer(playerid, pyr::TIMER_JAIL); 
     }
 
-    if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME))
+    if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_WAITING))
     {
+        new gameid = game::Player[playerid][pyr::gameid];
         SetPlayerInterior(playerid, 0);
         SetPlayerVirtualWorld(playerid, 0);
-        Game::RemovePlayer(game::Player[playerid][pyr::gameid], playerid);
-        Game::ClearPlayer(playerid);
+        Game::RemovePlayer(gameid, playerid);
     }
 
     else if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING)) 
     {
         new gameid = game::Player[playerid][pyr::gameid];
+        SetPlayerInterior(playerid, 0);
+        SetPlayerVirtualWorld(playerid, 0);
         Race::EliminatePlayer(playerid, gameid);
-        Game::ClearPlayer(playerid);
     }
 
     else

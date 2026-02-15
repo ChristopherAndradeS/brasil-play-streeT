@@ -173,21 +173,24 @@ stock Race::GetPodiumPlace(raceid, playerid)
 stock Race::EliminatePlayer(playerid, gameid)
 {   
     new raceid = game::Player[playerid][pyr::raceid];
-
+    
     if(raceid == INVALID_RACE_ID || !list_valid(game::Race[raceid][race::podium]))
         return 0;
-
+    
+    Game::SendMessageToAll(gameid, 
+    "{ff5533}[ CORRIDA ] {ffffff}O corredor {ff5533}%s {ffffff}desistiu da corrida", GetPlayerNameStr(playerid));
+    
     Race::RemPodium(playerid, raceid, 1);
+    
     game::Player[playerid][pyr::flags] = 0;
     SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_ELIMINATED);
     Race::UpdatePodium(gameid);
     DisablePlayerCheckpoint(playerid);
     RemovePlayerFromVehicle(playerid);
-
     Veh::Destroy(race::Player[playerid][race::vehicleid]);
     SetPlayerInterior(playerid, 0);
     SetPlayerVirtualWorld(playerid, 0);
-
+    
     Player::Spawn(playerid);
 
     Game::ClearPlayer(playerid);
