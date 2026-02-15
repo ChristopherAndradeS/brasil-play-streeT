@@ -11,7 +11,8 @@ hook OnGameModeInit()
         DB::CreateTable(db_entity, "players", 
         "uid             INTEGER PRIMARY KEY AUTOINCREMENT,\
         name            VARCHAR(24) NOT NULL UNIQUE,\
-        pass            VARCHAR(16) NOT NULL,\
+        pass            CHAR(64) NOT NULL,\
+        pass_salt       CHAR(32) NOT NULL,\
         ip              VARCHAR(16) NOT NULL,\
         payday_tleft    INTEGER,\
         bitcoin         INTEGER,\
@@ -60,7 +61,36 @@ hook OnGameModeInit()
         ");
     }
 
-    else db_entity = DB_Open("entitys.db");
+    else
+    {
+        db_entity = DB_Open("entitys.db");
+
+        new DBResult:result = DB_ExecuteQuery(db_entity, "PRAGMA table_info(players);");
+        new bool:has_pass_salt = false;
+
+        if(result)
+        {
+            while(DB_SelectNextRow(result))
+            {
+                new column_name[32];
+                DB_GetFieldString(result, 1, column_name, sizeof(column_name));
+
+                if(!strcmp(column_name, "pass_salt", true))
+                {
+                    has_pass_salt = true;
+                    break;
+                }
+            }
+
+            DB_FreeResultSet(result);
+        }
+
+        if(!has_pass_salt)
+        {
+            printf("[ DB ] Atualizando tabela players para suportar hash SHA-256 com salt...");
+            DB_ExecuteQuery(db_entity, "ALTER TABLE players ADD COLUMN pass_salt CHAR(32) DEFAULT '';");
+        }
+    }
 
     if(!fexist("stocks.db"))
     {
