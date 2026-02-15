@@ -3,6 +3,7 @@
 #include <open.mp>
 #include <sscanf2>
 #include <streamer>
+#include <samp_bcrypt>
 #include <PawnPlus>
 
 #define CGEN_MEMORY 20000

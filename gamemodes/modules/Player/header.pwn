@@ -311,7 +311,7 @@ stock Login::IsValidPassword(const text[], &issue)
     return 1;
 }
 
-stock Login::GenerateSalt(output[], size = sizeof(output))
+stock Login::GenerateSalt(playerid, output[], size = sizeof(output))
 {
     if(size < 2)
         return 0;
@@ -319,6 +319,8 @@ stock Login::GenerateSalt(output[], size = sizeof(output))
     new entropy[96], hash[65];
     format(entropy, sizeof(entropy), "%d:%d:%d:%d", gettime(), GetTickCount(), random(cellmax), random(cellmax));
     SHA256_Hash(entropy, "BPS_LOGIN_SALT", hash, sizeof(hash));
+
+    bcrypt_hash(playerid, const callback[], const input[], cost, const args[] = "", {Float, _}:...)
 
     strmid(output, hash, 0, size - 1, size);
 

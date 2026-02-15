@@ -65,8 +65,12 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
                 return 1;
             }
             
-            if(!Login::GenerateSalt(Player[playerid][pyr::pass_salt], sizeof(Player[][pyr::pass_salt]))
-            || !Login::HashPassword(stext, Player[playerid][pyr::pass_salt], Player[playerid][pyr::pass], sizeof(Player[][pyr::pass])))
+            bcrypt_hash(playerid, "OnPasswordHashFinished", stext, BCRYPT_COST);
+
+            new sucess = Login::GenerateSalt(Player[playerid][pyr::pass_salt]);
+            sucess = (sucess && Login::HashPassword(stext, Player[playerid][pyr::pass_salt], Player[playerid][pyr::pass]));
+            
+            if(!sucess)
             {
                 SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Falha ao processar sua senha de forma segura, tente novamente.");
                 return 1;
@@ -159,6 +163,11 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
     }
 
     return 1;
+}
+
+public OnPasswordHashFinished(playerid, hashid)
+{
+    
 }
 
 stock Login::SetPlayer(playerid)

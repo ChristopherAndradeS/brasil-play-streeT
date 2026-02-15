@@ -61,37 +61,6 @@ hook OnGameModeInit()
         ");
     }
 
-    else
-    {
-        db_entity = DB_Open("entitys.db");
-
-        new DBResult:result = DB_ExecuteQuery(db_entity, "PRAGMA table_info(players);");
-        new bool:has_pass_salt = false;
-
-        if(result)
-        {
-            while(DB_SelectNextRow(result))
-            {
-                new column_name[32];
-                DB_GetFieldString(result, 1, column_name, sizeof(column_name));
-
-                if(!strcmp(column_name, "pass_salt", true))
-                {
-                    has_pass_salt = true;
-                    break;
-                }
-            }
-
-            DB_FreeResultSet(result);
-        }
-
-        if(!has_pass_salt)
-        {
-            printf("[ DB ] Atualizando tabela players para suportar hash SHA-256 com salt...");
-            DB_ExecuteQuery(db_entity, "ALTER TABLE players ADD COLUMN pass_salt CHAR(32) DEFAULT '';");
-        }
-    }
-
     if(!fexist("stocks.db"))
     {
         printf("[ DB ] Arquivo \"stocks.db\" não encontrado, gerando um novo...\n");
