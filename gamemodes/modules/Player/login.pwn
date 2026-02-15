@@ -65,7 +65,12 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
                 return 1;
             }
             
-            format(Player[playerid][pyr::pass], 16, "%s", stext);
+            if(!Login::GenerateSalt(Player[playerid][pyr::pass_salt], sizeof(Player[][pyr::pass_salt]))
+            || !Login::HashPassword(stext, Player[playerid][pyr::pass_salt], Player[playerid][pyr::pass], sizeof(Player[][pyr::pass])))
+            {
+                SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Falha ao processar sua senha de forma segura, tente novamente.");
+                return 1;
+            }
 
             Login::RegisterPlayer(playerid);
 
@@ -90,10 +95,37 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
             new name[MAX_PLAYER_NAME];
             GetPlayerName(playerid, name);
             
-            DB::GetDataString(db_entity, "players", "pass", Player[playerid][pyr::pass], 16, "name = '%q'", name);
+            new db_hash[65], db_salt[33], input_hash[65];
+            DB::GetDataString(db_entity, "players", "pass", db_hash, sizeof(db_hash), "name = '%q'", name);
+            DB::GetDataString(db_entity, "players", "pass_salt", db_salt, sizeof(db_salt), "name = '%q'", name);
 
-            if(strcmp(stext, Player[playerid][pyr::pass]))
-            {  
+            if(!db_hash[0])
+            {
+                Dialog_ShowCallback(playerid, using inline dialog_login, DIALOG_STYLE_PASSWORD, "{ffffff}BPS {ff3333}| {ffffff}Login", 
+                "{ff3333}[ x ] {ffffff}Senha {ff3333}incorreta!\n\n\
+                >> {ffffff}Digite sua {ff3333}senha {ff3333}novamente!:\n\n", "Inserir", "Fechar");
+                return 1;
+            }
+
+            if(!db_salt[0])
+            {
+                if(strcmp(stext, db_hash))
+                {
+                    Dialog_ShowCallback(playerid, using inline dialog_login, DIALOG_STYLE_PASSWORD, "{ffffff}BPS {ff3333}| {ffffff}Login", 
+                    "{ff3333}[ x ] {ffffff}Senha {ff3333}incorreta!\n\n\
+                    >> {ffffff}Digite sua {ff3333}senha {ff3333}novamente!:\n\n", "Inserir", "Fechar");
+                    return 1;
+                }
+
+                if(Login::GenerateSalt(db_salt, sizeof(db_salt)) && Login::HashPassword(stext, db_salt, db_hash, sizeof(db_hash)))
+                {
+                    DB::SetDataString(db_entity, "players", "pass", db_hash, "name = '%q'", name);
+                    DB::SetDataString(db_entity, "players", "pass_salt", db_salt, "name = '%q'", name);
+                }
+            }
+
+            else if(!Login::HashPassword(stext, db_salt, input_hash, sizeof(input_hash)) || strcmp(input_hash, db_hash))
+            {
                 Dialog_ShowCallback(playerid, using inline dialog_login, DIALOG_STYLE_PASSWORD, "{ffffff}BPS {ff3333}| {ffffff}Login", 
                 "{ff3333}[ x ] {ffffff}Senha {ff3333}incorreta!\n\n\
                 >> {ffffff}Digite sua {ff3333}senha {ff3333}novamente!:\n\n", "Inserir", "Fechar");
@@ -189,8 +221,8 @@ stock Login::RegisterPlayer(playerid)
     GetPlayerName(playerid, name);
     GetPlayerIp(playerid, ip);
 
-    new status = DB::Insert(db_entity, "players", "name, pass, ip, payday_tleft, bitcoin, money, pX, pY, pZ, pA, \
-    score, skinid, orgid", "'%q', '%q', '%q', %i, %i, %f, %f, %f, %f, %f, %i, %i, %i", name, Player[playerid][pyr::pass], ip, 
+    new status = DB::Insert(db_entity, "players", "name, pass, pass_salt, ip, payday_tleft, bitcoin, money, pX, pY, pZ, pA, \
+    score, skinid, orgid", "'%q', '%q', '%q', '%q', %i, %i, %f, %f, %f, %f, %f, %i, %i, %i", name, Player[playerid][pyr::pass], Player[playerid][pyr::pass_salt], ip, 
     3600000, 0, 500.0, 834.28 + RandomFloat(2.0), -1834.89 + RandomFloat(2.0), 12.502, 180.0,
     1, random(300), 0);
 
