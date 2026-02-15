@@ -21,7 +21,7 @@ stock Veh::IsVisibleTDForPlayer(playerid)
 
 stock Veh::ShowTDForPlayer(playerid)
 {
-	if(Baseboard::IsVisibleTDForPlayer(playerid)) return;
+	if(Veh::IsVisibleTDForPlayer(playerid)) return;
 	
 	Veh::CreatePlayerTD(playerid);
 	
@@ -45,6 +45,15 @@ stock Veh::HideTDForPlayer(playerid)
         PlayerTextDrawHide(playerid, Veh::PlayerTD[playerid][i]); 
 
 	Veh::DestroyPlayerTD(playerid);
+}
+
+stock Veh::DestroyPublicTD()
+{
+    for(new i = 0; i < 11; i++)
+	{
+    	TextDrawDestroy(playerid, Veh::PublicTD[i]);
+		Veh::PublicTD[i] = INVALID_PLAYER_TEXT_DRAW;
+	}
 }
 
 stock Veh::DestroyPlayerTD(playerid)

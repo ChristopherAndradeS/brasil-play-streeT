@@ -47,6 +47,15 @@ stock Acessory::DestroyPlayerTD(playerid)
 	}
 }
 
+stock Acessory::DestroyPublicTD()
+{
+    for(new i = 0; i < 21; i++)
+	{
+    	TextDrawDestroy(playerid, Acessory::PublicTD[i]);
+		Acessory::PublicTD[i] = INVALID_PLAYER_TEXT_DRAW;
+	}
+}
+
 stock Acessory::CreatePublicTD()
 {
 	Acessory::PublicTD[0] = TextDrawCreate(315.000000, 105.000000, "ld_dual:white");

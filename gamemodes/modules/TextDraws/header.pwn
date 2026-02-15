@@ -117,6 +117,7 @@ enum _:E_PTD_VEH
     PlayerText:PTD_VEH_LAST_DOT  = 16,
     PlayerText:PTD_VEH_TXT_NAME = 17,
 }
+
 hook OnGameModeInit()
 {
     Login::CreatePublicTD();
@@ -135,6 +136,15 @@ hook OnGameModeInit()
     printf("[ TEXTDRAW ] TextDraw: Velocimetro\n");
 
     return 1;
+}
+
+hook OnGameModeExit()
+{
+    Login::DestroyPublicTD();
+    Baseboard::DestroyPublicTD();
+    Acessory::DestroyPublicTD();
+    Adm::DestroyPublicTD();
+    Veh::DestroyPublicTD();
 }
 
 hook OnPlayerDisconnect(playerid, reason)

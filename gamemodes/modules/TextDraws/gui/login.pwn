@@ -45,6 +45,15 @@ stock Login::DestroyPlayerTD(playerid)
 	}
 }
 
+stock Login::DestroyPublicTD()
+{
+    for(new i = 0; i < 7; i++)
+	{
+    	TextDrawDestroy(playerid, Login::PublicTD[i]);
+		Login::PublicTD[i] = INVALID_PLAYER_TEXT_DRAW;
+	}
+}
+
 stock Login::CreatePublicTD()
 {
 	Login::PublicTD[0] = TextDrawCreate(220.000000, 100.000000, "ld_dual:white");

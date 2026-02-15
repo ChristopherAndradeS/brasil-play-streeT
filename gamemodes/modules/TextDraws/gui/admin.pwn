@@ -70,6 +70,15 @@ stock Adm::DestroyPlayerTD(playerid)
 	}
 }
 
+stock Adm::DestroyPublicTD()
+{
+    for(new i = 0; i < 14; i++)
+	{
+    	TextDrawDestroy(playerid, Adm::PublicTD[i]);
+		Adm::PublicTD[i] = INVALID_PLAYER_TEXT_DRAW;
+	}
+}
+
 stock Adm::CreatePublicTD()
 {
 	Adm::PublicTD[0] = TextDrawCreate(380.000000, 345.000000, "ld_dual:white");
