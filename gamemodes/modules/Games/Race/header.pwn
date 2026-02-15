@@ -51,6 +51,7 @@ new Race::IndexByGameID[MAX_GAMES] = {INVALID_RACE_ID, ...};
 enum (<<= 1)
 {
     FLAG_RACE_CREATED = 1,
+    FLAG_RACE_FINISHED,
 }
 
 forward Float:GetPlayerRaceProgress(playerid, raceid);
@@ -64,6 +65,7 @@ stock Race::Create(gameid, notify = false)
     game::Race[raceid][race::gameid] = gameid;
     game::Race[raceid][race::finisheds] = 0;
     SetFlag(game::Race[raceid][race::flags], FLAG_RACE_CREATED);
+    ResetFlag(game::Race[raceid][race::flags], FLAG_RACE_FINISHED);
     Race::IndexByGameID[gameid] = raceid;
 
     for(new i = 0; i < MAX_RACE_VEHICLES; i++)
@@ -172,6 +174,9 @@ stock Race::EliminatePlayer(playerid, gameid)
 {   
     new raceid = game::Player[playerid][pyr::raceid];
 
+    if(raceid == INVALID_RACE_ID || !list_valid(game::Race[raceid][race::podium]))
+        return 0;
+
     Race::RemPodium(playerid, raceid, 1);
     game::Player[playerid][pyr::flags] = 0;
     SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_ELIMINATED);
@@ -226,8 +231,9 @@ stock Race::UpdatePlayerCheck(playerid, lap, checkid)
     return 1;
 }
 
-stock Float:GetPlayerRaceProgress(playerid)
+stock Float:GetPlayerRaceProgress(playerid, raceid)
 {
+    #pragma unused raceid
     new lap = race::Player[playerid][race::lap];
     new check = race::Player[playerid][race::checkid];
     new total = sizeof(Race::gCheckpoints);
@@ -368,7 +374,6 @@ stock Race::Start(gameid)
 
 stock Race::Update(gameid)
 {
-    #pragma unused gameid
     Race::UpdatePodium(gameid);
     return 1;
 }
@@ -377,18 +382,26 @@ stock Race::Finish(gameid)
 {
     new raceid = Race::GetIDByGameID(gameid);
 
+    if(raceid == INVALID_RACE_ID || !list_valid(game::Race[raceid][race::podium]))
+        return 0;
+
+    if(GetFlag(game::Race[raceid][race::flags], FLAG_RACE_FINISHED))
+        return 1;
+
+    SetFlag(game::Race[raceid][race::flags], FLAG_RACE_FINISHED);
+
     new len = list_size(game::Race[raceid][race::podium]);
 
     if(game::Race[raceid][race::finisheds] < 1)
         SendClientMessageToAll(-1, "{ff5533}[ CORRIDA ] {ffffff}A corrida terminou! {ff5533}Ninguém conseguiu finalizar!");
     
-    for(new i = 0; i < len; i++)
+    for(new i = len - 1; i >= 0; i--)
     {
         new playerid = list_get(game::Race[raceid][race::podium], i);
 
-        if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED)) continue;
-
         if(playerid == INVALID_PLAYER_ID) continue;
+
+        if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED)) continue;
 
         Race::RemPodium(playerid, raceid, 1);
         game::Player[playerid][pyr::flags] = 0;
@@ -427,7 +440,7 @@ stock Race::GiveRewards(gameid)
 
         if(playerid == INVALID_PLAYER_ID || !IsPlayerConnected(playerid)) continue;
 
-        if(!GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_ELIMINATED)) continue;
+        if(!GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED)) continue;
 
         new Float:reward = 0.0;
 
