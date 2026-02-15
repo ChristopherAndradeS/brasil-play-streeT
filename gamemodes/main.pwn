@@ -85,6 +85,12 @@ public pp_on_error(source[], message[], error_level:level, &retval)
 
 public OnGameModeExit()
 {
+    foreach(new i : Player)
+    {
+        Kick(i);
+        printf("Jogador kikado");
+    }
+
 	if(DB_Close(db_entity))
     	db_entity = DB:0;
 
@@ -266,19 +272,19 @@ YCMD:teste2(playerid, params[], help)
     {
         if(IsValidPlayerTextDraw(playerid, i))
         {
-            printf("PlayerTextDraw %d is valid", i);
+            printf("PlayerTextDraw %d is valid. %d visible", i, IsPlayerTextDrawVisible(playerid, i));
             //PlayerTextDrawShow(playerid, i);
         }
     }
 
-    for(new Text:i = Text:0; i < MAX_TEXT_DRAWS; i++)
-    {
-        if(IsValidTextDraw(i))
-        {
-            printf("TextDraw %d is valid", i);
-            //PlayerTextDrawShow(playerid, i);
-        }
-    }
+    // for(new Text:i = Text:0; i < MAX_TEXT_DRAWS; i++)
+    // {
+    //     if(IsValidTextDraw(i))
+    //     {
+    //         printf("TextDraw %d is valid", i);
+    //         //PlayerTextDrawShow(playerid, i);
+    //     }
+    // }
 
     return 1;
 }

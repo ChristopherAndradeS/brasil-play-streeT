@@ -54,13 +54,6 @@ hook OnPlayerDisconnect(playerid, reason)
         return -1;
     }
     
-    if(IsValidTimer(pyr::Timer[playerid][pyr::TIMER_SPEEDOMETER]) || Veh::IsVisibleTDForPlayer(playerid))
-    {
-        printf("entrou");
-        Player::KillTimer(playerid, pyr::TIMER_SPEEDOMETER);
-        Veh::HideTDForPlayer(playerid);
-    }
-    
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 

@@ -40,7 +40,9 @@ stock Veh::ShowTDForPlayer(playerid)
 stock Veh::HideTDForPlayer(playerid)
 {
 	if(!Veh::IsVisibleTDForPlayer(playerid)) return;
-	
+
+	Player::KillTimer(playerid, pyr::TIMER_SPEEDOMETER);
+
 	for(new i = 0; i < 11; i++)
         TextDrawHideForPlayer(playerid, Veh::PublicTD[i]);   
     for(new i = 0; i < 18; i++)
@@ -226,6 +228,8 @@ stock Veh::CreatePublicTD()
 
 stock Veh::CreatePlayerTD(playerid)
 {
+	Veh::DestroyPlayerTD(playerid);
+
 	Veh::PlayerTD[playerid][0] = CreatePlayerTextDraw(playerid, 290.000000, 417.500000, "ld_dual:white");
 	PlayerTextDrawFont(playerid, Veh::PlayerTD[playerid][0], TEXT_DRAW_FONT:4);
 	PlayerTextDrawLetterSize(playerid, Veh::PlayerTD[playerid][0], 0.600000, 2.000000);

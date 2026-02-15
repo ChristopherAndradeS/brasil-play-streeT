@@ -210,7 +210,8 @@ stock Player::CreateTimer(playerid, timerid, const callback[] = "", time, bool:r
 
 stock Player::KillTimer(playerid, timerid)
 {
-    if(!IsValidTimer(pyr::Timer[playerid][timerid])) return 0;
+    if(!IsValidTimer(pyr::Timer[playerid][timerid])) 
+        return 0;
     
     KillTimer(pyr::Timer[playerid][timerid]);
 
