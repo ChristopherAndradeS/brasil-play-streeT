@@ -9,8 +9,7 @@
 /*                  PLAYER                  */
 enum E_PLAYER 
 {
-    pyr::pass[65],
-    pyr::pass_salt[33],
+    pyr::pass[BCRYPT_HASH_LENGTH],
     pyr::bitcoin,
     Float:pyr::money,
     Float:pyr::health,
@@ -311,34 +310,6 @@ stock Login::IsValidPassword(const text[], &issue)
     return 1;
 }
 
-stock Login::GenerateSalt(playerid, output[], size = sizeof(output))
-{
-    if(size < 2)
-        return 0;
-
-    new entropy[96], hash[65];
-    format(entropy, sizeof(entropy), "%d:%d:%d:%d", gettime(), GetTickCount(), random(cellmax), random(cellmax));
-    SHA256_Hash(entropy, "BPS_LOGIN_SALT", hash, sizeof(hash));
-
-    bcrypt_hash(playerid, const callback[], const input[], cost, const args[] = "", {Float, _}:...)
-
-    strmid(output, hash, 0, size - 1, size);
-
-    output[size - 1] = '\0';
-    return 1;
-}
-
-stock Login::HashPassword(const password[], const salt[], output[], size = sizeof(output))
-{
-    if(size < 65)
-    {
-        output[0] = '\0';
-        return 0;
-    }
-
-    SHA256_Hash(password, salt, output, size);
-    return 1;
-}
 
 stock Player::Spawn(playerid)
 {

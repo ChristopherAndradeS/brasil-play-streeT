@@ -5,6 +5,7 @@
 #include <streamer>
 #include <samp_bcrypt>
 #include <PawnPlus>
+#include <samp_bcrypt>
 
 #define CGEN_MEMORY 20000
 

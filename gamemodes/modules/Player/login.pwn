@@ -1,6 +1,8 @@
 #include <YSI\YSI_Coding\y_hooks>
 
 forward OnPlayerLogin(playerid);
+forward OnPlayerPasswordHash(playerid, hashid);
+forward OnPlayerPasswordVerify(playerid, bool:success);
 
 new gLoginIssue[][64] = 
 {
@@ -8,6 +10,42 @@ new gLoginIssue[][64] =
     {"pequena demais"},
     {"grande demais"}
 };
+
+public OnPlayerPasswordHash(playerid, hashid)
+{
+    #pragma unused hashid
+
+    if(!IsPlayerConnected(playerid) || !IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_REGISTER))
+        return 1;
+
+    bcrypt_get_hash(Player[playerid][pyr::pass], sizeof(Player[][pyr::pass]));
+
+    if(!Player[playerid][pyr::pass][0])
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Nao foi possivel proteger sua senha, tente novamente.");
+        return 1;
+    }
+
+    Login::RegisterPlayer(playerid);
+    Login::UnSetPlayer(playerid);
+
+    return 1;
+}
+
+public OnPlayerPasswordVerify(playerid, bool:success)
+{
+    if(!IsPlayerConnected(playerid) || !IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_LOGIN))
+        return 1;
+
+    if(!success)
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ x ] {ffffff}Senha incorreta! Clique novamente para tentar.");
+        return 1;
+    }
+
+    Login::UnSetPlayer(playerid);
+    return 1;
+}
 
 hook OnPlayerConnect(playerid)
 {
@@ -64,21 +102,14 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
                 Dialog_ShowCallback(playerid, using inline dialog_register, DIALOG_STYLE_PASSWORD, "{ffffff}BPS {33ff33}| {ffffff}Log-in", str, "Inserir", "Fechar");
                 return 1;
             }
-            
-            bcrypt_hash(playerid, "OnPasswordHashFinished", stext, BCRYPT_COST);
 
-            new sucess = Login::GenerateSalt(Player[playerid][pyr::pass_salt]);
-            sucess = (sucess && Login::HashPassword(stext, Player[playerid][pyr::pass_salt], Player[playerid][pyr::pass]));
-            
-            if(!sucess)
+            if(!bcrypt_hash(playerid, "OnPlayerPasswordHash", stext, BCRYPT_COST))
             {
-                SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Falha ao processar sua senha de forma segura, tente novamente.");
+                SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Nao foi possivel criptografar sua senha no momento.");
                 return 1;
             }
 
-            Login::RegisterPlayer(playerid);
-
-            Login::UnSetPlayer(playerid); 
+            SendClientMessage(playerid, -1, "{33ff33}[ BPS ] {ffffff}Processando sua senha de forma segura...");
 
             return 1;
         }
@@ -98,45 +129,19 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
 
             new name[MAX_PLAYER_NAME];
             GetPlayerName(playerid, name);
-            
-            new db_hash[65], db_salt[33], input_hash[65];
-            DB::GetDataString(db_entity, "players", "pass", db_hash, sizeof(db_hash), "name = '%q'", name);
-            DB::GetDataString(db_entity, "players", "pass_salt", db_salt, sizeof(db_salt), "name = '%q'", name);
+            DB::GetDataString(db_entity, "players", "pass", Player[playerid][pyr::pass], sizeof(Player[][pyr::pass]), "name = '%q'", name);
 
-            if(!db_hash[0])
+            if(!Player[playerid][pyr::pass][0])
             {
-                Dialog_ShowCallback(playerid, using inline dialog_login, DIALOG_STYLE_PASSWORD, "{ffffff}BPS {ff3333}| {ffffff}Login", 
-                "{ff3333}[ x ] {ffffff}Senha {ff3333}incorreta!\n\n\
-                >> {ffffff}Digite sua {ff3333}senha {ff3333}novamente!:\n\n", "Inserir", "Fechar");
+                SendClientMessage(playerid, -1, "{ff3333}[ x ] {ffffff}Conta com senha inválida no banco, contate um administrador.");
                 return 1;
             }
 
-            if(!db_salt[0])
+            if(!bcrypt_verify(playerid, "OnPlayerPasswordVerify", stext, Player[playerid][pyr::pass]))
             {
-                if(strcmp(stext, db_hash))
-                {
-                    Dialog_ShowCallback(playerid, using inline dialog_login, DIALOG_STYLE_PASSWORD, "{ffffff}BPS {ff3333}| {ffffff}Login", 
-                    "{ff3333}[ x ] {ffffff}Senha {ff3333}incorreta!\n\n\
-                    >> {ffffff}Digite sua {ff3333}senha {ff3333}novamente!:\n\n", "Inserir", "Fechar");
-                    return 1;
-                }
-
-                if(Login::GenerateSalt(db_salt, sizeof(db_salt)) && Login::HashPassword(stext, db_salt, db_hash, sizeof(db_hash)))
-                {
-                    DB::SetDataString(db_entity, "players", "pass", db_hash, "name = '%q'", name);
-                    DB::SetDataString(db_entity, "players", "pass_salt", db_salt, "name = '%q'", name);
-                }
-            }
-
-            else if(!Login::HashPassword(stext, db_salt, input_hash, sizeof(input_hash)) || strcmp(input_hash, db_hash))
-            {
-                Dialog_ShowCallback(playerid, using inline dialog_login, DIALOG_STYLE_PASSWORD, "{ffffff}BPS {ff3333}| {ffffff}Login", 
-                "{ff3333}[ x ] {ffffff}Senha {ff3333}incorreta!\n\n\
-                >> {ffffff}Digite sua {ff3333}senha {ff3333}novamente!:\n\n", "Inserir", "Fechar");
+                SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Falha ao validar senha no momento, tente novamente.");
                 return 1;
             }
-
-            Login::UnSetPlayer(playerid);  
 
             return 1;
         }
