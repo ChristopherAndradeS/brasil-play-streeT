@@ -246,7 +246,9 @@ hook function CreateVehicle(modelid, Float:x, Float:y, Float:z, Float:rotation, 
 
 stock Veh::Destroy(&vehicleid)
 {
-    DestroyVehicle(vehicleid);
+    if(IsValidVehicle(vehicleid))
+        DestroyVehicle(vehicleid);
+        
     vehicleid = INVALID_VEHICLE_ID;
 }
 

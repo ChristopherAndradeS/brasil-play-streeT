@@ -532,7 +532,7 @@ public Response_ACC_MENU(playerid, dialogid, response, listitem, string:inputtex
 
     else
     {
-        new count = DB::GetCount(db_stock, "acessorys", "*", "");
+        new count = DB::GetCount(db_stock, "acessorys", "");
  
         if(!count)
         {

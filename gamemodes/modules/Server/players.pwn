@@ -2,19 +2,11 @@
 
 hook OnServerUpdateSeconds()
 {
-    TextDrawSetString(Baseboard::PublicTD[TD_BASEBOARD_CLOCK], "%02d:%02d:%02d~n~~g~~h~~h~%s | %02d_de_%s_de_%04d", 
+    TextDrawSetString(Baseboard::PublicTD[TD_BASEBOARD_CLOCK], "%02d:%02d:%02d~n~~g~~h~~h~%s - %02d_de_%s_de_%04d", 
     Server[srv::hour], Server[srv::minute], Server[srv::seconds],
     gWeekDays[Server[srv::weekday]], Server[srv::day], gMonths[Server[srv::month]], Server[srv::year]);
 
     Server::UpdatePlayerSeconds();
-}
-
-hook OnServerUpdateMinutes()
-{
-    foreach (new i : Player)
-    {
-        SetPlayerTime(i, Server[srv::hour], Server[srv::minute]);
-    }
 }
 
 stock Server::UpdatePlayerSeconds()
@@ -23,6 +15,7 @@ stock Server::UpdatePlayerSeconds()
     {
         Player::UpdatePayday(i);
         Player::UpdateJail(i);
+        SetPlayerTime(i, Server[srv::hour], Server[srv::minute]);
     }
 
     foreach(new i : Adm_Iter)

@@ -1,7 +1,7 @@
 #define MAX_RACE_VEHICLES       (5)
 #define MAX_RACE_PARTICIPANTS   (5)
 #define MAX_GAME_RACES          (5)
-#define MAX_LAPS                (3)
+#define MAX_LAPS                (2)
 #define INVALID_RACE_ID         (-1)
 
 /* ------------------- Tabelas globais da corrida -------------------- */
@@ -18,21 +18,22 @@ new const Float:Race::gVehicleSpawns[][4] =
 // Checkpoints sequenciais (X, Y, Z)
 new const Float:Race::gCheckpoints[][3] =
 {
-    {-1395.7150, -216.3227, 1042.4036}, // check1
     {-1407.3843, -150.4694, 1043.2502}, // check2
     {-1503.4323, -151.5957, 1048.5673}, // check3
     {-1517.9471, -249.8785, 1049.8755}, // check4
     {-1419.1387, -277.5760, 1050.4873}, // check5
     {-1354.6580, -130.7808, 1050.3792}, // check6
     {-1265.3080, -193.3538, 1049.9474}, // check7
-    {-1308.0317, -271.3692, 1047.4279}  // check8
+    {-1308.0317, -271.3692, 1047.4279},  // check8
+    {-1395.7150, -216.3227, 1042.4036} // check1
 };
 
 enum E_GAME_RACE
 {
     race::gameid,
     race::flags,
-    List:podium,
+    List:race::podium,
+    race::finisheds,
     race::vehicleid[MAX_RACE_VEHICLES],
 }
 
@@ -40,6 +41,7 @@ enum E_RACE_PART
 {
     race::checkid,
     race::lap,
+    race::vehicleid,
 }
 
 new game::Race[MAX_GAME_RACES][E_GAME_RACE];
@@ -51,6 +53,8 @@ enum (<<= 1)
     FLAG_RACE_CREATED = 1,
 }
 
+forward Float:GetPlayerRaceProgress(playerid, raceid);
+
 stock Race::Create(gameid, notify = false)
 {
     new raceid = Race::GetFreeSlotID();
@@ -58,6 +62,7 @@ stock Race::Create(gameid, notify = false)
 
     game::Race[raceid][race::podium] = list_new();
     game::Race[raceid][race::gameid] = gameid;
+    game::Race[raceid][race::finisheds] = 0;
     SetFlag(game::Race[raceid][race::flags], FLAG_RACE_CREATED);
     Race::IndexByGameID[gameid] = raceid;
 
@@ -81,13 +86,16 @@ stock Race::Destroy(gameid, const name[])
     if(raceid == INVALID_RACE_ID) return 0;
 
     for(new i = 0; i < MAX_RACE_VEHICLES; i++)
-        Veh::Destroy(game::Race[raceid][race::vehicleid][i]);
+        if(IsValidVehicle(game::Race[raceid][race::vehicleid][i]))
+            Veh::Destroy(game::Race[raceid][race::vehicleid][i]);
 
     if(list_valid(game::Race[raceid][race::podium]))
-        list_destroy(game::Race[raceid][race::podium]);
+        list_delete(game::Race[raceid][race::podium]);
 
     game::Race[raceid][race::gameid] = INVALID_GAME_ID;
     game::Race[raceid][race::flags] = 0;
+    game::Race[raceid][race::finisheds] = 0;
+    //game::Race[raceid][race::vehicleid] = {INVALID_VEHICLE_ID, ...};
     Race::IndexByGameID[gameid] = INVALID_RACE_ID;
 
     printf("[ EVENTO ] Evento %s destruido com sucesso\n", name);
@@ -114,6 +122,7 @@ stock Race::RemPodium(playerid, raceid, reason)
     if(!list_valid(game::Race[raceid][race::podium])) return 0;
 
     new idx = list_find(game::Race[raceid][race::podium], playerid);
+
     if(idx != -1)
     {
         list_remove(game::Race[raceid][race::podium], idx);
@@ -125,8 +134,7 @@ stock Race::RemPodium(playerid, raceid, reason)
 
 stock Race::GetIDByGameID(gameid)
 {
-    if(gameid < 0 || gameid >= MAX_GAMES)
-        return INVALID_RACE_ID;
+    if(gameid < 0 || gameid >= MAX_GAMES) return INVALID_RACE_ID;
 
     new raceid = Race::IndexByGameID[gameid];
 
@@ -160,6 +168,34 @@ stock Race::GetPodiumPlace(raceid, playerid)
     return (list_find(game::Race[raceid][race::podium], playerid) + 1);
 }
 
+stock Race::EliminatePlayer(playerid, gameid)
+{   
+    new raceid = game::Player[playerid][pyr::raceid];
+
+    Race::RemPodium(playerid, raceid, 1);
+    game::Player[playerid][pyr::flags] = 0;
+    SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_ELIMINATED);
+    Race::UpdatePodium(gameid);
+    DisablePlayerCheckpoint(playerid);
+    RemovePlayerFromVehicle(playerid);
+
+    Veh::Destroy(race::Player[playerid][race::vehicleid]);
+    SetPlayerInterior(playerid, 0);
+    SetPlayerVirtualWorld(playerid, 0);
+
+    Player::Spawn(playerid);
+
+    Game::ClearPlayer(playerid);
+
+    if(list_size(game::Race[raceid][race::podium]) < 1 && Game[gameid][game_state] == GAME_STATE_STARTED)
+    {
+        SendClientMessageToAll(-1, "{ff5533}[ CORRIDA ] {ffffff}Os jogadores desistiram da corrida. Não houve vencedores");
+        Game[gameid][game::start_time] = 0;
+    }
+    
+    return 1;
+}
+
 stock Race::SendPlayer(playerid, gameid)
 {
     game::Player[playerid][pyr::raceid] = Race::GetIDByGameID(gameid);
@@ -177,97 +213,94 @@ stock Race::UpdatePlayerCheck(playerid, lap, checkid)
         return 0;
 
     SetPlayerCheckpoint(playerid,
-    Race::gCheckpoints[checkid][0], Race::gCheckpoints[checkid][1], Race::gCheckpoints[checkid][2], 2.5);
+    Race::gCheckpoints[checkid][0], Race::gCheckpoints[checkid][1], Race::gCheckpoints[checkid][2], 25.0);
 
     race::Player[playerid][race::checkid] = checkid;
     race::Player[playerid][race::lap] = lap;
 
     new place = Race::GetPodiumPlace(raceid, playerid);
-    new len = list_size(game::Race[raceid][race::podium]);
-
-    SendClientMessage(playerid, -1, "{44ff66}[ CORRIDA ] {ffffff}Checkpoint {44ff66}%d/%d {ffffff}| Volta: {44ff66}%d/%d {ffffff}| Posição: {44ff66}%dº Lugar",
-    checkid + 1, sizeof(Race::gCheckpoints), lap, MAX_LAPS, place, len);
+    
+    SendClientMessage(playerid, -1, "{44ff66}[ CORRIDA ] {ffffff}Checkpoint {44ff66}%d/%d {ffffff}| Volta: {44ff66}%d/%d {ffffff}| Posição: {44ff66}%d| Lugar",
+    checkid + 1, sizeof(Race::gCheckpoints), lap, MAX_LAPS, place);
 
     return 1;
+}
+
+stock Float:GetPlayerRaceProgress(playerid)
+{
+    new lap = race::Player[playerid][race::lap];
+    new check = race::Player[playerid][race::checkid];
+    new total = sizeof(Race::gCheckpoints);
+
+    // new next = (check + 1) % total;
+
+    // new Float:px, Float:py, Float:pz;
+
+    // GetPlayerPos(playerid, px, py, pz);
+
+    // new 
+    //     Float:ax = Race::gCheckpoints[next][0], 
+    //     Float:ay = Race::gCheckpoints[next][1]
+    // ;
+
+    // new Float:dist = floatpower(px - ax, 2.0) + floatpower(py - ay, 2.0);
+
+    return float((lap * total) + check);// + (1.0 / (dist + 1.0));
 }
 
 stock Race::UpdatePodium(gameid)
 {
     new raceid = Race::GetIDByGameID(gameid);
 
-    if(raceid == INVALID_RACE_ID || !list_valid(game::Race[raceid][race::podium]))
+    if(raceid == INVALID_RACE_ID)
         return 0;
 
-    new players[MAX_GAME_PARTICIPANTS];
-    new progress[MAX_GAME_PARTICIPANTS];
-    new old_pos[MAX_PLAYERS];
-    new count;
+    if(!list_valid(game::Race[raceid][race::podium]))
+        return 0;
 
-    for(new i = 0; i < MAX_PLAYERS; i++)
-        old_pos[i] = -1;
-
-    new old_len = list_size(game::Race[raceid][race::podium]);
-
-    for(new i = 0; i < old_len; i++)
-    {
-        new playerid = list_get(game::Race[raceid][race::podium], i);
-
-        if(playerid != INVALID_PLAYER_ID)
-            old_pos[playerid] = i;
-    }
-
-    for(new i = 0; i < Game[gameid][game::max_players]; i++)
-    {
-        new playerid = Game[gameid][game::players][i];
-
-        if(playerid == INVALID_PLAYER_ID)
-            continue;
-
-        players[count] = playerid;
-        progress[count] = (race::Player[playerid][race::lap] * sizeof(Race::gCheckpoints)) + race::Player[playerid][race::checkid];
-        count++;
-    }
+    new count = list_size(game::Race[raceid][race::podium]);
 
     if(count <= 1)
         return 1;
 
-    for(new i = 0; i < count - 1; i++)
-    {
-        for(new j = i + 1; j < count; j++)
-        {
-            if(progress[j] > progress[i])
-            {
-                new tmp_progress = progress[i];
-                progress[i] = progress[j];
-                progress[j] = tmp_progress;
-
-                new tmp_playerid = players[i];
-                players[i] = players[j];
-                players[j] = tmp_playerid;
-            }
-        }
-    }
-
     for(new i = 1; i < count; i++)
     {
-        new front = players[i - 1];
-        new back = players[i];
+        new player = list_get(game::Race[raceid][race::podium], i);
 
-        if(old_pos[front] != -1 && old_pos[back] != -1 && old_pos[front] > old_pos[back])
+        new Float:player_progress = GetPlayerRaceProgress(player, raceid);
+
+        new j = i - 1;
+
+        while(j >= 0)
         {
-            new front_name[MAX_PLAYER_NAME], back_name[MAX_PLAYER_NAME];
-            GetPlayerName(front, front_name, MAX_PLAYER_NAME);
-            GetPlayerName(back, back_name, MAX_PLAYER_NAME);
+            new other = list_get(game::Race[raceid][race::podium], j);
 
-            Game::SendMessageToAll(gameid, "{44ff66}[ CORRIDA ] {ffffff}%s ultrapassou %s.", front_name, back_name);
+            if(GetFlag(game::Player[other][pyr::flags], FLAG_PLAYER_FINISHED)) break;
+        
+            new Float:other_progress = GetPlayerRaceProgress(other, raceid);
+
+            if(player_progress <= other_progress)
+                break;
+
+            list_set(game::Race[raceid][race::podium], j + 1, other);
+            list_set(game::Race[raceid][race::podium], j, player);
+
+            new name1[MAX_PLAYER_NAME];
+            new name2[MAX_PLAYER_NAME];
+
+            GetPlayerName(player, name1, sizeof(name1));
+            GetPlayerName(other, name2, sizeof(name2));
+
+            Game::SendMessageToAll(
+                gameid,
+                "{44ff66}[ CORRIDA ] {ffffff}O corredor {44ff66}%s {ffffff}ultrapassou {44ff66}%s",
+                name1,
+                name2
+            );
+
+            j--;
         }
     }
-
-    list_destroy(game::Race[raceid][race::podium]);
-    game::Race[raceid][race::podium] = list_new();
-
-    for(new i = 0; i < count; i++)
-        list_add(game::Race[raceid][race::podium], players[i]);
 
     return 1;
 }
@@ -284,18 +317,34 @@ stock Race::Ready(gameid)
         if(playerid != INVALID_PLAYER_ID)
         {
             Race::AddPodium(playerid, raceid);
+            
+            race::Player[playerid][race::vehicleid] = game::Race[raceid][race::vehicleid][i];
 
             ResetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_WAITING);
             SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING);
+            
+            if(IsPlayerInAnyVehicle(playerid)) 
+                RemovePlayerFromVehicle(playerid);
 
-            PutPlayerInVehicle(playerid, game::Race[raceid][race::vehicleid][i], 0);
+            SetVehiclePos(game::Race[raceid][race::vehicleid][i], 
+            Race::gVehicleSpawns[i][0], 
+            Race::gVehicleSpawns[i][1], 
+            Race::gVehicleSpawns[i][2]);            
+
+            SetVehicleHealth(game::Race[raceid][race::vehicleid][i], 1000.0 + 1000.0);
+
+            SetVehicleZAngle(game::Race[raceid][race::vehicleid][i], Float:Race::gVehicleSpawns[i][3]);
+        
             TogglePlayerControllable(playerid, false);
-            Veh::UpdateParams(game::Race[raceid][race::vehicleid][i], FLAG_PARAMS_ENGINE, 1);
+            
+            PutPlayerInVehicle(playerid, game::Race[raceid][race::vehicleid][i], 0);
+
+            Veh::UpdateParams(game::Race[raceid][race::vehicleid][i], FLAG_PARAM_ENGINE, 1);
         }
+        
         else
-        {
             Veh::Destroy(game::Race[raceid][race::vehicleid][i]);
-        }
+        
     }
 
     return 1;
@@ -319,24 +368,46 @@ stock Race::Start(gameid)
 
 stock Race::Update(gameid)
 {
+    #pragma unused gameid
     Race::UpdatePodium(gameid);
     return 1;
 }
 
 stock Race::Finish(gameid)
 {
-    for(new i = 0; i < Game[gameid][game::max_players]; i++)
+    new raceid = Race::GetIDByGameID(gameid);
+
+    new len = list_size(game::Race[raceid][race::podium]);
+
+    if(game::Race[raceid][race::finisheds] < 1)
+        SendClientMessageToAll(-1, "{ff5533}[ CORRIDA ] {ffffff}A corrida terminou! {ff5533}Ninguém conseguiu finalizar!");
+    
+    for(new i = 0; i < len; i++)
     {
-        new playerid = Game[gameid][game::players][i];
+        new playerid = list_get(game::Race[raceid][race::podium], i);
+
+        if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED)) continue;
 
         if(playerid == INVALID_PLAYER_ID) continue;
 
+        Race::RemPodium(playerid, raceid, 1);
+        game::Player[playerid][pyr::flags] = 0;
+        SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_ELIMINATED);
+    
         DisablePlayerCheckpoint(playerid);
-        RemovePlayerFromVehicle(playerid);
+
+        if(IsPlayerInAnyVehicle(playerid)) 
+            RemovePlayerFromVehicle(playerid);
+
+        Veh::Destroy(race::Player[playerid][race::vehicleid]);
         SetPlayerInterior(playerid, 0);
         SetPlayerVirtualWorld(playerid, 0);
+
         Player::Spawn(playerid);
         PlayerPlaySound(playerid, 31202, 0.0, 0.0, 0.0);
+        Game::ClearPlayer(playerid);
+
+        //SendClientMessage(playerid, -1, "{ff5533}[ CORRIDA ] {ffffff}Você não conseguiu finalizar a corrida :(");
     }
 
     return 1;
@@ -345,6 +416,7 @@ stock Race::Finish(gameid)
 stock Race::GiveRewards(gameid)
 {
     new raceid = Race::GetIDByGameID(gameid);
+
     if(raceid == INVALID_RACE_ID || !list_valid(game::Race[raceid][race::podium])) return 0;
 
     new len = list_size(game::Race[raceid][race::podium]);
@@ -352,7 +424,10 @@ stock Race::GiveRewards(gameid)
     for(new i = 0; i < len; i++)
     {
         new playerid = list_get(game::Race[raceid][race::podium], i);
+
         if(playerid == INVALID_PLAYER_ID || !IsPlayerConnected(playerid)) continue;
+
+        if(!GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_ELIMINATED)) continue;
 
         new Float:reward = 0.0;
 
@@ -365,8 +440,8 @@ stock Race::GiveRewards(gameid)
 
         if(reward > 0.0)
         {
+            SendClientMessage(playerid, -1, "{44ff66}[ CORRIDA ] {ffffff}Premiação da corrida: {44ff66}R$ %.2f{ffffff} por terminar em {44ff66}%d {ffffff} | lugar.", reward, i + 1);
             Player::GiveMoney(playerid, reward);
-            SendClientMessage(playerid, -1, "{44ff66}[ CORRIDA ] {ffffff}Premiação da corrida: {44ff66}R$ %.2f{ffffff} por terminar em {44ff66}%dº{ffffff}.", reward, i + 1);
         }
     }
 

@@ -84,6 +84,13 @@ hook OnPlayerDisconnect(playerid, reason)
         Game::ClearPlayer(playerid);
     }
 
+    else if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING)) 
+    {
+        new gameid = game::Player[playerid][pyr::gameid];
+        Race::EliminatePlayer(playerid, gameid);
+        Game::ClearPlayer(playerid);
+    }
+
     else
     {
         new Float:pX, Float:pY, Float:pZ, Float:pA;

@@ -43,6 +43,8 @@ stock DB::GetCount(DB:db, const table[], const where[], OPEN_MP_TAGS:...)
     
     new count = DB_GetFieldInt(result);
 
+    //printf("field %d", count);
+    
     DB_FreeResultSet(result);
 
     return count;

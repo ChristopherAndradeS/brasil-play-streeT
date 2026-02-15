@@ -94,6 +94,8 @@ stock Adm::Exists(const name[], &level = INVALID_ADM_LEVEL)
     if(DB::Exists(db_entity, "admins", "name = '%q'", name))
         return DB::GetDataInt(db_entity, "admins", "level", level, "name = '%q'", name);
     
+    printf("NAO EXISTE O ADMIN %s", name);
+    
     level = INVALID_ADM_LEVEL;
 
     return 0;

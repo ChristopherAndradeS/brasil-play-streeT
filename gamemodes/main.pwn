@@ -69,7 +69,7 @@
 // -- HEADERS 
 #include "../gamemodes/modules/Games/Race/header.pwn"
 // -- HANDLES
-//#include "../gamemodes/modules/Games/Race/handle.pwn"
+#include "../gamemodes/modules/Games/Race/handle.pwn"
 
 main()
 {
@@ -180,26 +180,26 @@ hook function SendClientMessageToAll(colour, const msg[], GLOBAL_TAG_TYPES:...)
     return continue(colour, fixed_msg);
 }
 
-hook SetPlayerCheckpoint(playerid, Float:x, Float:y, Float:z, Float:size)
-{
-    SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_CHECKPOINT);
-    PlayerPlaySound(playerid, 1056, 0.0, 0.0, 0.0);
-    return continue(playerid, Float:x, Float:y, Float:z, Float:size);
-}
+// hook SetPlayerCheckpoint(playerid, Float:x, Float:y, Float:z, Float:size)
+// {
+//     SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_CHECKPOINT);
+//     PlayerPlaySound(playerid, 1056, 0.0, 0.0, 0.0);
+//     return continue(playerid, Float:x, Float:y, Float:z, Float:size);
+// }
 
-public OnPlayerEnterCheckpoint(playerid)
-{
-    if(IsPlayerCheckpointActive(playerid))
-    {
-        ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_CHECKPOINT);
-        DisablePlayerCheckpoint(playerid);
-        SendClientMessage(playerid, -1, "{33ff33}[ GPS ] {ffffff}Você chegou ao seu destino!");
-        PlayerPlaySound(playerid, 1058, 0.0, 0.0, 0.0); 
-        return 1;
-    }
+// public OnPlayerEnterCheckpoint(playerid)
+// {
+//     if(IsPlayerCheckpointActive(playerid))
+//     {
+//         ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_CHECKPOINT);
+//         DisablePlayerCheckpoint(playerid);
+//         SendClientMessage(playerid, -1, "{33ff33}[ GPS ] {ffffff}Você chegou ao seu destino!");
+//         PlayerPlaySound(playerid, 1058, 0.0, 0.0, 0.0); 
+//         return 1;
+//     }
     
-    return 1;
-}
+//     return 1;
+// }
 
 YCMD:veh(playerid, params[], help)
 {
@@ -241,8 +241,6 @@ YCMD:games(playerid, params[], help)
 {
 
     new gameid = strval(params);
- 
-    //GAME_STATES:game_state,
 
     SendClientMessage(playerid, -1, "%s nome", Game[gameid][game::name]);
     SendClientMessage(playerid, -1, "%d tipo", _:Game[gameid][game::type]);
