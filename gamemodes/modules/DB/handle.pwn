@@ -60,8 +60,6 @@ hook OnGameModeInit()
         ");
     }
 
-    else db_entity = DB_Open("entitys.db");
-
     if(!fexist("stocks.db"))
     {
         printf("[ DB ] Arquivo \"stocks.db\" não encontrado, gerando um novo...\n");

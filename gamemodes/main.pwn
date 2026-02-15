@@ -3,6 +3,7 @@
 #include <open.mp>
 #include <sscanf2>
 #include <streamer>
+#include <samp_bcrypt>
 #include <PawnPlus>
 #include <samp_bcrypt>
 

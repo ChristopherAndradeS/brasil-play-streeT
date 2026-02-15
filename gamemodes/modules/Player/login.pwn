@@ -170,6 +170,11 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
     return 1;
 }
 
+public OnPasswordHashFinished(playerid, hashid)
+{
+    
+}
+
 stock Login::SetPlayer(playerid)
 {
 
@@ -230,8 +235,8 @@ stock Login::RegisterPlayer(playerid)
     GetPlayerName(playerid, name);
     GetPlayerIp(playerid, ip);
 
-    new status = DB::Insert(db_entity, "players", "name, pass, ip, payday_tleft, bitcoin, money, pX, pY, pZ, pA, \
-    score, skinid, orgid", "'%q', '%q', '%q', %i, %i, %f, %f, %f, %f, %f, %i, %i, %i", name, Player[playerid][pyr::pass], ip, 
+    new status = DB::Insert(db_entity, "players", "name, pass, pass_salt, ip, payday_tleft, bitcoin, money, pX, pY, pZ, pA, \
+    score, skinid, orgid", "'%q', '%q', '%q', '%q', %i, %i, %f, %f, %f, %f, %f, %i, %i, %i", name, Player[playerid][pyr::pass], Player[playerid][pyr::pass_salt], ip, 
     3600000, 0, 500.0, 834.28 + RandomFloat(2.0), -1834.89 + RandomFloat(2.0), 12.502, 180.0,
     1, random(300), 0);
 
