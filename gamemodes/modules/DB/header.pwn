@@ -35,15 +35,19 @@ stock DB::GetCount(DB:db, const table[], const where[], OPEN_MP_TAGS:...)
         new str[128];
         va_format(str, 128, where, ___(3));
         result = DB_ExecuteQuery(db, "SELECT COUNT(*) FROM %q WHERE %s;", table, str);
-        //printf("SELECT COUNT(*) FROM %q WHERE %s;", table, str);
+        printf("SELECT COUNT(*) FROM %q WHERE %s;", table, str);
     }
 
     if(!result)
+    {
+        printf("Deu ruim");
+        DB_FreeResultSet(result);
         return 0;
+    }
     
     new count = DB_GetFieldInt(result);
 
-    //printf("field %d", count);
+    printf("field %d", count);
     
     DB_FreeResultSet(result);
 

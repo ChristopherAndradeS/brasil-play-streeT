@@ -141,7 +141,6 @@ stock Player::ClearAllData(playerid)
 stock Player::ClearData(playerid)
 {
     Player[playerid][pyr::pass]          = '\0';
-    Player[playerid][pyr::pass_salt]     = '\0';
     Player[playerid][pyr::bitcoin]       = 0;
     Player[playerid][pyr::money]         = 0.0;
     Player[playerid][pyr::flags]         = 0x00000000;

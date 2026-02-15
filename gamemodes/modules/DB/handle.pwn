@@ -11,7 +11,7 @@ hook OnGameModeInit()
         DB::CreateTable(db_entity, "players", 
         "uid             INTEGER PRIMARY KEY AUTOINCREMENT,\
         name            VARCHAR(24) NOT NULL UNIQUE,\
-        pass            CHAR(60) NOT NULL,\
+        pass            VARCHAR(60) NOT NULL,\
         ip              VARCHAR(16) NOT NULL,\
         payday_tleft    INTEGER,\
         bitcoin         INTEGER,\

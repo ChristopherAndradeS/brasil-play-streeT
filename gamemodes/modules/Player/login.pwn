@@ -18,7 +18,7 @@ public OnPlayerPasswordHash(playerid, hashid)
     if(!IsPlayerConnected(playerid) || !IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_REGISTER))
         return 1;
 
-    bcrypt_get_hash(Player[playerid][pyr::pass], sizeof(Player[][pyr::pass]));
+    bcrypt_get_hash(Player[playerid][pyr::pass]);
 
     if(!Player[playerid][pyr::pass][0])
     {
@@ -32,25 +32,35 @@ public OnPlayerPasswordHash(playerid, hashid)
     return 1;
 }
 
-public OnPlayerPasswordVerify(playerid, bool:success)
+hook OnPlayerPasswordVerify(playerid, bool:success)
 {
-    if(!IsPlayerConnected(playerid) || !IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_LOGIN))
-        return 1;
+    if(!IsPlayerConnected(playerid)) return 1;
 
-    if(!success)
+    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_LOGIN))
     {
-        SendClientMessage(playerid, -1, "{ff3333}[ x ] {ffffff}Senha incorreta! Clique novamente para tentar.");
-        return 1;
+        if(!success)
+        {
+            SendClientMessage(playerid, -1, "{ff3333}[ x ] {ffffff}Senha incorreta! Clique novamente para tentar.");
+            return 1;
+        }
+
+        Login::UnSetPlayer(playerid);
     }
 
-    Login::UnSetPlayer(playerid);
+    else if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED))
+    {
+        if(success)
+        {
+            SendClientMessage(playerid, -1, "{ff3333}[ OPA! ] {ff3333}Não compartilhe sua senha {ffffff}com ninguém, {ff3333}nem mesmo admins!");
+            return 0;
+        }
+    }
     return 1;
 }
 
 hook OnPlayerConnect(playerid)
 {
     Login::SetPlayer(playerid);
-    
     return 1;
 }
 
@@ -129,7 +139,7 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
 
             new name[MAX_PLAYER_NAME];
             GetPlayerName(playerid, name);
-            DB::GetDataString(db_entity, "players", "pass", Player[playerid][pyr::pass], sizeof(Player[][pyr::pass]), "name = '%q'", name);
+            DB::GetDataString(db_entity, "players", "pass", Player[playerid][pyr::pass], BCRYPT_HASH_LENGTH, "name = '%q'", name);
 
             if(!Player[playerid][pyr::pass][0])
             {
@@ -168,11 +178,6 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
     }
 
     return 1;
-}
-
-public OnPasswordHashFinished(playerid, hashid)
-{
-    
 }
 
 stock Login::SetPlayer(playerid)
@@ -235,8 +240,9 @@ stock Login::RegisterPlayer(playerid)
     GetPlayerName(playerid, name);
     GetPlayerIp(playerid, ip);
 
-    new status = DB::Insert(db_entity, "players", "name, pass, pass_salt, ip, payday_tleft, bitcoin, money, pX, pY, pZ, pA, \
-    score, skinid, orgid", "'%q', '%q', '%q', '%q', %i, %i, %f, %f, %f, %f, %f, %i, %i, %i", name, Player[playerid][pyr::pass], Player[playerid][pyr::pass_salt], ip, 
+    new status = DB::Insert(db_entity, "players", 
+    "name, pass, ip, payday_tleft, bitcoin, money, pX, pY, pZ, pA, score, skinid, orgid", 
+    "'%q', '%q', '%q', %i, %i, %f, %f, %f, %f, %f, %i, %i, %i", name, Player[playerid][pyr::pass], ip, 
     3600000, 0, 500.0, 834.28 + RandomFloat(2.0), -1834.89 + RandomFloat(2.0), 12.502, 180.0,
     1, random(300), 0);
 

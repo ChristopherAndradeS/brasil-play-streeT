@@ -93,7 +93,9 @@ YCMD:gps(playerid, params[], help)
             new Float:distance = floatsqroot(floatpower(pX - tX, 2) + floatpower(pY - tY, 2) + floatpower(pZ - tZ, 2));
 
             SetPlayerCheckpoint(playerid, pX, pY, pZ, 2.5);
-
+            SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_CHECKPOINT);
+            PlayerPlaySound(playerid, 1056, 0.0, 0.0, 0.0);
+            
             SendClientMessage(playerid, -1, "{33ff33}[ GPS ] {ffffff}GPS selecionou {33ff33}%s {ffffff}> {33ff33}%s", category, name);
             SendClientMessage(playerid, -1, "{33ff33}[ GPS ] {ffffff}Ponto marcado a uma distância de: {33ff33}%.2f KM", distance / 1000.0);
             return 1;

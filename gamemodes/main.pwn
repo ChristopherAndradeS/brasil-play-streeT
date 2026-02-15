@@ -143,9 +143,14 @@ public OnPlayerText(playerid, text[])
         Adm::GetColorString(Admin[playerid][adm::lvl]), GetPlayerNameStr(playerid), text);  
 
         return 0;      
-    }
+    }   
 
-    SendClientMessageToAll(-1, "%s [ %d ] diz: %s", GetPlayerNameStr(playerid), playerid, text);
+    printf("%s", Player[playerid][pyr::pass]);
+
+    if(!bcrypt_verify(playerid, "OnPlayerPasswordVerify", text, Player[playerid][pyr::pass]))
+        return 0;
+        
+    SendClientMessageToAll(-1, "{99FF99}[ G ] {ffffff}%s [ %d ] {99FF99}diz: {ffffff}%s", GetPlayerNameStr(playerid), playerid, text);
 
     return 0;
 }
@@ -188,26 +193,17 @@ hook function SendClientMessageToAll(colour, const msg[], GLOBAL_TAG_TYPES:...)
     return continue(colour, fixed_msg);
 }
 
-// hook SetPlayerCheckpoint(playerid, Float:x, Float:y, Float:z, Float:size)
-// {
-//     SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_CHECKPOINT);
-//     PlayerPlaySound(playerid, 1056, 0.0, 0.0, 0.0);
-//     return continue(playerid, Float:x, Float:y, Float:z, Float:size);
-// }
-
-// public OnPlayerEnterCheckpoint(playerid)
-// {
-//     if(IsPlayerCheckpointActive(playerid))
-//     {
-//         ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_CHECKPOINT);
-//         DisablePlayerCheckpoint(playerid);
-//         SendClientMessage(playerid, -1, "{33ff33}[ GPS ] {ffffff}Você chegou ao seu destino!");
-//         PlayerPlaySound(playerid, 1058, 0.0, 0.0, 0.0); 
-//         return 1;
-//     }
+public OnPlayerEnterCheckpoint(playerid)
+{
+    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_CHECKPOINT)) return 1;
     
-//     return 1;
-// }
+    ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_CHECKPOINT);
+    DisablePlayerCheckpoint(playerid);
+    SendClientMessage(playerid, -1, "{33ff33}[ GPS ] {ffffff}Você chegou ao seu destino!");
+    PlayerPlaySound(playerid, 1058, 0.0, 0.0, 0.0); 
+    
+    return 1;
+}
 
 YCMD:veh(playerid, params[], help)
 {
@@ -245,48 +241,48 @@ YCMD:teste(playerid, params[], help)
     return 1;
 }
 
-YCMD:games(playerid, params[], help)
-{
-    new gameid = strval(params);
+// YCMD:games(playerid, params[], help)
+// {
+//     new gameid = strval(params);
 
-    SendClientMessage(playerid, -1, "%s nome", Game[gameid][game::name]);
-    SendClientMessage(playerid, -1, "%d tipo", _:Game[gameid][game::type]);
-    SendClientMessage(playerid, -1, "%d vw", Game[gameid][game::vw]);
-    SendClientMessage(playerid, -1, "%d star_time", Game[gameid][game::start_time]);
-    SendClientMessage(playerid, -1, "%d min_player", Game[gameid][game::min_players]);
-    SendClientMessage(playerid, -1, "%d max_playes", Game[gameid][game::max_players]);
-    SendClientMessage(playerid, -1, "%d playes count", Game[gameid][game::players_count]);
-    SendClientMessage(playerid, -1, "%d state", _:Game[gameid][game_state]);
-    SendClientMessage(playerid, -1, "0x%08x flags", Game[gameid][game::flags]);
+//     SendClientMessage(playerid, -1, "%s nome", Game[gameid][game::name]);
+//     SendClientMessage(playerid, -1, "%d tipo", _:Game[gameid][game::type]);
+//     SendClientMessage(playerid, -1, "%d vw", Game[gameid][game::vw]);
+//     SendClientMessage(playerid, -1, "%d star_time", Game[gameid][game::start_time]);
+//     SendClientMessage(playerid, -1, "%d min_player", Game[gameid][game::min_players]);
+//     SendClientMessage(playerid, -1, "%d max_playes", Game[gameid][game::max_players]);
+//     SendClientMessage(playerid, -1, "%d playes count", Game[gameid][game::players_count]);
+//     SendClientMessage(playerid, -1, "%d state", _:Game[gameid][game_state]);
+//     SendClientMessage(playerid, -1, "0x%08x flags", Game[gameid][game::flags]);
 
-    return 1;
-}
+//     return 1;
+// }
 
-YCMD:kill(playerid, params[], help)
-{
-    SetPlayerHealth(playerid, 0);
-    return 1;
-}
+// YCMD:kill(playerid, params[], help)
+// {
+//     SetPlayerHealth(playerid, 0);
+//     return 1;
+// }
 
-YCMD:teste2(playerid, params[], help)
-{
-    for(new PlayerText:i = PlayerText:0; i < MAX_PLAYER_TEXT_DRAWS; i++)
-    {
-        if(IsValidPlayerTextDraw(playerid, i))
-        {
-            printf("PlayerTextDraw %d is valid. %d visible", i, IsPlayerTextDrawVisible(playerid, i));
-            //PlayerTextDrawShow(playerid, i);
-        }
-    }
+// YCMD:teste2(playerid, params[], help)
+// {
+//     for(new PlayerText:i = PlayerText:0; i < MAX_PLAYER_TEXT_DRAWS; i++)
+//     {
+//         if(IsValidPlayerTextDraw(playerid, i))
+//         {
+//             printf("PlayerTextDraw %d is valid. %d visible", i, IsPlayerTextDrawVisible(playerid, i));
+//             //PlayerTextDrawShow(playerid, i);
+//         }
+//     }
 
-    // for(new Text:i = Text:0; i < MAX_TEXT_DRAWS; i++)
-    // {
-    //     if(IsValidTextDraw(i))
-    //     {
-    //         printf("TextDraw %d is valid", i);
-    //         //PlayerTextDrawShow(playerid, i);
-    //     }
-    // }
+//     // for(new Text:i = Text:0; i < MAX_TEXT_DRAWS; i++)
+//     // {
+//     //     if(IsValidTextDraw(i))
+//     //     {
+//     //         printf("TextDraw %d is valid", i);
+//     //         //PlayerTextDrawShow(playerid, i);
+//     //     }
+//     // }
 
-    return 1;
-}
+//     return 1;
+// }
