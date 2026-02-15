@@ -145,6 +145,8 @@ hook OnGameModeExit()
     Acessory::DestroyPublicTD();
     Adm::DestroyPublicTD();
     Veh::DestroyPublicTD();
+
+    return 1;
 }
 
 hook OnPlayerDisconnect(playerid, reason)

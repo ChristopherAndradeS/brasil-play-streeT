@@ -51,8 +51,8 @@ stock Acessory::DestroyPublicTD()
 {
     for(new i = 0; i < 21; i++)
 	{
-    	TextDrawDestroy(playerid, Acessory::PublicTD[i]);
-		Acessory::PublicTD[i] = INVALID_PLAYER_TEXT_DRAW;
+    	TextDrawDestroy(Acessory::PublicTD[i]);
+		Acessory::PublicTD[i] = INVALID_TEXT_DRAW;
 	}
 }
 

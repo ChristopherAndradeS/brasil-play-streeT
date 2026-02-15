@@ -36,8 +36,8 @@ hook OnPlayerStateChange(playerid, PLAYER_STATE:newstate, PLAYER_STATE:oldstate)
     else if(oldstate == PLAYER_STATE_DRIVER || oldstate == PLAYER_STATE_PASSENGER)
     {
         Veh::HideTDForPlayer(playerid);
-        Baseboard::ShowTDForPlayer(playerid);
         Player::KillTimer(playerid, pyr::TIMER_SPEEDOMETER);
+        Baseboard::ShowTDForPlayer(playerid);
     }
 
     return 1;
@@ -64,13 +64,20 @@ hook OnVehicleHealthChance(vehicleid, Float:new_health, Float:old_health)
 
 public OnSpeedOMeterUpdate(playerid)
 {
-    if(!Veh::IsVisibleTDForPlayer(playerid) || !IsPlayerInAnyVehicle(playerid)) return 1;
+    if(!IsPlayerInAnyVehicle(playerid) || !IsPlayerConnected(playerid))
+    {
+        printf("limpeza devida por ter saido do carro\n");
+        Veh::HideTDForPlayer(playerid);
+        Player::KillTimer(playerid, pyr::TIMER_SPEEDOMETER);
+        return 1;
+    }
 
     new vehicleid = GetPlayerVehicleID(playerid);
 
     if(IsFlagSet(Vehicle[vehicleid][veh::flags], FLAG_VEH_IS_DEAD))
     {
-        Player::KillTimer(playerid, pyr::TIMER_SPEEDOMETER);
+        printf("limpeza devida por ter matado o carro");
+        Veh::UpdateTDForPlayer(playerid, PTD_VEH_TXT_SPEED, "X");
         return 1;
     }
 

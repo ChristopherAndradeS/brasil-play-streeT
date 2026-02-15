@@ -74,8 +74,8 @@ stock Adm::DestroyPublicTD()
 {
     for(new i = 0; i < 14; i++)
 	{
-    	TextDrawDestroy(playerid, Adm::PublicTD[i]);
-		Adm::PublicTD[i] = INVALID_PLAYER_TEXT_DRAW;
+    	TextDrawDestroy(Adm::PublicTD[i]);
+		Adm::PublicTD[i] = INVALID_TEXT_DRAW;
 	}
 }
 

@@ -48,8 +48,8 @@ stock Baseboard::DestroyPublicTD()
 {
     for(new i = 0; i < 13; i++)
 	{
-    	TextDrawDestroy(playerid, Baseboard::PublicTD[i]);
-		Baseboard::PublicTD[i] = INVALID_PLAYER_TEXT_DRAW;
+    	TextDrawDestroy(Baseboard::PublicTD[i]);
+		Baseboard::PublicTD[i] = INVALID_TEXT_DRAW;
 	}
 }
 

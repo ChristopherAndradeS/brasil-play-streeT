@@ -49,8 +49,8 @@ stock Login::DestroyPublicTD()
 {
     for(new i = 0; i < 7; i++)
 	{
-    	TextDrawDestroy(playerid, Login::PublicTD[i]);
-		Login::PublicTD[i] = INVALID_PLAYER_TEXT_DRAW;
+    	TextDrawDestroy(Login::PublicTD[i]);
+		Login::PublicTD[i] = INVALID_TEXT_DRAW;
 	}
 }
 
