@@ -4,6 +4,7 @@
 #include <sscanf2>
 #include <streamer>
 #include <PawnPlus>
+#include <samp_bcrypt>
 
 #define CGEN_MEMORY 20000
 

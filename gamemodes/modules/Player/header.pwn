@@ -9,7 +9,7 @@
 /*                  PLAYER                  */
 enum E_PLAYER 
 {
-    pyr::pass[16],
+    pyr::pass[BCRYPT_HASH_LENGTH],
     pyr::bitcoin,
     Float:pyr::money,
     Float:pyr::health,
@@ -308,6 +308,7 @@ stock Login::IsValidPassword(const text[], &issue)
     issue = 0;
     return 1;
 }
+
 
 stock Player::Spawn(playerid)
 {
