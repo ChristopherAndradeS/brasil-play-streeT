@@ -13,6 +13,7 @@ enum E_PLAYER
     pyr::bitcoin,
     Float:pyr::money,
     Float:pyr::health,
+    pyr::gender,
     pyr::score,
     pyr::orgid,
     pyr::flags,
@@ -29,7 +30,8 @@ enum (<<= 1)
     MASK_PLAYER_IN_LOGIN,
     MASK_PLAYER_SPECTATING,
     MASK_PLAYER_IN_JAIL,
-    MASK_PLAYER_CHECKPOINT
+    MASK_PLAYER_CHECKPOINT,
+    MASK_PLAYER_DEATH,
 }
 
 new Player[MAX_PLAYERS][E_PLAYER];
@@ -103,6 +105,12 @@ enum (<<= 1)
 }
 
 new acs::Player[MAX_PLAYERS][E_PLAYER_ACESSORY];
+
+// new const Register::gValidsSkin[2][] = 
+// {
+//     {2, 4, 7, 170, 188, 250, 259},
+//     {12, 13, 41, 56, 65, 93, 193}
+// };
 
 /*                  PLAYER FORWARDS                 */
 forward Player::Kick(playerid, timerid, const msg[]);
@@ -205,7 +213,10 @@ stock Player::CreateTimer(playerid, timerid, const callback[] = "", time, bool:r
         return printf("[ TIMER Player ] Erro ao tentar criar Timer #%d (%s [PID : %d]) %d pois já existia", timerid, callback, playerid, time);
     
     pyr::Timer[playerid][timerid] = SetTimerEx(callback, time, repeate, specifiers, ___(6));
-    return printf("[ TIMER Player ] Timer #%d (%s [PID : %d]) %d foi criado\n", timerid, callback, playerid, time);
+    
+    //return printf("[ TIMER Player ] Timer #%d (%s [PID : %d]) %d foi criado\n", timerid, callback, playerid, time);
+
+    return 1;
 }
 
 stock Player::KillTimer(playerid, timerid)
@@ -216,7 +227,7 @@ stock Player::KillTimer(playerid, timerid)
     KillTimer(pyr::Timer[playerid][timerid]);
 
     pyr::Timer[playerid][timerid] = INVALID_TIMER;
-    printf("[ TIMER Player ] Timer #%d ([PID : %d]) foi morto\n", timerid, playerid);
+    //printf("[ TIMER Player ] Timer #%d ([PID : %d]) foi morto\n", timerid, playerid);
     
     return 1;
 }
@@ -310,7 +321,7 @@ stock Login::IsValidPassword(const text[], &issue)
 }
 
 
-stock Player::Spawn(playerid)
+stock Player::Spawn(playerid, spawn_default = false)
 {
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
@@ -330,14 +341,12 @@ stock Player::Spawn(playerid)
     DB::GetDataFloat(db_entity, "players", "pZ", pZ, "name = '%q'", name);
     DB::GetDataFloat(db_entity, "players", "pA", pA, "name = '%q'", name);
 
+    if(pX == 0.0 && pY == 0.0 && pZ == 0.0) spawn_default = true;
+
     /* SET SPAWN */
 
-    //new sucess = CA_RayCastLine(pX, pY, pZ + 0.5, x, y, pZ + 0.5, pX, pY, pZ);
-    new sucess = 1;
-
-    if(sucess)
-        SetSpawnInfo(playerid, 0, 
-        skinid, pX, pY, pZ, pA, 
+    if(!spawn_default)
+        SetSpawnInfo(playerid, 0, skinid, pX, pY, pZ, pA, 
         WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0);
     else
     {
@@ -345,18 +354,14 @@ stock Player::Spawn(playerid)
         834.28 + RandomFloat(2.0), -1834.89 + RandomFloat(2.0), 12.502, 180.0, 
         WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0);
 
-        SendClientMessage(playerid, -1, "{ff9933}[ SERVER ] {ffffff}Seu Spawn anterior era inválido, enviado para spawn civil padrão!");
+        // DB::Update(db_entity, "players", 
+        // "pX = %f, pY = %f, pZ = %f, pA = %f WHERE name = '%q'",
+        // 834.28 + RandomFloat(2.0), -1834.89 + RandomFloat(2.0), 12.502, 180.0, name);
+
+        //SendClientMessage(playerid, -1, "{ff9933}[ SERVER ] {ffffff}Seu Spawn anterior era inválido, enviado para spawn civil padrão!");
     }
     
     SpawnPlayer(playerid);
-
-    /* PÓS SPAWN */
-
-    // CPF
-    Player::SetCPF(playerid);
-
-    // RODAPÉ
-    Baseboard::ShowTDForPlayer(playerid);
 
     return 1;
 }

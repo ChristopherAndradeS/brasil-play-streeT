@@ -340,7 +340,7 @@ stock Adm::SendMsgToAllTagged(flags, color, const msg[], GLOBAL_TAG_TYPES:...)
     return 1;
 }
 
-stock Adm::HasPermission(playerid, level)
+stock Adm::HasPermission(playerid, level, need_work = true)
 {    
     if(!IsFlagSet(Admin[playerid][adm::flags], FLAG_IS_ADMIN))
     {
@@ -354,8 +354,10 @@ stock Adm::HasPermission(playerid, level)
         return 0;
     }   
 
-    if(!IsFlagSet(Admin[playerid][adm::flags], FLAG_ADM_WORKING))
+    if(!IsFlagSet(Admin[playerid][adm::flags], FLAG_ADM_WORKING) && need_work)
     {
+        if((Admin[playerid][adm::lvl]) >= ROLE_ADM_CEO) return 1;
+        
         SendClientMessage(playerid,  -1, "{ff3333}[ ADM ] {ffffff}Voce precisar estar em modo de trabalho: /aw!");
         return 0;
     }

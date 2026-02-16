@@ -394,6 +394,11 @@ public Response_ACC_LOJA(playerid, dialogid, response, listitem, string:inputtex
     if(!response) 
         return CallLocalFunction("OnPlayerCommandText", "is", playerid, "/acessorios");
 
+    if(!DB::Exists(db_stock, "acessorys", "uid = %d", listitem + 1))
+    {
+        return SendClientMessage(playerid, -1, "{ff3333}[ ACS ] {ffffff}Estoque vazio! Já compraram esse acessório");
+    }
+    
     new slotid = Acessory::GetFreeSlot(playerid);
 
     if(slotid == INVALID_SLOTID) return 0;
@@ -475,7 +480,7 @@ public Response_ACC_OPTIONS(playerid, dialogid, response, listitem, string:input
 
                 if(!sresponse) return 1;
 
-                Player::GiveMoney(playerid, price * 0.8);
+                Player::GiveMoney(playerid, price * 0.6);
                 DB::Delete(db_entity, "acessorys", "owner = '%q' AND slotid = %d", name, slotid);
                 RemovePlayerAttachedObject(playerid, slotid);
                 acs::ClearData(playerid);
@@ -578,7 +583,6 @@ public Response_ACC_MENU(playerid, dialogid, response, listitem, string:inputtex
 
 stock Acessory::SetPlayerEditor(playerid, slotid)
 {
-    printf("slotid = %d", slotid);
     Acessory::ShowTDForPlayer(playerid);
     Acessory::LoadOnPlayer(playerid, slotid);
 
@@ -753,8 +757,7 @@ stock Acessory::SaveData(playerid, slotid)
     //MENSAGEM PERSONALIZADA
     if(sX == 0.0 || sY == 0.0 || sZ == 0.0)
     {
-        SendClientMessage(playerid, -1, "erro ao salvar");
-        printf("erro ao salvar");
+        printf("[ ERRO ACS ] ERRO FATAL: Ao salvar informações do acessório!");
         return 1;
     }
 
@@ -938,36 +941,5 @@ stock Acessory::GetNameByModelid(modelid, name[], len = sizeof(name))
         default:            return 0;
     }
 
-    return 1;
-}
-
-YCMD:acessorios(playerid, params[], help)
-{
-    acs::ClearData(playerid);
-
-    new msg[1024], name[MAX_PLAYER_NAME], modelid;
-    
-    GetPlayerName(playerid, name);
-
-    format(msg, sizeof(msg), "{ffffff}Slot\t{ffffff}ID \t{ffffff}Status\n");
-
-    for(new i = 0; i < MAX_PLAYER_ACESSORYS; i++)
-    {
-        if(DB::Exists(db_entity, "acessorys", "owner = '%q' AND slotid = %d", name, i))
-        {
-            DB::GetDataInt(db_entity, "acessorys", "modelid", modelid, "owner = '%q' AND slotid = %d", name, i);
-
-            format(msg, sizeof(msg), "%s{ffffff}Slot: {9999ff}%d\t{ffffff}%d\t%s\n", 
-            msg, i + 1, modelid,
-            IsPlayerAttachedObjectSlotUsed(playerid, i) ? "{33ff33}[ EQUIPADO ]" : "{ff9933}[ DESEQUIPADO ]");
-        }
-
-        else
-            format(msg, sizeof(msg), "%s{ffffff}Slot: {ff3333}%d\t\t{ff3333}[ VAZIO ]\n", msg, i + 1);
-    }
-
-    format(msg, sizeof(msg), "%s{cdcdcd}CLIQUE AQUI para comprar\t\t\n", msg);
-    
-    Dialog_ShowCallback(playerid, using public Response_ACC_MENU<iiiis>, DIALOG_STYLE_TABLIST_HEADERS, "{FFFFFF}Gerenciar Acessorios", msg, "Selecionar", "Fechar");
     return 1;
 }

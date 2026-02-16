@@ -1,7 +1,7 @@
 #define MAX_GAME_PARTICIPANTS (5)
 #define MAX_GAMES             (5)
 
-#define GAME_TIME_WAIT        (10)
+#define GAME_TIME_WAIT        (60)
 
 #define INVALID_GAME_ID       (-1)
 #define INVALID_SEAT_ID       (-1)
@@ -25,7 +25,6 @@ enum GAME_STATES
 enum E_GAMES
 {
     GAME_TYPES:game::type,
-    game::name[32],
     game::start_time,
     game::flags,
     game::vw,
@@ -49,7 +48,6 @@ enum (<<= 1)
     FLAG_PLAYER_WAITING,
     FLAG_PLAYER_PLAYING,
     FLAG_PLAYER_FINISHED,
-    FLAG_PLAYER_ELIMINATED,
 }
 
 enum E_PLAYER_GAMES
@@ -64,14 +62,13 @@ new game::Player[MAX_PLAYERS][E_PLAYER_GAMES];
 
 forward Game_Update(gameid);
 
-stock Game::Create(GAME_TYPES:typeid, const name[], min_players, max_players, notify = false)
+stock Game::Create(GAME_TYPES:typeid, min_players, max_players, notify = false)
 {
     new gameid = Game::GetFreeSlotID();
 
     if(gameid == INVALID_GAME_ID) return 0;
 
     /* VAR INIT */
-    format(Game[gameid][game::name], 32, "%s", name);
     Game[gameid][game::type] = typeid;
     Game[gameid][game::vw] = gameid + 1;
     Game[gameid][game::start_time] = GAME_TIME_WAIT;
@@ -89,20 +86,21 @@ stock Game::Create(GAME_TYPES:typeid, const name[], min_players, max_players, no
     }
 }
 
-stock Game::Clear(gameid, notify = false)
+stock Game::Clear(gameid)
 {
-    new name[32], min_p, max_p, GAME_TYPES:type;
+    new min_p, max_p, GAME_TYPES:type;
 
-    format(name, 32, "%s", Game[gameid][game::name]);
     min_p = Game[gameid][game::min_players];
     max_p = Game[gameid][game::max_players];
     type  = Game[gameid][game::type];
     
     Game::Destroy(gameid);
-    Game::Create(type, name, min_p, max_p, false);
+    Game::Create(type, min_p, max_p, true);
 
-    if(notify)
-        SendClientMessageToAll(-1, "{ff5533}[ EVENTO ] {ffffff}Evento {ff5533}%s {ffffff}reiniciou.", name);
+    // new raceid = Race::GetIDByGameID(gameid);
+
+    // if(notify)
+    //     SendClientMessageToAll(-1, "{ff5533}[ EVENTO ] {ffffff}Evento {ff5533}%s {ffffff}reiniciou.", game::Race[raceid][race::name]);
 }
 
 stock Game::Destroy(gameid)
@@ -110,10 +108,7 @@ stock Game::Destroy(gameid)
     if(!GetFlag(Game[gameid][game::flags], FLAG_GAME_CREATED)) return 1;
 
     new GAME_TYPES:typeid = Game[gameid][game::type];
-
-    new name[32];
-    format(name, 32, "%s", Game[gameid][game::name]);
-    format(Game[gameid][game::name], 32, "");
+ 
     Game[gameid][game::type]        = INVALID_GAME_TYPE;
     Game[gameid][game::vw]          = -1;
     Game[gameid][game::start_time]  = 0;
@@ -126,7 +121,7 @@ stock Game::Destroy(gameid)
 
     switch(typeid)
     {
-        case GAME_TYPE_RACE: return Race::Destroy(gameid, name);
+        case GAME_TYPE_RACE: return Race::Destroy(gameid);
 
         default: return 0;
     }
@@ -211,15 +206,10 @@ stock Game::RemovePlayer(gameid, playerid)
 
     Game[gameid][game::players][seat] = INVALID_PLAYER_ID;
     Game[gameid][game::players_count]--;
-
-    if(IsPlayerInAnyVehicle(playerid))
-        RemovePlayerFromVehicle(playerid);
-        
-    SetPlayerInterior(playerid, 0);
-    SetPlayerVirtualWorld(playerid, 0);
-    Player::Spawn(playerid);
-
+    
     Game::ClearPlayer(playerid);
+
+    SetPlayerVirtualWorld(playerid, 0);
 
     return 1;
 }
@@ -239,7 +229,7 @@ stock Game::ClearPlayers(gameid, lenght)
         new playerid = Game[gameid][game::players][i];
 
         if(playerid != INVALID_PLAYER_ID)
-            Game::ClearPlayer(playerid);
+            Game::RemovePlayer(gameid, playerid);
 
         Game[gameid][game::players][i] = INVALID_PLAYER_ID;
     }
@@ -289,6 +279,18 @@ stock Game::SendMessageToAll(gameid, const message[], GLOBAL_TAG_TYPES:...)
     for(new i = 0; i < lenght; i++)
         if(Game[gameid][game::players][i] != INVALID_PLAYER_ID)
             SendClientMessage(Game[gameid][game::players][i], -1, formatted_message);
+}
+
+stock Game::ShowTextForAll(gameid, const str[], time, style, GLOBAL_TAG_TYPES:...)
+{
+    new format_msg[144];
+    va_format(format_msg, 144, str, ___(4)); 
+
+    new lenght = Game[gameid][game::max_players];
+
+    for(new i = 0; i < lenght; i++)
+        if(Game[gameid][game::players][i] != INVALID_PLAYER_ID)
+            GameTextForPlayer(Game[gameid][game::players][i], format_msg, time, style);
 }
 
 stock Game::SetPlayersReady(gameid)
@@ -367,6 +369,7 @@ public Game_Update(gameid)
                 return;
             }   
 
+            Game::ShowTextForAll(gameid, "~p~Aguardando %d jogadores...", 1000, 4, Game[gameid][game::min_players]);
             Game[gameid][game_state] = GAME_STATE_FINISHED;
             return;
         }
@@ -389,7 +392,7 @@ public Game_Update(gameid)
 
                 if(time <= 0)
                 {
-                    GameTextForAll("~y~Iniciando...", 1500, 3);
+                    Game::ShowTextForAll(gameid, "~y~Iniciando...", 1500, 4);
                     Game[gameid][game::start_time] = 5;
 
                     Game::SendMessageToAll(gameid, "{ff5533}[ EVENTO ] {ffffff}Iniciando Corrida! {ff5533}Se preparem!");
@@ -400,7 +403,7 @@ public Game_Update(gameid)
 
                 else
                 {
-                    GameTextForAll("~g~~h~~h~Esperando %02d:%02d", (time <= 10) ? 500 : 990, 3, floatround(time/60), time % 60);
+                    Game::ShowTextForAll(gameid, "~g~~h~~h~Esperando %02d:%02d", (time <= 10) ? 500 : 990, 4, floatround(time/60), time % 60);
                     Game[gameid][game::start_time]--;
                     Game[gameid][game_state] = GAME_STATE_WAIT_FILL;
                     return;   
@@ -414,9 +417,9 @@ public Game_Update(gameid)
 
             if(time <= 0)
             {
-                GameTextForAll("~r~VAI...", 1500, 3);
+                Game::ShowTextForAll(gameid, "~r~VAI...", 1500, 3);
                 Game::PlaySoundForAll(gameid, 1057);
-                Game[gameid][game::start_time] = 100; //5 minutos para acabar o evento
+                Game[gameid][game::start_time] = 240; //5 minutos para acabar o evento
                 Game::StartPlayers(gameid); 
                 Game[gameid][game_state] = GAME_STATE_STARTED;
                 return;   
@@ -424,7 +427,7 @@ public Game_Update(gameid)
 
             else
             {
-                GameTextForAll("~r~~h~%d", 990, 3, time);
+                Game::ShowTextForAll(gameid, "~r~~h~%d", 990, 3, time);
                 Game::PlaySoundForAll(gameid, 1056);
                 Game[gameid][game::start_time]--;
                 Game[gameid][game_state] = GAME_STATE_STARTING;
@@ -446,7 +449,6 @@ public Game_Update(gameid)
 
             else
             {
-                SendClientMessageToAll(-1, "{ff5533}[ EVENTO ] {ffffff}O evento {ff5533}%s {ffffff}acabou!", Game[gameid][game::name]);
                 Game::FinishPlayers(gameid);
                 Game[gameid][game::start_time] = 0;
                 Game[gameid][game_state] = GAME_STATE_FINISHING;
@@ -457,7 +459,7 @@ public Game_Update(gameid)
         case GAME_STATE_FINISHING:
         {
             Game::GivePlayerRewards(gameid);
-            Game::Clear(gameid, true);
+            Game::Clear(gameid);
             return;
         }
 

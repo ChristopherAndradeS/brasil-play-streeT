@@ -1,5 +1,8 @@
 YCMD:evento(playerid, params[], help)
 {
+    if(IsFlagSet(Admin[playerid][adm::flags], FLAG_ADM_WORKING))
+        return SendClientMessage(playerid, -1, "{ff5533}[ EVENTO ] {ffffff}Sai do modo de trabalho: {ff5533}/aw {ffffff}para poder jogar nos eventos!");
+
     if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME))
         return SendClientMessage(playerid, -1, "{ff5533}[ EVENTO ] {ffffff}Você já está em um evento. Digite {ff5533}/sair {ffffff}para sair deste evento.");
 
@@ -12,9 +15,9 @@ YCMD:evento(playerid, params[], help)
     if(Game::GetCount() <= 0)
         return SendClientMessage(playerid, -1, "{ff5533}[ EVENTO ] {ffffff}Não há eventos disponíveis no momento.");
     
-    new msg[512];
-
-    strcat(msg, "ID\tEvento\tStatus\tParticipantes\t \n");
+    new msg[512], raceid;
+    
+    strcat(msg, "ID\tEvento\tStatus\tParticipantes\n");
 
     new idx = 1;
 
@@ -22,8 +25,10 @@ YCMD:evento(playerid, params[], help)
     {
         if(!GetFlag(Game[i][game::flags], FLAG_GAME_CREATED)) continue;
 
-        format(msg, 512, "%s{ff5533}%d.\t{ffffff}%s\t%s\t{55ff55}%d{ffffff}/{55ff55}%d\t{cdcdcd}CLIQUE AQUI PARA ENTRAR\n", msg,
-        idx, Game[i][game::name], 
+        raceid = Race::GetIDByGameID(i);
+
+        format(msg, 512, "%s{ff5533}%d.\t{ffffff}%s\t%s\t{55ff55}%d{ffffff}/{55ff55}%d\n", msg,
+        idx, game::Race[raceid][race::name], 
         Game[i][game_state] <= GAME_STATE_STARTING ? "{99ff99}Aguardando" : "{ffff99}Em andamento", 
         Game::GetPlayerCount(i), Game[i][game::max_players]);
 
@@ -58,21 +63,26 @@ YCMD:sair(playerid, params[], help)
     if(!GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME))
         return SendClientMessage(playerid, -1, "{ff5533}[ EVENTO ] {ffffff}Você não está participando de nenhum evento.");
 
-    if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING))
-        return SendClientMessage(playerid, -1, "{ff5533}[ EVENTO ] {ffffff}Para sair do evento, {ff5533}saia do veículo");
-
     if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED))
-        return SendClientMessage(playerid, -1, "{ff5533}[ EVENTO ] {ffffff}Você terminou uma corrida, aguarde a {ff5533}premiação!");
+        return SendClientMessage(playerid, -1, "{ff5533}[ EVENTO ] {ffffff}Você está esperando uma partida a qual você já se classificou terminar!");
 
-    new gameid = game::Player[playerid][pyr::gameid];
+    if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_WAITING))
+    {
+        new gameid = game::Player[playerid][pyr::gameid];
+        SetPlayerInterior(playerid, 0);
+        SetPlayerVirtualWorld(playerid, 0);
+        Game::RemovePlayer(gameid, playerid);
+    }
 
-    // if(gameid == INVALID_GAME_ID)
-    // {
-    //     printf("[ EVENTO ] ERRO FATAL: O jogador %s tentou sair de um evento, mas não tinha um ID de jogo válido.", GetPlayerNameStr(playerid));
-    //     return SendClientMessage(playerid, -1, "{ff5533}[ EVENTO ] {ffffff}Ocorreu um erro ao tentar sair do evento. Tente novamente.");
-    // }
-    
-    Game::RemovePlayer(gameid, playerid);
+    else if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING)) 
+    {
+        new gameid = game::Player[playerid][pyr::gameid];
+        SetPlayerInterior(playerid, 0);
+        SetPlayerVirtualWorld(playerid, 0);
+        Race::EliminatePlayer(playerid, gameid);
+    }
+
+    Player::Spawn(playerid, true);
     SendClientMessage(playerid, -1, "{ff5533}[ EVENTO ] {ffffff}Você saiu do evento com sucesso.");
     
     return 1;

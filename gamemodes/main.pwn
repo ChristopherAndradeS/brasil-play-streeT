@@ -29,6 +29,8 @@
 #include "../gamemodes/modules/Admin/header.pwn"
 #include "../gamemodes/modules/Maps/header.pwn"
 #include "../gamemodes/modules/Games/header.pwn"
+    /* GAMES */
+#include "../gamemodes/modules/Games/Race/header.pwn"
 /*                          HANDLE                          */
 #include "../gamemodes/modules/Server/handle.pwn"
 #include "../gamemodes/modules/Vehicle/handle.pwn"
@@ -37,6 +39,8 @@
 #include "../gamemodes/modules/DB/handle.pwn"
 #include "../gamemodes/modules/Maps/handle.pwn"
 #include "../gamemodes/modules/Games/handle.pwn"
+    /* GAMES */
+#include "../gamemodes/modules/Games/Race/handle.pwn"
 /*                          SERVER                          */
 #include "../gamemodes/modules/Server/wheather.pwn"
 #include "../gamemodes/modules/Server/players.pwn"
@@ -61,6 +65,7 @@
 #include "../gamemodes/modules/Player/login.pwn"
 #include "../gamemodes/modules/Player/payday.pwn"
 #include "../gamemodes/modules/Player/acessory.pwn"
+#include "../gamemodes/modules/Player/commands.pwn"
 /*                          ADMIN                          */
 #include "../gamemodes/modules/Admin/commands.pwn"
 #include "../gamemodes/modules/Admin/panel.pwn"
@@ -68,31 +73,14 @@
 #include "../gamemodes/modules/Vehicle/commands.pwn"
 /*                          GAME                        */
 #include "../gamemodes/modules/Games/commands.pwn"
-// -- HEADERS 
-#include "../gamemodes/modules/Games/Race/header.pwn"
-// -- HANDLES
-#include "../gamemodes/modules/Games/Race/handle.pwn"
 
 main()
 {
-    // Avoid amx_FindPublic collisions on some plugin stacks during GMX/unload.
     pp_use_funcidx(true);
-}
-
-public pp_on_error(source[], message[], error_level:level, &retval)
-{
-    printf("[ PawnPlus ] %s | nivel: %d | %s", source, _:level, message);
-    return 0;
 }
 
 public OnGameModeExit()
 {
-    foreach(new i : Player)
-    {
-        Kick(i);
-        printf("Jogador kikado");
-    }
-
 	if(DB_Close(db_entity))
     	db_entity = DB:0;
 
@@ -115,9 +103,15 @@ public OnGameModeExit()
         count++;
     }
 
-    printf("[ LISTAS ] %d Lista Encadeada de Veículos e Áreas Dinâmicas destruídas com sucesso!\n", count);
+    printf("[ LISTAS ] %d Lista Encadeada de Veiculos e Areas Dinâmicas destruidas com sucesso!\n", count);
 
     return 1;
+}
+
+public pp_on_error(source[], message[], error_level:level, &retval)
+{
+    printf("[ PawnPlus ] %s | nivel: %d | %s", source, _:level, message);
+    return 0;
 }
 
 public e_COMMAND_ERRORS:OnPlayerCommandReceived(playerid, cmdtext[], e_COMMAND_ERRORS:success)
@@ -136,6 +130,20 @@ public e_COMMAND_ERRORS:OnPlayerCommandReceived(playerid, cmdtext[], e_COMMAND_E
 
 public OnPlayerText(playerid, text[])
 {
+    if(isnull(text)) return 0;
+
+    if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED))
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ SEGURANCA ] {ffffff}Chat bloqueado durante login/registro. Use apenas o dialog para senha.");
+        return 0;
+    }
+
+    if(!strcmp(lgn::Player[playerid][lgn::input], text))
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ OPA! ] {ffffff}Nao compartilhe {ff3333}sua senha {ffffff}com ninguem, {ff3333}nem mesmo com admins!");
+        return 0;
+    }
+
     if(IsFlagSet(Admin[playerid][adm::flags], FLAG_ADM_WORKING))
     {      
         Adm::SendMsgToAllTagged(FLAG_ADM_WORKING | FLAG_IS_ADMIN, 0xFFFF33AA, 
@@ -145,12 +153,12 @@ public OnPlayerText(playerid, text[])
         return 0;      
     }   
 
-    printf("%s", Player[playerid][pyr::pass]);
-
     if(!bcrypt_verify(playerid, "OnPlayerPasswordVerify", text, Player[playerid][pyr::pass]))
         return 0;
-        
+
     SendClientMessageToAll(-1, "{99FF99}[ G ] {ffffff}%s [ %d ] {99FF99}diz: {ffffff}%s", GetPlayerNameStr(playerid), playerid, text);
+    
+    ApplyAnimation(playerid, "ped", "IDLE_chat", 4.1, false, false, false, false, 1500);
 
     return 0;
 }
@@ -204,85 +212,3 @@ public OnPlayerEnterCheckpoint(playerid)
     
     return 1;
 }
-
-YCMD:veh(playerid, params[], help)
-{
-    new modelid;
-
-    if(sscanf(params, "i", modelid)) return 1;
-
-    new Float:pX, Float:pY, Float:pZ;
-    GetPlayerPos(playerid, pX, pY, pZ);
-
-    new vehicleid = CreateVehicle(modelid, pX, pY, pZ, 0.0, RandomMinMax(0, 10), RandomMinMax(0, 10), -1);
-    PutPlayerInVehicle(playerid, vehicleid, 0);
-
-    LinkVehicleToInterior(vehicleid, GetPlayerInterior(playerid));
-
-    new regionid = Vehicle[vehicleid][veh::regionid];
-
-    new count = linked_list_size(veh::gRegion[regionid]);
-
-    new str[128];
-    format(str, 128, "Veiculo: {33ff33}%d {ffffff}| Regiao: {33ff33}%d {ffffff}| QTR: {33ff33}%d", vehicleid, regionid, count);
-
-    Vehicle[vehicleid][veh::tex3did] = CreateDynamic3DTextLabel(str, -1, pX, pY, pZ, 50.0, .attachedplayer = INVALID_PLAYER_ID, .attachedvehicle = vehicleid);
-
-    return 1;
-}
-
-YCMD:teste(playerid, params[], help)
-{
-    SendClientMessage(playerid, -1, "%d veiculos", GetVehicleModelCount(571));
-    SendClientMessage(playerid, -1, "%d seat", game::Player[playerid][pyr::seat]);
-    SendClientMessage(playerid, -1, "%d gameid", game::Player[playerid][pyr::gameid]);
-    SendClientMessage(playerid, -1, "%d vw", GetPlayerVirtualWorld(playerid));
-    SendClientMessage(playerid, -1, "0x%08x flags", game::Player[playerid][pyr::flags]);
-    return 1;
-}
-
-// YCMD:games(playerid, params[], help)
-// {
-//     new gameid = strval(params);
-
-//     SendClientMessage(playerid, -1, "%s nome", Game[gameid][game::name]);
-//     SendClientMessage(playerid, -1, "%d tipo", _:Game[gameid][game::type]);
-//     SendClientMessage(playerid, -1, "%d vw", Game[gameid][game::vw]);
-//     SendClientMessage(playerid, -1, "%d star_time", Game[gameid][game::start_time]);
-//     SendClientMessage(playerid, -1, "%d min_player", Game[gameid][game::min_players]);
-//     SendClientMessage(playerid, -1, "%d max_playes", Game[gameid][game::max_players]);
-//     SendClientMessage(playerid, -1, "%d playes count", Game[gameid][game::players_count]);
-//     SendClientMessage(playerid, -1, "%d state", _:Game[gameid][game_state]);
-//     SendClientMessage(playerid, -1, "0x%08x flags", Game[gameid][game::flags]);
-
-//     return 1;
-// }
-
-// YCMD:kill(playerid, params[], help)
-// {
-//     SetPlayerHealth(playerid, 0);
-//     return 1;
-// }
-
-// YCMD:teste2(playerid, params[], help)
-// {
-//     for(new PlayerText:i = PlayerText:0; i < MAX_PLAYER_TEXT_DRAWS; i++)
-//     {
-//         if(IsValidPlayerTextDraw(playerid, i))
-//         {
-//             printf("PlayerTextDraw %d is valid. %d visible", i, IsPlayerTextDrawVisible(playerid, i));
-//             //PlayerTextDrawShow(playerid, i);
-//         }
-//     }
-
-//     // for(new Text:i = Text:0; i < MAX_TEXT_DRAWS; i++)
-//     // {
-//     //     if(IsValidTextDraw(i))
-//     //     {
-//     //         printf("TextDraw %d is valid", i);
-//     //         //PlayerTextDrawShow(playerid, i);
-//     //     }
-//     // }
-
-//     return 1;
-// }

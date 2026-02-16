@@ -9,7 +9,8 @@ enum E_SERVER
     srv::g_weatherid, srv::j_weatherid,
     Float:srv::g_weather_prob, Float:srv::j_weather_prob,
 
-    srv::is_count_down
+    srv::is_count_down,
+    srv::last_rand_msgid,
 }
 
 new Server[E_SERVER];

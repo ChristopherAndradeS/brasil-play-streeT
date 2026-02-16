@@ -22,6 +22,7 @@ public OnPlayerPasswordHash(playerid, hashid)
 
     if(!Player[playerid][pyr::pass][0])
     {
+        lgn::Player[playerid][lgn::input] = '\0';
         SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Nao foi possivel proteger sua senha, tente novamente.");
         return 1;
     }
@@ -40,6 +41,7 @@ hook OnPlayerPasswordVerify(playerid, bool:success)
     {
         if(!success)
         {
+            lgn::Player[playerid][lgn::input] = '\0';
             SendClientMessage(playerid, -1, "{ff3333}[ x ] {ffffff}Senha incorreta! Clique novamente para tentar.");
             return 1;
         }
@@ -47,32 +49,12 @@ hook OnPlayerPasswordVerify(playerid, bool:success)
         Login::UnSetPlayer(playerid);
     }
 
-    else if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED))
-    {
-        if(success)
-        {
-            SendClientMessage(playerid, -1, "{ff3333}[ OPA! ] {ff3333}Não compartilhe sua senha {ffffff}com ninguém, {ff3333}nem mesmo admins!");
-            return 0;
-        }
-    }
     return 1;
 }
 
 hook OnPlayerConnect(playerid)
 {
     Login::SetPlayer(playerid);
-    return 1;
-}
-
-hook OnPlayerSpawn(playerid)
-{
-    if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED))
-        return 1;
-
-    //Adicionar Timer e sistema de carregamento para evitar travamentos ao spwanar
-
-    GameTextForPlayer(playerid, "~g~~h~~h~Bem Vindo", 2000, 3);
-
     return 1;
 }
 
@@ -113,6 +95,8 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
                 return 1;
             }
 
+            format(lgn::Player[playerid][lgn::input], 16, "%s", stext);
+
             if(!bcrypt_hash(playerid, "OnPlayerPasswordHash", stext, BCRYPT_COST))
             {
                 SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Nao foi possivel criptografar sua senha no momento.");
@@ -152,6 +136,8 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
                 SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Falha ao validar senha no momento, tente novamente.");
                 return 1;
             }
+
+            format(lgn::Player[playerid][lgn::input], 16, "%s", stext);
 
             return 1;
         }

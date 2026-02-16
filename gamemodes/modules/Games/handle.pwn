@@ -2,11 +2,9 @@
 
 hook OnGameModeInit()
 {
-    Game::Create(GAME_TYPE_RACE, "Corrida de Kart 1", 2, 5);
-    Game::Create(GAME_TYPE_RACE, "Corrida de Kart 2", 2, 5);
-    Game::Create(GAME_TYPE_RACE, "Corrida de Kart 3", 2, 5);
-    // Game::Create(GAME_TYPE_RACE, "Corrida de Kart 4", 2, 5);
-    // Game::Create(GAME_TYPE_RACE, "Corrida de Kart 5", 2, 5);
+    Game::Create(GAME_TYPE_RACE, 2, 5);
+    Game::Create(GAME_TYPE_RACE, 2, 5);
+    Game::Create(GAME_TYPE_RACE, 2, 5);
 
     return 1;
 }

@@ -312,11 +312,11 @@ YCMD:megafone(playerid, params[], help)
 
     new msg[144], time;
     if(sscanf(params, "is[144]", time, msg))
-        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /megafone {ff3333}[ MSG ] [ DURACAO (segundos) ]");
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /megafone {ff3333}[ DURACAO (segundos) ] [ MSG ] ");
     
     time = clamp(time, 1, 15);
 
-    GameTextForAll("~g~~h~~h~%s", time * 1000, 3, msg);
+    GameTextForAll("~r~~h~~h~%s", time * 1000, 4, msg);
     SendClientMessageToAll(-1, "{ff3399}[ ANUNCIO ADM ] {ffffff}%s", msg);
 
     return 1;
@@ -526,7 +526,7 @@ YCMD:tp(playerid, params[], help)
         return 1;
     }
 
-    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER)) return 1;
+    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER, false)) return 1;
  
     new Float:pX, Float:pY, Float:pZ, interiorid, vw;
     if(sscanf(params, "fffii", pX, pY, pZ, interiorid, vw)) 
@@ -569,7 +569,7 @@ YCMD:setarskin(playerid, params[], help)
 
     new targetid, skinid;
     if(sscanf(params, "ui", targetid, skinid))
-        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /kick {ff3333}[ ID ] [ SKINID ]");
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /setarskin {ff3333}[ ID ] [ SKINID ]");
     
     if(skinid < 0 || skinid > 311) 
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Erro do parâmetro: {ff3333}skinid {ffffff}[0 - 311]");
@@ -750,7 +750,7 @@ YCMD:cgps(playerid, params[], help)
         return 1;
     }    
 
-    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER)) return 1;
+    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER, false)) return 1;
 
     new name[32], category[32], msg[512];
 
@@ -808,7 +808,7 @@ YCMD:cgps(playerid, params[], help)
                     if(!response3)
                     {
                         msg[0] = EOS;
-                        Dialog_ShowCallback(playerid, using inline select_gps_cat_dialog, DIALOG_STYLE_LIST, "{00FF00}GPS - Escolha a Categoria", msg, "Selecionar", "Voltar");
+                        Dialog_ShowCallback(playerid, using inline select_gps_cat_dialog, DIALOG_STYLE_LIST, "CRIAR GPS - CATEGORIA", msg, "Selecionar", "Voltar");
                         return 1;
                     }
 
@@ -823,7 +823,8 @@ YCMD:cgps(playerid, params[], help)
                 }
 
                 Dialog_ShowCallback(playerid, using inline create_gps_cat_dialog, DIALOG_STYLE_INPUT,
-                "{ff5555}>> {ffffff}Digite o nome da {ff5555}nova categoria:\n\n", "", "Criar", "Voltar");            
+                "CRIAR GPS - CATEGORIA",
+                "{ff5555}>> {ffffff}Digite o nome da {ff5555}nova categoria:\n\n", "Criar", "Voltar");            
             }
 
             else
@@ -832,14 +833,14 @@ YCMD:cgps(playerid, params[], help)
         }
 
         Dialog_ShowCallback(playerid, using inline select_gps_cat_dialog, DIALOG_STYLE_LIST,
-        "{00FF00}GPS - Escolha a Categoria", msg, "Selecionar", "Voltar");
+        "CRIAR GPS - CATEGORIA", msg, "Selecionar", "Voltar");
         
         return 1;
     }
     
-    Dialog_ShowCallback(playerid, using inline create_gps_name_dialog, DIALOG_STYLE_INPUT,
+    Dialog_ShowCallback(playerid, using inline create_gps_name_dialog, DIALOG_STYLE_INPUT, "CRIAR GPS - NOME",
     "{ff5555}>> {ffffff}Digite o nome do local que deseja criar no GPS global\n\
-    {ffff33}[ i ] {ffffff}Certifique-se de estar {ff3333}posicionado corretamente!", "", 
+    {ffff33}[ i ] {ffffff}Certifique-se de estar {ff3333}posicionado corretamente!", 
     "Avançar", "Voltar");
 
     return 1;
@@ -860,6 +861,119 @@ stock Adm::CreateLocation(playerid, const name[], const category[], const admin[
     name, category, admin, pX, pY, pZ);
 
     printf("[ GPS ] O Admin %s criou uma nova localização: name: %s categoria: %s", admin, name, category);
+
+    return 1;
+}
+
+YCMD:veh(playerid, params[], help)
+{
+    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER, false)) return 1;
+
+    new modelid;
+
+    if(sscanf(params, "i", modelid)) return 1;
+
+    new Float:pX, Float:pY, Float:pZ;
+    GetPlayerPos(playerid, pX, pY, pZ);
+
+    new vehicleid = CreateVehicle(modelid, pX, pY, pZ, 0.0, RandomMinMax(0, 10), RandomMinMax(0, 10), -1);
+    PutPlayerInVehicle(playerid, vehicleid, 0);
+
+    LinkVehicleToInterior(vehicleid, GetPlayerInterior(playerid));
+
+    new regionid = Vehicle[vehicleid][veh::regionid];
+
+    new count = linked_list_size(veh::gRegion[regionid]);
+
+    new str[128];
+    format(str, 128, "Veiculo: {33ff33}%d {ffffff}| Regiao: {33ff33}%d {ffffff}| QTR: {33ff33}%d", vehicleid, regionid, count);
+
+    Vehicle[vehicleid][veh::tex3did] = CreateDynamic3DTextLabel(str, -1, pX, pY, pZ, 50.0, .attachedplayer = INVALID_PLAYER_ID, .attachedvehicle = vehicleid);
+
+    return 1;
+}
+
+YCMD:gmx(playerid, params[], help)
+{
+    if(!Adm::HasPermission(playerid, ROLE_ADM_CEO)) return 1;
+
+    new time, reason[64];
+
+    if(Server[srv::is_count_down])
+        return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Existe um cronometro rodando, espere ele terminar!");
+   
+    if(sscanf(params, "is[64]", time, reason))
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /gmx {ff3333}[ TEMPORIZADOR ] [ MOTIVO ]");
+
+    time = clamp(time, 30, 120);
+
+    inline CountDown()
+    {
+        if(time <= 0)
+        {
+            new str[64];
+            GetISODate(str, 64, Server[srv::gmt]);
+            printf("[ GMX ] Gmx realizada em %s", str);
+            Server[srv::is_count_down] = 0;
+            Timer_KillCallback(srv::Timer[srv::TIMER_COUNT_DOWN]);
+
+            GameModeExit();
+        }
+
+        if(time <= 10)
+        {
+            GameTextForAll("~r~Reiniciando...", 1500, 3);
+            SendClientMessageToAll(-1, "{ff9933}[ GMX ] {ffffff}Você foi desconectado do servidor por conta de um server reset!");
+            
+            foreach(new i : Player)
+            {
+                Kick(i);
+            }
+        }
+
+        else
+        {
+            GameTextForAll("~r~~h~~h~Server Reset em ~w~%02d~r~~h~:~w~%02d", 990, 3, floatround((time - 10)/60), (time - 10) % 60);
+        }
+
+        time--;
+    }
+
+    SendClientMessageToAll(-1, "{ff9933}[ GMX ] {ffffff}O servidor vai reiniciar para limpeza e adição de novidades!");
+    SendClientMessageToAll(-1, "{ff9933}[ GMX ] {ffffff}Alguns recurso estaram bloqueados, aconcelhamos salvar suas informações!");
+    
+    srv::Timer[srv::TIMER_COUNT_DOWN] = Timer_CreateCallback(using inline CountDown, 1000, 1000, time + 2);
+    Server[srv::is_count_down] = 1;
+
+    return 1;
+}
+
+YCMD:cacs(playerid, params[], help)
+{
+    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER, false)) return 1;
+
+    new modelid, name[64], sucess;
+    Acessory::GetNameByModelid(modelid, name);
+
+    for(new i = 1; i <= 8; i++)
+    {
+        if(DB::Exists(db_stock, "acessorys", "uid = %d", i))
+            continue;
+
+        for(;;)
+        {
+            modelid = RandomMinMax(18632, 19914);
+            sucess = Acessory::GetNameByModelid(modelid, name);
+            
+            if(sucess)
+                break;
+        }
+
+        DB::Insert(db_stock, "acessorys", 
+        "uid, name, creator, price, modelid, boneid, pX, pY, pZ, rX, rY, rZ, sX, sY, sZ, color1, color2", 
+        "%i, '%s', 'SERVER', %.2f, %i, %i, %f, %f, %f, %f, %f, %f, %f, %f, %f, %i, %i", 
+        i, name, Float:RandomFloatMinMax(50.0, 300.0), modelid, 2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, -1, -1);
+    }
 
     return 1;
 }

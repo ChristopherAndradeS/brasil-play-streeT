@@ -133,20 +133,64 @@ hook OnPlayerLogin(playerid)
 
     Player::Spawn(playerid);
 
+    /* PÓS SPAWN */
+
+    // CPF
+    Player::SetCPF(playerid);
+
+    // RODAPÉ
+    Baseboard::ShowTDForPlayer(playerid);
+
+    GameTextForPlayer(playerid, "~g~~h~~h~Bem Vindo", 2000, 3);
+
     return 1;
 }
 
 hook OnPlayerRequestClass(playerid, classid)
 {
-    if(!IsValidPlayer(playerid)) return -1;
+    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+   
+    //if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH)) return 1;
 
-    SpawnPlayer(playerid);
-    return SpawnPlayer(playerid);
+    Player::Spawn(playerid);
+
+    return 1;
+}
+
+hook OnPlayerDeath(playerid, killerid, WEAPON:reason)
+{
+    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+    
+    SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH);
+
+    if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_WAITING))
+    {
+        new gameid = game::Player[playerid][pyr::gameid];
+        SetPlayerInterior(playerid, 0);
+        SetPlayerVirtualWorld(playerid, 0);
+        Game::RemovePlayer(gameid, playerid);
+        //Player::Spawn(playerid, true);
+    }
+
+    else if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING))
+    {
+        new gameid = game::Player[playerid][pyr::gameid];
+        SetPlayerInterior(playerid, 0);
+        SetPlayerVirtualWorld(playerid, 0);
+        Race::EliminatePlayer(playerid, gameid);
+        //Player::Spawn(playerid, true);
+        SendClientMessage(playerid, -1, "{ff5533}[ EVENTO ] {ffffff}Você foi eliminado do evento, porque morreu!");
+    }
+
+    return 1;
 }
 
 hook OnPlayerSpawn(playerid)
 {    
     if(IsPlayerNPC(playerid)) return -1;
+
+    if(GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH))
+        ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH);
 
     if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) 
     {
@@ -155,14 +199,17 @@ hook OnPlayerSpawn(playerid)
         return -1;
     }
 
+
     if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING))
     {
         ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING);  
+        ApplyAnimation(playerid, "ped", "null", 0.0, false, false, false, false, 0); 
+        ApplyAnimation(playerid, "DANCING", "null", 0.0, false, false, false, false, 0); 
         //SendClientMessage(playerid, -1, "{33ff33}[ SERVER ] {ffffff}Voce saiu do modo espectador!");
         Adm::AddSpectatorInList(playerid); 
         SetPlayerWeather(playerid, Server[srv::g_weatherid]);
 
-        return -1;
+        return 1;
     }
 
     if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL))
@@ -170,7 +217,7 @@ hook OnPlayerSpawn(playerid)
         SetPlayerWeather(playerid, Server[srv::j_weatherid]);
         return -1;
     }
-
+   
     return 1;
 }
 

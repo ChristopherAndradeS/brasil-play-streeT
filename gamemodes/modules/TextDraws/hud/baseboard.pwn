@@ -2,6 +2,7 @@
 
 stock Baseboard::UpdateTDForPlayer(playerid, textid, const text[], GLOBAL_TAG_TYPES:...)
 {
+	if(!Baseboard::IsVisibleTDForPlayer(playerid)) return;
 	PlayerTextDrawSetString(playerid, Baseboard::PlayerTD[playerid][textid], text, ___(3));
 }
 
@@ -111,7 +112,7 @@ stock Baseboard::CreatePublicTD()
 	TextDrawSetProportional(Baseboard::PublicTD[3], true);
 	TextDrawSetSelectable(Baseboard::PublicTD[3], false);
 
-	Baseboard::PublicTD[4] = TextDrawCreate(565.000000, 434.000000, "DOMINGO   -   00:00:00~n~1 de janeiro de 1970");
+	Baseboard::PublicTD[4] = TextDrawCreate(550.000000, 434.000000, "DOMINGO   -   00:00:00~n~1 de janeiro de 1970");
 	TextDrawFont(Baseboard::PublicTD[4], TEXT_DRAW_FONT:2);
 	TextDrawLetterSize(Baseboard::PublicTD[4], 0.187500, 0.750000);
 	TextDrawTextSize(Baseboard::PublicTD[4], 400.000000, 170.500000);
@@ -254,7 +255,7 @@ stock Baseboard::CreatePlayerTD(playerid)
 	PlayerTextDrawSetProportional(playerid, Baseboard::PlayerTD[playerid][0], true);
 	PlayerTextDrawSetSelectable(playerid, Baseboard::PlayerTD[playerid][0], false);
 
-	Baseboard::PlayerTD[playerid][1] = CreatePlayerTextDraw(playerid, 455.0, 437.500000, "~b~~h~~h~PAYDAY~w~ ...");
+	Baseboard::PlayerTD[playerid][1] = CreatePlayerTextDraw(playerid, 392.5, 437.500000, "~b~~h~~h~PAYDAY~w~ ...");
 	PlayerTextDrawFont(playerid, Baseboard::PlayerTD[playerid][1], TEXT_DRAW_FONT:2);
 	PlayerTextDrawLetterSize(playerid, Baseboard::PlayerTD[playerid][1], 0.250000, 1.000000);
 	PlayerTextDrawTextSize(playerid, Baseboard::PlayerTD[playerid][1], 400.000000, 170.500000);
@@ -268,7 +269,7 @@ stock Baseboard::CreatePlayerTD(playerid)
 	PlayerTextDrawSetProportional(playerid, Baseboard::PlayerTD[playerid][1], true);
 	PlayerTextDrawSetSelectable(playerid, Baseboard::PlayerTD[playerid][1], false);
 
-	Baseboard::PlayerTD[playerid][2] = CreatePlayerTextDraw(playerid, 228.300003, 437.500000, "~g~~h~~h~R$: 999.999");
+	Baseboard::PlayerTD[playerid][2] = CreatePlayerTextDraw(playerid, 227.50, 437.500000, "~g~~h~~h~R$: 999.999");
 	PlayerTextDrawFont(playerid, Baseboard::PlayerTD[playerid][2], TEXT_DRAW_FONT:2);
 	PlayerTextDrawLetterSize(playerid, Baseboard::PlayerTD[playerid][2], 0.281250, 1.125000);
 	PlayerTextDrawTextSize(playerid, Baseboard::PlayerTD[playerid][2], 400.000000, 170.500000);
@@ -282,7 +283,9 @@ stock Baseboard::CreatePlayerTD(playerid)
 	PlayerTextDrawSetProportional(playerid, Baseboard::PlayerTD[playerid][2], true);
 	PlayerTextDrawSetSelectable(playerid, Baseboard::PlayerTD[playerid][2], false);
 
-	Baseboard::PlayerTD[playerid][3] = CreatePlayerTextDraw(playerid, 391.660003, 437.500000, "L: 999");
+	//391.660003, 437.500000 -> L
+
+	Baseboard::PlayerTD[playerid][3] = CreatePlayerTextDraw(playerid, 105.83, 437.500000, "L: 999");
 	PlayerTextDrawFont(playerid, Baseboard::PlayerTD[playerid][3], TEXT_DRAW_FONT:2);
 	PlayerTextDrawLetterSize(playerid, Baseboard::PlayerTD[playerid][3], 0.250000, 1.000000);
 	PlayerTextDrawTextSize(playerid, Baseboard::PlayerTD[playerid][3], 400.000000, 170.500000);
@@ -296,7 +299,7 @@ stock Baseboard::CreatePlayerTD(playerid)
 	PlayerTextDrawSetProportional(playerid, Baseboard::PlayerTD[playerid][3], true);
 	PlayerTextDrawSetSelectable(playerid, Baseboard::PlayerTD[playerid][3], false);
 
-	Baseboard::PlayerTD[playerid][4] = CreatePlayerTextDraw(playerid, 134.600006, 437.500000, "~y~B$: sem conta");
+	Baseboard::PlayerTD[playerid][4] = CreatePlayerTextDraw(playerid, 166.66, 437.500000, "~y~B$: sem conta");
 	PlayerTextDrawFont(playerid, Baseboard::PlayerTD[playerid][4], TEXT_DRAW_FONT:2);
 	PlayerTextDrawLetterSize(playerid, Baseboard::PlayerTD[playerid][4], 0.281250, 1.125000);
 	PlayerTextDrawTextSize(playerid, Baseboard::PlayerTD[playerid][4], 400.000000, 170.500000);

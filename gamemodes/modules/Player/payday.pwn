@@ -1,6 +1,6 @@
 #include <YSI\YSI_Coding\y_hooks>
 
-#define PAYMENT_BASE (1500.0)
+#define PAYMENT_BASE (1000.0)
 
 forward OnPayDayReach(playerid);
 
@@ -31,6 +31,12 @@ public OnPayDayReach(playerid)
             
     Player::GiveMoney(playerid, total);
 
+    Player[playerid][pyr::score]++;
+
+    DB::SetDataInt(db_entity, "players", "score", Player[playerid][pyr::score], "name = '%q'", GetPlayerNameStr(playerid));
+
+    Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_LVL, "L: %d", Player[playerid][pyr::score]);
+    
     new timerid = pyr::Timer[playerid][pyr::TIMER_PAYDAY];
 
     if(GetTimerInterval(timerid) == 3600000 && IsRepeatingTimer(timerid))
@@ -49,7 +55,7 @@ stock Payday::GetPlayerBonus(playerid, &Float:bonus)
     // if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_ORG))
     //     bonus += 1200.0;
     if(IsFlagSet(Admin[playerid][adm::flags], FLAG_IS_ADMIN))
-        bonus += 500.0;
+        bonus += 250.0;
 
     return 1;
 }

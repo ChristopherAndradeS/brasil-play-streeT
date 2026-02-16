@@ -2,6 +2,8 @@
 
 YCMD:trancar(playerid, params[], help)
 {
+    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+
     new Float:distance;
     new vehicleid = GetClosestVehicle(playerid, distance);
     
@@ -18,6 +20,8 @@ YCMD:trancar(playerid, params[], help)
 
 YCMD:abrir(playerid, params[], help)
 {
+    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+
     new Float:distance;
     new vehicleid = GetClosestVehicle(playerid, distance);
 
@@ -34,6 +38,8 @@ YCMD:abrir(playerid, params[], help)
 
 YCMD:gps(playerid, params[], help)
 {
+    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+
     new category[32], name[32], msg[512];
 
     new DBResult:result = DB_ExecuteQuery(db_stock, "SELECT EXISTS (SELECT 1 FROM locations LIMIT 1);");
@@ -116,5 +122,12 @@ YCMD:cancelargps(playerid, params[], help)
     
     DisablePlayerCheckpoint(playerid);
     SendClientMessage(playerid, -1, "{33ff33}[ GPS ] {ffffff}GPS desligado.");
+    return 1;
+}
+
+YCMD:mochila(playerid, params[], help)
+{
+    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+    
     return 1;
 }

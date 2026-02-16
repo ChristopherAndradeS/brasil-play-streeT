@@ -65,9 +65,3 @@ hook OnServerUpdateSeconds()
 
     return 1;
 }
-
-hook OnServerUpdateMinutes()
-{
-
-    return 1;
-}
