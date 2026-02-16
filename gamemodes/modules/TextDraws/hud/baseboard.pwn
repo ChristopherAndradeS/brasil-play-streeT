@@ -255,7 +255,7 @@ stock Baseboard::CreatePlayerTD(playerid)
 	PlayerTextDrawSetProportional(playerid, Baseboard::PlayerTD[playerid][0], true);
 	PlayerTextDrawSetSelectable(playerid, Baseboard::PlayerTD[playerid][0], false);
 
-	Baseboard::PlayerTD[playerid][1] = CreatePlayerTextDraw(playerid, 392.5, 437.500000, "~b~~h~~h~PAYDAY~w~ ...");
+	Baseboard::PlayerTD[playerid][1] = CreatePlayerTextDraw(playerid, 415.0, 437.500000, "~b~~h~~h~PAYDAY~w~ ...");
 	PlayerTextDrawFont(playerid, Baseboard::PlayerTD[playerid][1], TEXT_DRAW_FONT:2);
 	PlayerTextDrawLetterSize(playerid, Baseboard::PlayerTD[playerid][1], 0.250000, 1.000000);
 	PlayerTextDrawTextSize(playerid, Baseboard::PlayerTD[playerid][1], 400.000000, 170.500000);

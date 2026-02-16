@@ -135,6 +135,8 @@ stock Punish::SetJail(const name[], const admin[], const reason[], time)
 {
     if(!DB::Exists(db_entity, "players", "name = '%q'", name)) return 0;
     
+    time = time * 60000;
+
     if(DB::Exists(db_entity, "punishments", "name = '%q' AND level = 1", name))
     {
         new t_left;

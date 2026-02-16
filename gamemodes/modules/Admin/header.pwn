@@ -55,6 +55,7 @@ enum E_ADMIN
     adm::flags,
     adm::lvl,
     adm::spectateid,
+    adm::vehicleid
 }
 
 new Admin[MAX_PLAYERS][E_ADMIN];
@@ -156,6 +157,9 @@ stock Adm::Set(const name[], const promoter[], level)
 
     else
     {
+        if(!DB::Exists(db_entity, "players", "name = '%q'", name))
+            return 0;
+        
         new sucess = DB::Insert(db_entity, "admins", "name, level, promoter, promote_date", 
         "'%q', %i, '%q', '%q'", name, level, promoter, timestr);
 
@@ -192,6 +196,7 @@ stock Adm::Load(playerid)
     SetFlag(Admin[playerid][adm::flags], FLAG_IS_ADMIN);
     Admin[playerid][adm::lvl] = level;
     Admin[playerid][adm::spectateid] = INVALID_PLAYER_ID; 
+    Admin[playerid][adm::vehicleid] = INVALID_VEHICLE_ID; 
 
     return 1;   
 }
@@ -418,6 +423,25 @@ stock Adm::IsValidTargetName(playerid, const name[], const target_name[])
         SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Voce nao poder aplicar essa acao ao seu {ff3333}colega/subordinado!");
         return 0;        
     }
+
+    return 1;
+}
+
+stock Adm::CreateLocation(playerid, const name[], const category[], const admin[])
+{
+    if(DB::Exists(db_stock, "locations", "name = '%q' AND category = '%q'", name, category))
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ GPS ] {ffffff}Esse o nome '%s', já existe na categoria \"%s\"", name, category);
+        return 1;
+    }
+
+    new Float:pX, Float:pY, Float:pZ;
+    GetPlayerPos(playerid, pX, pY, pZ);
+
+    DB::Insert(db_stock, "locations", "name, category, creator, pX, pY, pZ", "'%q', '%q', '%q', %f, %f, %f", 
+    name, category, admin, pX, pY, pZ);
+
+    printf("[ GPS ] O Admin %s criou uma nova localização: name: %s categoria: %s", admin, name, category);
 
     return 1;
 }

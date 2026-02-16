@@ -59,7 +59,7 @@ YCMD:acessorios(playerid, params[], help)
 {
     if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
     
-    if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME))
+    if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME) && !GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED))
         return SendClientMessage(playerid, -1, "{ff5533}[ ERRO ] {ffffff}Você não pode mexer com acessórios durante o evento!");
 
     acs::ClearData(playerid);

@@ -34,6 +34,7 @@ enum E_GAME_RACE
 {
     race::name[32],
     race::gameid,
+    race::modelid,
     race::flags,
     List:race::podium,
     race::finisheds,
@@ -74,9 +75,11 @@ stock Race::Create(gameid, notify = false)
     ResetFlag(game::Race[raceid][race::flags], FLAG_RACE_FINISHED);
     Race::IndexByGameID[gameid] = raceid;
 
-    new modelid = RandomMinMaxExcept(0, sizeof(Race::gModels), old_modelid) % sizeof(Race::gModels);
+    game::Race[raceid][race::modelid] = RandomMinMaxExcept(0, sizeof(Race::gModels), old_modelid) % sizeof(Race::gModels);
     
-    old_modelid = modelid;
+    new modelid = game::Race[raceid][race::modelid];
+
+    old_modelid = game::Race[raceid][race::modelid];
 
     new name[64];
 
@@ -332,43 +335,50 @@ stock Race::Ready(gameid)
     new raceid = Race::GetIDByGameID(gameid);
     if(raceid == INVALID_RACE_ID) return 0;
 
-    for(new i = 0; i < Game[gameid][game::max_players]; i++)
+    for(new i = 0; i < MAX_RACE_PARTICIPANTS; i++)
     {
+        Veh::Destroy(game::Race[raceid][race::vehicleid][i]);
+        
         new playerid = Game[gameid][game::players][i];
 
-        if(playerid != INVALID_PLAYER_ID)
-        {
-            Race::AddPodium(playerid, raceid);
-            
-            race::Player[playerid][race::vehicleid] = game::Race[raceid][race::vehicleid][i];
+        if(playerid == INVALID_PLAYER_ID)continue;
 
-            ResetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_WAITING);
-            SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING);
-            
-            if(IsPlayerInAnyVehicle(playerid)) 
-                RemovePlayerFromVehicle(playerid);
+        Race::AddPodium(playerid, raceid);
 
-            SetVehiclePos(game::Race[raceid][race::vehicleid][i], 
-            Race::gVehicleSpawns[i][0], 
-            Race::gVehicleSpawns[i][1], 
-            Race::gVehicleSpawns[i][2]);            
+        if(IsPlayerInAnyVehicle(playerid)) RemovePlayerFromVehicle(playerid);
 
-            SetVehicleHealth(game::Race[raceid][race::vehicleid][i], 1000.0 + 1000.0);
-
-            SetVehicleZAngle(game::Race[raceid][race::vehicleid][i], Float:Race::gVehicleSpawns[i][3]);
-        
-            TogglePlayerControllable(playerid, false);
-            
-            PutPlayerInVehicle(playerid, game::Race[raceid][race::vehicleid][i], 0);
-
-            Veh::UpdateParams(game::Race[raceid][race::vehicleid][i], FLAG_PARAM_ENGINE, 1);
-        }
-        
-        else
-            Veh::Destroy(game::Race[raceid][race::vehicleid][i]);
-        
     }
 
+    new modelid = game::Race[raceid][race::modelid];
+
+    for(new idx = 0; idx < list_size(game::Race[raceid][race::podium]); idx++)
+    {
+        new playerid = list_get(game::Race[raceid][race::podium], idx);
+
+        game::Race[raceid][race::vehicleid][idx] = Veh::Create(Race::gModels[modelid],
+        Race::gVehicleSpawns[idx][0], Race::gVehicleSpawns[idx][1], Race::gVehicleSpawns[idx][2],
+        Race::gVehicleSpawns[idx][3], RandomMinMax(3, 12), RandomMinMax(3, 12), 7, Game[gameid][game::vw], FLAG_PARAM_ENGINE);
+        
+        race::Player[playerid][race::vehicleid] = game::Race[raceid][race::vehicleid][idx];
+
+        PutPlayerInVehicle(playerid, race::Player[playerid][race::vehicleid], 0);
+
+        SetVehicleHealth(race::Player[playerid][race::vehicleid], 1000.0 + 1000.0);
+
+        SetVehicleZAngle(race::Player[playerid][race::vehicleid], Float:Race::gVehicleSpawns[idx][3]);
+
+        ResetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_WAITING);
+        SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING);
+
+        SetPlayerInterior(playerid, GetVehicleInterior(race::Player[playerid][race::vehicleid]));
+        SetPlayerVirtualWorld(playerid, GetVehicleVirtualWorld(race::Player[playerid][race::vehicleid]));      
+        
+        TogglePlayerControllable(playerid, false);
+        
+        Veh::UpdateParams(game::Race[raceid][race::vehicleid][idx], FLAG_PARAM_ENGINE, 1);
+    }
+    
+   
     return 1;
 }
 

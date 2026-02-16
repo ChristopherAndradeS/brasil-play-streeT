@@ -92,9 +92,9 @@ YCMD:aa(playerid, params[], help)
     if(Admin[playerid][adm::lvl] >= ROLE_ADM_FOREMAN)
         strcat(str, "cronometro\nmegafone\nprender\nprenderoff\nsoltar\nsoltaroff\n");
     if(Admin[playerid][adm::lvl] >= ROLE_ADM_MANAGER)
-        strcat(str, "tp\nlchat\nsetarskin\nsetarvida\nsetarcolete\n");
+        strcat(str, "tp\nlchat\nsetarskin\nsetarvida\nsetarcolete\ncgps\nveh\ndveh\ncacs");
     if(Admin[playerid][adm::lvl] >= ROLE_ADM_CEO)
-        strcat(str, "ban\ndesban\nsetadm\nremadm\n");
+        strcat(str, "ban\ndesban\nsetadm\nremadm\ngmx");
 
     inline no_use_dialog(targetid, dialogid, response, listitem, string:inputtext[])
     {
@@ -385,7 +385,7 @@ YCMD:prender(playerid, params[], help)
     GetPlayerName(targetid, name, sizeof(name));
     GetPlayerName(playerid, admin, sizeof(admin));
 
-    minutes = clamp(minutes * 60000, 180000, 18000000);
+    minutes = clamp(minutes, 3, 300);
 
     new result = Punish::SetJail(name, admin, reason, minutes);
 
@@ -479,7 +479,7 @@ YCMD:prenderoff(playerid, params[], help)
     if(targetid != INVALID_PLAYER_ID)
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] Jogador %s está online! {ffffff}Seu ID é {ff3333}%d", name, targetid);
 
-    if(!Punish::SetJail(name, GetPlayerNameStr(playerid), reason, clamp(minutes * 60000, 180000, 18000000)))
+    if(!Punish::SetJail(name, GetPlayerNameStr(playerid), reason, clamp(minutes, 3, 300)))
         return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Houve um erro. Provalmente o jogador não existe nos dados!");
   
     SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce definiu {33ff33}%d {ffffff}minutos de cadeia para {33ff33}%s {ffffff}com sucesso.", minutes, name);
@@ -695,7 +695,7 @@ YCMD:setadm(playerid, params[], help)
         return 1;
     }
 
-    if(!IsPlayerAdmin(playerid)) return 1;
+    if(!Adm::HasPermission(playerid, ROLE_ADM_CEO, false)) return 1;
     
     new name[MAX_PLAYER_NAME], level;
     if(sscanf(params, "s[24]i", name, level)) 
@@ -707,7 +707,7 @@ YCMD:setadm(playerid, params[], help)
     level = clamp(level, 1, 9);
 
     if(!Adm::Set(name, admin_name, level))
-        return SendClientMessage(playerid, COLOR_ERRO, "[ ADM ] {ffffff}Erro Fatal ao setar voce como fundador, procure um programador!");
+        return SendClientMessage(playerid, COLOR_ERRO, "[ ADM ] {ffffff}Erro ao setar admin, provavelmente não existe no banco de dados!");
 
     SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce promoveu {33ff33}%s {ffffff}com sucesso.", name);
     SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Cargo de promoção: %s%s", Adm::GetColorString(level), Adm::gRoleNames[level]);
@@ -722,7 +722,7 @@ YCMD:remadm(playerid, params[], help)
         return 1;
     }
 
-    if(!IsPlayerAdmin(playerid)) return 1;
+    if(!Adm::HasPermission(playerid, ROLE_ADM_FOUNDER, false)) return 1;
     
     new name[MAX_PLAYER_NAME];
     if(sscanf(params, "s[24]", name)) 
@@ -846,55 +846,69 @@ YCMD:cgps(playerid, params[], help)
     return 1;
 }
 
-stock Adm::CreateLocation(playerid, const name[], const category[], const admin[])
+
+YCMD:veh(playerid, params[], help)
 {
-    if(DB::Exists(db_stock, "locations", "name = '%q' AND category = '%q'", name, category))
+    if(help)
     {
-        SendClientMessage(playerid, -1, "{ff3333}[ GPS ] {ffffff}Esse o nome '%s', já existe na categoria \"%s\"", name, category);
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Cria um veículo particular.");
         return 1;
     }
 
+    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER, false)) return 1;
+
+    if(IsValidVehicle(Admin[playerid][adm::vehicleid]))
+        return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Você já possui um veículo criado. Use {ff3333}/dveh {ffffff}para destrui-lo e criar outro!");
+
+    if(GetPlayerInterior(playerid))
+        return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Você não pode criar veículos aqui!");
+
+    new modelid;
+    if(sscanf(params, "i", modelid)) 
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /veh {ff3333}[ MODELID ]");
+    
+    if(modelid < 400 || modelid > 605) 
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Parâmetro {ff3333}[ MODELID ] {ffffff}Inválido!");
+    
     new Float:pX, Float:pY, Float:pZ;
     GetPlayerPos(playerid, pX, pY, pZ);
 
-    DB::Insert(db_stock, "locations", "name, category, creator, pX, pY, pZ", "'%q', '%q', '%q', %f, %f, %f", 
-    name, category, admin, pX, pY, pZ);
+    Admin[playerid][adm::vehicleid] = CreateVehicle(modelid, pX, pY, pZ, 0.0, RandomMinMax(0, 10), RandomMinMax(0, 10), -1);
+    PutPlayerInVehicle(playerid, Admin[playerid][adm::vehicleid], 0);
 
-    printf("[ GPS ] O Admin %s criou uma nova localização: name: %s categoria: %s", admin, name, category);
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Veículo criado com sucesso!");
 
     return 1;
 }
 
-YCMD:veh(playerid, params[], help)
+YCMD:dveh(playerid, params[], help)
 {
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Destroí o veículo particular.");
+        return 1;
+    }
+
     if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER, false)) return 1;
 
-    new modelid;
+    if(!IsValidVehicle(Admin[playerid][adm::vehicleid]))
+        return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Você precisa criar um veículo antes. Use {ff3333}/veh [ MODELID ] {ffffff}para isso!");
 
-    if(sscanf(params, "i", modelid)) return 1;
+    DestroyVehicle(Admin[playerid][adm::vehicleid]);
 
-    new Float:pX, Float:pY, Float:pZ;
-    GetPlayerPos(playerid, pX, pY, pZ);
-
-    new vehicleid = CreateVehicle(modelid, pX, pY, pZ, 0.0, RandomMinMax(0, 10), RandomMinMax(0, 10), -1);
-    PutPlayerInVehicle(playerid, vehicleid, 0);
-
-    LinkVehicleToInterior(vehicleid, GetPlayerInterior(playerid));
-
-    new regionid = Vehicle[vehicleid][veh::regionid];
-
-    new count = linked_list_size(veh::gRegion[regionid]);
-
-    new str[128];
-    format(str, 128, "Veiculo: {33ff33}%d {ffffff}| Regiao: {33ff33}%d {ffffff}| QTR: {33ff33}%d", vehicleid, regionid, count);
-
-    Vehicle[vehicleid][veh::tex3did] = CreateDynamic3DTextLabel(str, -1, pX, pY, pZ, 50.0, .attachedplayer = INVALID_PLAYER_ID, .attachedvehicle = vehicleid);
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Veículo destruído com sucesso!");
 
     return 1;
 }
 
 YCMD:gmx(playerid, params[], help)
 {
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Prepara server para GMX.");
+        return 1;
+    }
+
     if(!Adm::HasPermission(playerid, ROLE_ADM_CEO)) return 1;
 
     new time, reason[64];
@@ -905,7 +919,7 @@ YCMD:gmx(playerid, params[], help)
     if(sscanf(params, "is[64]", time, reason))
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /gmx {ff3333}[ TEMPORIZADOR ] [ MOTIVO ]");
 
-    time = clamp(time, 30, 120);
+    time = clamp(time, 40, 130);
 
     inline CountDown()
     {
@@ -913,7 +927,7 @@ YCMD:gmx(playerid, params[], help)
         {
             new str[64];
             GetISODate(str, 64, Server[srv::gmt]);
-            printf("[ GMX ] Gmx realizada em %s", str);
+            printf("[ GMX ] Gmx realizada em %s. Motivo: %s", str, reason);
             Server[srv::is_count_down] = 0;
             Timer_KillCallback(srv::Timer[srv::TIMER_COUNT_DOWN]);
 
@@ -939,7 +953,8 @@ YCMD:gmx(playerid, params[], help)
         time--;
     }
 
-    SendClientMessageToAll(-1, "{ff9933}[ GMX ] {ffffff}O servidor vai reiniciar para limpeza e adição de novidades!");
+    SendClientMessageToAll(-1, "{ff9933}[ GMX ] {ffffff}O servidor vai reiniciar."); 
+    SendClientMessageToAll(-1, "{ff9933}[ GMX ] Motivo: {ffffff}%s!", reason);
     SendClientMessageToAll(-1, "{ff9933}[ GMX ] {ffffff}Alguns recurso estaram bloqueados, aconcelhamos salvar suas informações!");
     
     srv::Timer[srv::TIMER_COUNT_DOWN] = Timer_CreateCallback(using inline CountDown, 1000, 1000, time + 2);
@@ -950,6 +965,12 @@ YCMD:gmx(playerid, params[], help)
 
 YCMD:cacs(playerid, params[], help)
 {
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Preenche o estoque da loja de acessórios.");
+        return 1;
+    }
+
     if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER, false)) return 1;
 
     new modelid, name[64], sucess;

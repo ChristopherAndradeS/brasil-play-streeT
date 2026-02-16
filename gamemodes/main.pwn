@@ -1,4 +1,4 @@
-#define MAX_PLAYERS 20
+#define MAX_PLAYERS 50
 
 #include <open.mp>
 #include <sscanf2>
@@ -54,6 +54,7 @@
 #include "../gamemodes/modules/Maps/squares.pwn"
 #include "../gamemodes/modules/Maps/store.pwn"
 #include "../gamemodes/modules/Maps/prision.pwn"
+
 /*                          TEXTDRAWS                       */
 #include "../gamemodes/modules/TextDraws/gui/login.pwn"
 #include "../gamemodes/modules/TextDraws/gui/acs_editor.pwn"
