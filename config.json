@@ -109,7 +109,7 @@
     },
     "password": "",
     "pawn": {
-        "legacy_plugins": ["streamer", "PawnPlus", "samp_bcrypt"],
+        "legacy_plugins": ["crashdetect", "streamer", "PawnPlus", "samp_bcrypt"],
         "main_scripts": [
             "main 1"
         ],

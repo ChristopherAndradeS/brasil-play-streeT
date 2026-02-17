@@ -6,6 +6,7 @@
 #include <samp_bcrypt>
 #include <PawnPlus>
 #include <sampvoice>
+#include <crashdetect>
 
 #define CGEN_MEMORY 20000
 
@@ -158,16 +159,15 @@ public OnPlayerText(playerid, text[])
         Adm::SendMsgToAllTagged(FLAG_ADM_WORKING | FLAG_IS_ADMIN, 0xFFFF33AA, 
         "[ ADM CHAT ] %s%s {ffffff}: {ffff33}%s", 
         Adm::GetColorString(Admin[playerid][adm::lvl]), GetPlayerNameStr(playerid), text);  
-
         return 0;      
     }   
 
-    if(!bcrypt_verify(playerid, "OnPlayerPasswordVerify", text, Player[playerid][pyr::pass]))
-        return 0;
+    new Float:pX, Float:pY, Float:pZ;
+    GetPlayerPos(playerid, pX, pY, pZ);
 
-    SendClientMessageToAll(-1, "{99FF99}[ G ] {ffffff}%s [ %d ] {99FF99}diz: {ffffff}%s", GetPlayerNameStr(playerid), playerid, text);
+    SendMessageToNearPlayer(pX, pY, pZ, "{FFFF99}[ L ] {ffffff}%s {FFFF99}[ %d ] diz: {ffffff}%s", GetPlayerNameStr(playerid), playerid, text);
     
-    ApplyAnimation(playerid, "ped", "IDLE_chat", 4.1, false, false, false, false, 1500);
+    ApplyAnimation(playerid, "GANGS", "prtial_gngtlkA", 4.1, false, false, false, false, 1500);
 
     return 0;
 }
@@ -219,5 +219,28 @@ public OnPlayerEnterCheckpoint(playerid)
     SendClientMessage(playerid, -1, "{33ff33}[ GPS ] {ffffff}Você chegou ao seu destino!");
     PlayerPlaySound(playerid, 1058, 0.0, 0.0, 0.0); 
     
+    return 1;
+}
+
+stock SendMessageToNearPlayer(Float:pX, Float:pY, Float:pZ, const msg[], GLOBAL_TAG_TYPES:...)
+{
+    new count, near_players[MAX_PLAYERS];
+    
+    count = Player::GetPlayersIntoRange(pX, pY, pZ, 70.0, near_players);
+
+    new formated_msg[144];
+    va_format(formated_msg, 144, msg, ___(4));
+
+    for(new i = 0; i < count; i++)
+    {   
+        printf("Verifiquei");
+        
+        new playerid = near_players[i];
+
+        if(playerid == INVALID_PLAYER_ID) continue;
+        
+        SendClientMessage(playerid, -1, formated_msg); 
+    }
+
     return 1;
 }

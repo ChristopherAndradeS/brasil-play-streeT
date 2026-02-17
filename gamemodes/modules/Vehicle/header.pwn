@@ -28,35 +28,6 @@ new Vehicle[MAX_VEHICLES][E_VEHICLES];
 
 forward OnVehicleCreate(vehicleid, modelid, regionid, Float:x, Float:y, Float:z);
 
-stock Veh::GetClosest(Float:x, Float:y, Float:z, &Float:min_dist_sq)
-{
-    new regionid = GetRegionFromXY(x, y);
-
-    min_dist_sq = FLOAT_INFINITY;
-
-    if(regionid == INVALID_REGION_ID) return INVALID_VEHICLE_ID;
-
-    new closest_vehicle   = INVALID_VEHICLE_ID;
-    new count = linked_list_size(veh::Region[regionid]);
-
-    for(new i = 0; i < count; i++)
-    {
-        new vehicleid = linked_list_get(veh::Region[regionid], i);
-
-        if(!IsValidVehicle(vehicleid)) continue;
-        
-        new Float:dist = GetVehicleDistanceFromPoint(vehicleid, x, y, z);
-
-        if(dist < min_dist_sq)
-        {
-            min_dist_sq = dist;
-            closest_vehicle = vehicleid;
-        }
-    }
-
-    return closest_vehicle;
-}
-
 stock GetClosestVehicle(playerid, &Float:distance = 0.0)
 {
     new Float:pX, Float:pY, Float:pZ;
