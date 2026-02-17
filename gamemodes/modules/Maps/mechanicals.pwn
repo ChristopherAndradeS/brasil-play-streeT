@@ -23,6 +23,7 @@ stock Officine::RemoveGTAObjects(playerid, mapid)
         RemoveBuildingForPlayer(playerid, 1412, 1951.609, -1805.328, 13.812, 0.250);
     }
 }
+
 stock Officine::LoadMap(mapid)
 {
     new tmpobjid;

@@ -12,8 +12,8 @@
 #include <open.mp>
 
 // Players Move Speed
-#define MOVE_SPEED              10.0
-#define ACCEL_RATE              0.01
+#define MOVE_SPEED              100.0
+#define ACCEL_RATE              0.03
 
 // Players Mode
 #define CAMERA_MODE_NONE    	0
@@ -122,9 +122,8 @@ public OnPlayerUpdate(playerid)
 			}
 		}
 		noclipdata[playerid][udold] = ud; noclipdata[playerid][lrold] = lr; // Store current keys pressed for comparison next update
-		return 1;
+		return 0;
 	}
-	
 	return 1;
 }
 
@@ -181,12 +180,6 @@ public MovePlayerCamFly(playerid, Float:X, Float:Y, Float:Z)
 {
 	SetPlayerObjectPos(playerid, noclipdata[playerid][flyobject], X, Y, Z);
 	return 1;
-}
-
-forward GetPlayerCamFly(playerid);
-public GetPlayerCamFly(playerid)
-{
-	return noclipdata[playerid][flyobject];
 }
 
 //--------------------------------------------------

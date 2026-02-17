@@ -5,7 +5,7 @@
 #include <streamer>
 #include <samp_bcrypt>
 #include <PawnPlus>
-#include <samp_bcrypt>
+#include <sampvoice>
 
 #define CGEN_MEMORY 20000
 
@@ -21,7 +21,9 @@
 #include "../gamemodes/modules/header.pwn"
 #include "../gamemodes/modules/utils.pwn"
 /*                          HEADERS                        */
+#include "../gamemodes/modules/Voice/header.pwn"
 #include "../gamemodes/modules/DB/header.pwn"
+#include "../gamemodes/modules/LinkedLists/header.pwn"
 #include "../gamemodes/modules/Vehicle/header.pwn"
 #include "../gamemodes/modules/Server/header.pwn" 
 #include "../gamemodes/modules/TextDraws/header.pwn"
@@ -33,6 +35,7 @@
 #include "../gamemodes/modules/Games/Race/header.pwn"
 /*                          HANDLE                          */
 #include "../gamemodes/modules/Server/handle.pwn"
+#include "../gamemodes/modules/LinkedLists/handle.pwn"
 #include "../gamemodes/modules/Vehicle/handle.pwn"
 #include "../gamemodes/modules/Player/handle.pwn"
 #include "../gamemodes/modules/Admin/handle.pwn"
@@ -54,7 +57,6 @@
 #include "../gamemodes/modules/Maps/squares.pwn"
 #include "../gamemodes/modules/Maps/store.pwn"
 #include "../gamemodes/modules/Maps/prision.pwn"
-
 /*                          TEXTDRAWS                       */
 #include "../gamemodes/modules/TextDraws/gui/login.pwn"
 #include "../gamemodes/modules/TextDraws/gui/acs_editor.pwn"
@@ -93,18 +95,24 @@ public OnGameModeExit()
     printf("[ DATABASE ] Conexão com o banco de dados de ESTOQUES encerrada com suceso!\n");
 
     new count;
-    for(new region = 0; region < REGION_COUNT; region++)
+
+    for(new regionid = 0; regionid < REGION_COUNT; regionid++)
     {
-        if(linked_list_valid(veh::gRegion[region]))
-            linked_list_delete(veh::gRegion[region]);
+        if(linked_list_valid(veh::Region[regionid]))
+            linked_list_delete(veh::Region[regionid]);
         
-        if(IsValidDynamicArea(veh::gAreas[region]))
-            DestroyDynamicArea(veh::gAreas[region]);
+        if(linked_list_valid(pyr::Region[regionid]))
+            linked_list_delete(pyr::Region[regionid]);
+
+        if(IsValidDynamicArea(Areas[regionid]))
+            DestroyDynamicArea(Areas[regionid]);
         
         count++;
     }
 
-    printf("[ LISTAS ] %d Lista Encadeada de Veiculos e Areas Dinâmicas destruidas com sucesso!\n", count);
+    printf("[ AREAS ] %d areas globais foram destruídas com sucesso\n", count);
+    printf("[ REGIONS ] %d regioes de jogadores foram deletadas com sucesso\n", count);
+    printf("[ REGIONS ] %d regioes de veículos foram deletadas com sucesso\n", count);
 
     return 1;
 }

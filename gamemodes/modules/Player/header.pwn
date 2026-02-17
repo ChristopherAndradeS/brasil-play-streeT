@@ -17,9 +17,9 @@ enum E_PLAYER
     pyr::score,
     pyr::orgid,
     pyr::flags,
+    pyr::regionid,
+    
     Text3D:pyr::cpf_tag,
-
-    adm::adminid,
 }
 
 enum (<<= 1)

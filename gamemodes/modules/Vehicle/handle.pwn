@@ -2,28 +2,6 @@
 
 forward OnSpeedOMeterUpdate(playerid);
 
-hook OnGameModeInit()
-{
-    for(new row = 0; row < REGION_GRID_SIZE; row++)
-    {
-        for(new col = 0; col < REGION_GRID_SIZE; col++)
-        {
-            new region = (row * REGION_GRID_SIZE) + col;
-
-            veh::gRegion[region] = linked_list_new();
-
-            new Float:min_x = WORLD_MIN + (float(col) * REGION_SIZE);
-            new Float:min_y = WORLD_MIN + (float(row) * REGION_SIZE);
-            new Float:max_x = min_x + REGION_SIZE;
-            new Float:max_y = min_y + REGION_SIZE;
-
-            veh::gAreas[region] = CreateDynamicRectangle(min_x, min_y, max_x, max_y);
-        }
-    }
-
-    return 1;
-}
-
 hook OnPlayerStateChange(playerid, PLAYER_STATE:newstate, PLAYER_STATE:oldstate)
 {
     if(newstate == PLAYER_STATE_DRIVER || newstate == PLAYER_STATE_PASSENGER)
@@ -181,37 +159,6 @@ hook OnPlayerKeyStateChange(playerid, KEY:newkeys, KEY:oldkeys)
         return 1;
     }
 
-    return 1;
-}
-
-hook OnPlayerEnterDynamicArea(playerid, STREAMER_TAG_AREA:areaid)
-{
-    if(!IsPlayerInAnyVehicle(playerid)) return 1;
-
-    new regionid = GetRegionByArea(areaid);
-    if(regionid == INVALID_REGION_ID) return 1;
-
-    new vehicleid = GetPlayerVehicleID(playerid);
-    if(vehicleid == INVALID_VEHICLE_ID) return 1;
-
-    Veh::AddToRegion(vehicleid, regionid);
-
-    return 1;
-}
-
-hook OnPlayerLeaveDynamicArea(playerid, STREAMER_TAG_AREA:areaid)
-{
-    if(!IsPlayerInAnyVehicle(playerid)) return 1;
-
-    new regionid = GetRegionByArea(areaid);
-    if(regionid == INVALID_REGION_ID) return 1;
-
-    new vehicleid = GetPlayerVehicleID(playerid);
-    if(vehicleid == INVALID_VEHICLE_ID)  return 1;
-
-    Veh::RemoveFromRegion(vehicleid);
-    Veh::UpdateRegionByPosition(vehicleid);
-    
     return 1;
 }
 

@@ -7,15 +7,15 @@
 
 new MySQL:Conexao;
 
-#define MAX_GARAGES     30
+#define MAX_GARAGES         30
 #define MAX_PLAYER_VEHICLES 10
-#define MAX_ORGS        30
-#define MAX_DESMANCHES  50
-#define MAX_MECANICAS   50
-#define MAX_OFICINAS    20
-#define MAX_INV_SLOTS   16
-#define MAX_VEHICLE_SLOTS 3
-#define MAX_CARROS_CONCE 50
+#define MAX_ORGS            30
+#define MAX_DESMANCHES      50
+#define MAX_MECANICAS       50
+#define MAX_OFICINAS        20
+#define MAX_INV_SLOTS       16
+#define MAX_VEHICLE_SLOTS   3
+#define MAX_CARROS_CONCE    50
 
 #define DIALOG_CMDS 3
 #define DIALOG_ORGS 4

@@ -91,6 +91,13 @@
         "use_lan_mode": false,
         "use_omp_encryption": false
     },
+    
+    "sampvoice": {
+        "port": 7778,
+        "threads": 4,
+        "updaterate": 30
+    },
+    
     "npc": {
         "aim_sync_skip_update_limit": 15,
         "aiming_sync_rate": 30,

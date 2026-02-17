@@ -1,0 +1,25 @@
+[09:36:50] : [sv:dbg:network:init] : module initializing...
+[09:36:50] : [dbg:raknet:init] : module initializing...
+[09:36:50] : [dbg:raknet:init] : module initialized
+[09:36:50] : [sv:dbg:network:init] : module initialized
+[09:36:50] : [sv:dbg:main:Load] : creating 4 work threads...
+[09:36:50] :  -------------------------------------------    
+[09:36:50] :    ___                __   __    _              
+[09:36:50] :   / __| __ _ _ __  _ _\ \ / /__ (_) __ ___    
+[09:36:50] :   \__ \/ _` | '  \| '_ \   / _ \| |/ _/ -_)
+[09:36:50] :   |___/\__,_|_|_|_| .__/\_/\___/|_|\__\___|
+[09:36:50] :                   |_|                           
+[09:36:50] :  -------------------------------------------    
+[09:36:50] :                 SampVoice by MOR                
+[09:36:50] :     Ported to open.mp by AmyrAhmady (iAmir)     
+[09:36:50] :  -------------------------------------------    
+[09:36:51] : [sv:dbg:network:bind] : voice server running on port 7778
+[09:37:03] :  -------------------------------------------
+[09:37:03] :            SampVoice unloading...           
+[09:37:03] :  -------------------------------------------
+[09:37:03] : [sv:dbg:pawn:free] : module releasing...
+[09:37:03] : [sv:dbg:pawn:free] : module released
+[09:37:03] : [sv:dbg:network:free] : module releasing...
+[09:37:03] : [dbg:raknet:free] : module releasing...
+[09:37:03] : [dbg:raknet:free] : module released
+[09:37:03] : [sv:dbg:network:free] : module released
