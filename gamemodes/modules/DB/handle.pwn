@@ -85,6 +85,15 @@ hook OnGameModeInit()
         category VARCHAR(32),\
         creator VARCHAR(24),\
         pX FLOAT, pY FLOAT, pZ FLOAT");
+
+        DB::CreateTable(db_stock, "organizations", 
+        "name VARCHAR(32),\
+        type INTEGER,\
+        creator VARCHAR(24),\
+        leader VARCHAR(24),\
+        coleader VARCHAR(24),\
+        skins VARCHAR(32), color INTEGER, funds FLOAT, flags INTEGER,\
+        sX FLOAT, sY FLOAT, sZ FLOAT");
     }
 
     else db_stock = DB_Open("stocks.db");

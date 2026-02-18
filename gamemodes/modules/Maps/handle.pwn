@@ -18,14 +18,16 @@ hook OnGameModeInit()
     print("[ MAPA ] Mapa da Praça Hospital carregado com sucesso\n");
     Square::LoadMap(MAP_SQUARE_LS);
     print("[ MAPA ] Mapa da Praça LS carregado com sucesso\n");
-    Officine::LoadMap(MAP_MEC_LS);
-    print("[ MAPA ] Mapa da Mecânica LS carregado com sucesso\n");
+    // Officine::LoadMap(MAP_MEC_LS);
+    // print("[ MAPA ] Mapa da Mecânica LS carregado com sucesso\n");
     Officine::LoadMap(MAP_MEC_AIRPORT);
     print("[ MAPA ] Mapa da Mecânia Aeroporto carregado com sucesso\n");
     Officine::LoadMap(MAP_MEC_DROP);
     print("[ MAPA ] Mapa da Mecânia Drop carregado com sucesso\n");
     Prision::LoadMap();
     print("[ MAPA ] Mapa da Prisão staff carregado com sucesso\n");
+    Arena::LoadMap();
+    print("[ MAPA ] Mapa da Arena PvP carregado com sucesso\n");
 
     /* HANDLE CARREGAMENTO GERAL */
 

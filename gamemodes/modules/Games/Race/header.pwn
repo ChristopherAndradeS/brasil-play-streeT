@@ -355,16 +355,18 @@ stock Race::Ready(gameid)
     {
         new playerid = list_get(game::Race[raceid][race::podium], idx);
 
+        SetPlayerPos(playerid, Race::gVehicleSpawns[idx][0], 
+        Race::gVehicleSpawns[idx][1], Race::gVehicleSpawns[idx][2]);
+
         game::Race[raceid][race::vehicleid][idx] = Veh::Create(Race::gModels[modelid],
         Race::gVehicleSpawns[idx][0], Race::gVehicleSpawns[idx][1], Race::gVehicleSpawns[idx][2],
         Race::gVehicleSpawns[idx][3], RandomMinMax(3, 12), RandomMinMax(3, 12), 7, Game[gameid][game::vw], FLAG_PARAM_ENGINE);
         
+        SetPVarInt(playerid, "PutPlayerInVehicle", 1);
+
         race::Player[playerid][race::vehicleid] = game::Race[raceid][race::vehicleid][idx];
 
-        PutPlayerInVehicle(playerid, race::Player[playerid][race::vehicleid], 0);
-
         SetVehicleHealth(race::Player[playerid][race::vehicleid], 1000.0 + 1000.0);
-
         SetVehicleZAngle(race::Player[playerid][race::vehicleid], Float:Race::gVehicleSpawns[idx][3]);
 
         ResetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_WAITING);
@@ -378,7 +380,21 @@ stock Race::Ready(gameid)
         Veh::UpdateParams(game::Race[raceid][race::vehicleid][idx], FLAG_PARAM_ENGINE, 1);
     }
     
-   
+
+    return 1;
+}
+
+hook OnVehicleStreamIn(vehicleid, forplayerid)
+{
+    if( GetFlag(game::Player[forplayerid][pyr::flags], FLAG_PLAYER_PLAYING) && 
+        GetPVarInt(forplayerid, "PutPlayerInVehicle") && 
+        vehicleid == race::Player[forplayerid][race::vehicleid]
+    )
+    {
+        PutPlayerInVehicle(forplayerid, race::Player[forplayerid][race::vehicleid], 0);
+        DeletePVar(forplayerid, "PutPlayerInVehicle");
+    }
+
     return 1;
 }
 

@@ -22,11 +22,11 @@
 #include "../gamemodes/modules/header.pwn"
 #include "../gamemodes/modules/utils.pwn"
 /*                          HEADERS                        */
-#include "../gamemodes/modules/Voice/header.pwn"
 #include "../gamemodes/modules/DB/header.pwn"
 #include "../gamemodes/modules/LinkedLists/header.pwn"
 #include "../gamemodes/modules/Vehicle/header.pwn"
 #include "../gamemodes/modules/Server/header.pwn" 
+#include "../gamemodes/modules/Organization/header.pwn"
 #include "../gamemodes/modules/TextDraws/header.pwn"
 #include "../gamemodes/modules/Player/header.pwn"
 #include "../gamemodes/modules/Admin/header.pwn"
@@ -35,12 +35,13 @@
     /* GAMES */
 #include "../gamemodes/modules/Games/Race/header.pwn"
 /*                          HANDLE                          */
+#include "../gamemodes/modules/DB/handle.pwn"
 #include "../gamemodes/modules/Server/handle.pwn"
 #include "../gamemodes/modules/LinkedLists/handle.pwn"
+#include "../gamemodes/modules/Organization/handle.pwn"
 #include "../gamemodes/modules/Vehicle/handle.pwn"
 #include "../gamemodes/modules/Player/handle.pwn"
 #include "../gamemodes/modules/Admin/handle.pwn"
-#include "../gamemodes/modules/DB/handle.pwn"
 #include "../gamemodes/modules/Maps/handle.pwn"
 #include "../gamemodes/modules/Games/handle.pwn"
     /* GAMES */
@@ -58,6 +59,7 @@
 #include "../gamemodes/modules/Maps/squares.pwn"
 #include "../gamemodes/modules/Maps/store.pwn"
 #include "../gamemodes/modules/Maps/prision.pwn"
+#include "../gamemodes/modules/Maps/arena.pwn"
 /*                          TEXTDRAWS                       */
 #include "../gamemodes/modules/TextDraws/gui/login.pwn"
 #include "../gamemodes/modules/TextDraws/gui/acs_editor.pwn"
@@ -67,9 +69,11 @@
 /*                          PLAYER                          */
 #include "../gamemodes/modules/Player/punishment.pwn"
 #include "../gamemodes/modules/Player/login.pwn"
+#include "../gamemodes/modules/Voice/handle.pwn"
 #include "../gamemodes/modules/Player/payday.pwn"
 #include "../gamemodes/modules/Player/acessory.pwn"
 #include "../gamemodes/modules/Player/commands.pwn"
+/*                          ORGANIZATIONS                          */
 /*                          ADMIN                          */
 #include "../gamemodes/modules/Admin/commands.pwn"
 #include "../gamemodes/modules/Admin/panel.pwn"
@@ -210,6 +214,21 @@ hook function SendClientMessageToAll(colour, const msg[], GLOBAL_TAG_TYPES:...)
     return continue(colour, fixed_msg);
 }
 
+// public OnPlayerTakeDamage(playerid, issuerid, Float:amount, WEAPON:weaponid, bodypart)
+// {
+//     new Float:health;
+//     GetPlayerHealth(playerid, health);
+//     SetPlayerHealth(playerid, health - amount);
+
+//     if(bodypart == 9)
+//     {
+//         GameTextForAll("~r~HEADSHOOT",1000, 3);
+//         PlayerPlaySound(issuerid, 1136);
+//     }
+
+//     return 1;
+// }
+
 public OnPlayerEnterCheckpoint(playerid)
 {
     if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_CHECKPOINT)) return 1;
@@ -233,8 +252,6 @@ stock SendMessageToNearPlayer(Float:pX, Float:pY, Float:pZ, const msg[], GLOBAL_
 
     for(new i = 0; i < count; i++)
     {   
-        printf("Verifiquei");
-        
         new playerid = near_players[i];
 
         if(playerid == INVALID_PLAYER_ID) continue;
@@ -244,3 +261,35 @@ stock SendMessageToNearPlayer(Float:pX, Float:pY, Float:pZ, const msg[], GLOBAL_
 
     return 1;
 }
+
+// YCMD:pvp(playerid, params[], help)
+// {
+//     SetPlayerWeather(playerid, 1);
+//     GivePlayerWeapon(playerid, WEAPON_DEAGLE, 1000);
+//     SetPlayerPos(playerid,-2805.7141,712.7639,964.9241); // player 1
+//     return 1;
+// }
+
+// YCMD:pos1(playerid, params[], help)
+// {
+//     SetPlayerPos(playerid, -2823.7285,737.5068,969.2119); //  ESPEC 1
+//     return 1;
+// }
+
+// YCMD:pos3(playerid, params[], help)
+// {
+//     SetPlayerPos(playerid,-2841.5415,712.7768,964.9241); // player 2
+//     return 1;
+// }
+
+// YCMD:pos4(playerid, params[], help)
+// {
+//     SetPlayerPos(playerid,-2823.5251,690.0143,969.2119); // ESPEC 2
+//     return 1;
+// }
+
+// YCMD:sound(playerid, params[], help)
+// {
+//     PlayerPlaySound(playerid, strval(params));
+//     return 1;
+// }

@@ -140,8 +140,6 @@ stock Veh::RemoveFromRegion(vehicleid)
 
 stock Player::AddToRegion(playerid, regionid)
 {
-    printf("Tentando adicionar.. %d R: %d", playerid, regionid);
-
     if(Player[playerid][pyr::regionid] == regionid) return 1;
 
     Player::RemoveFromRegion(playerid);

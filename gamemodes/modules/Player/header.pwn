@@ -32,6 +32,7 @@ enum (<<= 1)
     MASK_PLAYER_IN_JAIL,
     MASK_PLAYER_CHECKPOINT,
     MASK_PLAYER_DEATH,
+    FLAG_PLAYER_IS_LEADER,
 }
 
 new Player[MAX_PLAYERS][E_PLAYER];
@@ -192,6 +193,9 @@ stock acs::ClearData(playerid)
     acs::Player[playerid][acs::color1]  = -1;
     acs::Player[playerid][acs::color2]  = -1;
 }
+
+stock Player::Exists(const name[])
+    return (DB::Exists(db_entity, "players", "name = '%q'", name));
 
 stock Player::LoadData(playerid)
 {

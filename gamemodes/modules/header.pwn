@@ -42,6 +42,7 @@
 #define game::              game_
 #define Race::              Race_
 #define race::              race_
+#define Arena::             ARN_
 
 /*          DEFINES          */
 #define DISCORD_LINK        "https://discord.gg/Czq6DWDvcB"
