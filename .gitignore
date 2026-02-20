@@ -2,7 +2,7 @@
 *.log
 logs/
 log.txt
-
+*.txt
 # AMX
 .vscode/
 

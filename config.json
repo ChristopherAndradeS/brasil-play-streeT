@@ -93,6 +93,7 @@
     },
     
     "sampvoice": {
+        "check_for_streamed_in": true,
         "port": 7778,
         "threads": 4,
         "updaterate": 30
