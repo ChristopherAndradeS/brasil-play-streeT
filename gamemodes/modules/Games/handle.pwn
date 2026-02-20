@@ -3,6 +3,7 @@
 hook OnGameModeInit()
 {
     Game::Create("[ EVENTO AUTO ] Corrida ", "Server", GAME_TYPE_RACE, 2, 5, true, "571 2 100.0 75.0 50.0 25.0 0.0");
+    Game::Create("[ EVENTO AUTO ] Arena ", "Server", GAME_TYPE_ARENA, 2, 5, true, "");
 
     return 1;
 }

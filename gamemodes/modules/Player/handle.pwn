@@ -189,10 +189,16 @@ hook OnPlayerDeath(playerid, killerid, WEAPON:reason)
 {
     if(!IsValidPlayer(playerid)) return 1;
 
+    if(GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH))
+        return 1;
+
     if(killerid == INVALID_PLAYER_ID) 
         if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH))
             if(reason != WEAPON_DROWN && reason != WEAPON_COLLISION && reason != REASON_EXPLOSION)
+            {
                 printf("[ PVP ] Morte suspeita: %s (ID: %d) morreu sem assassino. Motivo: %d", GetPlayerNameStr(playerid), playerid, _:reason);
+                return 0;
+            }
     
     return 1;
 }
@@ -200,6 +206,10 @@ hook OnPlayerDeath(playerid, killerid, WEAPON:reason)
 hook OnPlayerDied(playerid, killerid, WEAPON:reason)
 {
     if(!IsValidPlayer(playerid) && !IsValidPlayer(killerid)) return 1;
+
+    new gameid = game::Player[playerid][pyr::gameid];
+    if(gameid != INVALID_GAME_ID && Game[gameid][game::type] == GAME_TYPE_ARENA)
+        return 1;
     
     if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_PVP))   
     {
@@ -228,6 +238,8 @@ hook OnPlayerDied(playerid, killerid, WEAPON:reason)
 hook OnPlayerSpawn(playerid)
 {    
     if(IsPlayerNPC(playerid)) return -1;
+
+    ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH);
 
     if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) 
     {
