@@ -59,8 +59,8 @@ YCMD:acessorios(playerid, params[], help)
 {
     if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
     
-    if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME) && !GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED))
-        return SendClientMessage(playerid, -1, "{ff5533}[ ERRO ] {ffffff}Você não pode mexer com acessórios durante o evento!");
+    // if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME) && !GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED))
+    //     return SendClientMessage(playerid, -1, "{ff5533}[ ERRO ] {ffffff}Você não pode mexer com acessórios durante o evento!");
 
     acs::ClearData(playerid);
 
@@ -88,5 +88,41 @@ YCMD:acessorios(playerid, params[], help)
     format(msg, sizeof(msg), "%s{cdcdcd}CLIQUE AQUI para comprar\t\t\n", msg);
     
     Dialog_ShowCallback(playerid, using public Response_ACC_MENU<iiiis>, DIALOG_STYLE_TABLIST_HEADERS, "{FFFFFF}Gerenciar Acessorios", msg, "Selecionar", "Fechar");
+    return 1;
+}
+
+YCMD:orgs(playerid, params[], help)
+{
+    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+
+    new msg[1024], line[128], org::members[MAX_ORGS];
+    
+    foreach(new i : Player)
+    {
+        if(!IsValidPlayer(i) || Player[i][pyr::orgid] == INVALID_ORG_TYPE) continue;
+        org::members[Player[i][pyr::orgid]]++;
+    }
+
+    strcat(msg, "{ff99ff}ID\t{ffffff}Organizacao\t{ff99ff}Lider\t{ffffff}Colider\t{ff99ff}Membros Online\n");
+
+    for(new i = 1; i < MAX_ORGS; i++)
+    {
+        if(!GetFlag(Organization[i][org::flags], FLAG_ORG_CREATED)) continue;
+        
+        format(line, 128, "%d\t{%x}%s\t%s\t%s\t{ffffff}%d membros\n", i, Organization[i][org::color], Organization[i][org::name], 
+        Organization[i][org::leader], Organization[i][org::coleader], org::members[i]);
+        
+        strcat(msg, line);
+    }
+
+    inline no_use_dialog(playerid1, dialogid, response, listitem, string:inputtext[])
+    {
+        #pragma unused playerid1, dialogid, response, listitem, inputtext
+
+        return 1;
+    }
+    
+    Dialog_ShowCallback(playerid, using inline no_use_dialog, DIALOG_STYLE_TABLIST_HEADERS, "Orgs do Servidor", msg, "Fechar");
+   
     return 1;
 }

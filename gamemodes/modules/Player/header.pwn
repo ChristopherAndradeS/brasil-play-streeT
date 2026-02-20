@@ -13,6 +13,7 @@ enum E_PLAYER
     pyr::bitcoin,
     Float:pyr::money,
     Float:pyr::health,
+    pyr::skinid,
     pyr::gender,
     pyr::score,
     pyr::orgid,
@@ -33,6 +34,8 @@ enum (<<= 1)
     MASK_PLAYER_CHECKPOINT,
     MASK_PLAYER_DEATH,
     FLAG_PLAYER_IS_LEADER,
+    FLAG_PLAYER_IS_COLEADER,
+    FLAG_PLAYER_IN_PVP,
 }
 
 new Player[MAX_PLAYERS][E_PLAYER];
@@ -45,6 +48,7 @@ enum _:E_PLAYER_TIMERS
     pyr::TIMER_PAYDAY,
     pyr::TIMER_JAIL,
     pyr::TIMER_SPEEDOMETER,
+    pyr::TIMER_SEND_ARENA,
 }
 
 new pyr::Timer[MAX_PLAYERS][E_PLAYER_TIMERS];
@@ -106,6 +110,8 @@ enum (<<= 1)
 }
 
 new acs::Player[MAX_PLAYERS][E_PLAYER_ACESSORY];
+
+new const gNameIssue[][32] = { {"INVALID_ISSUE"}, {"contem caracter ilegal"}, {"tem tamanho invalido"} };
 
 // new const Register::gValidsSkin[2][] = 
 // {
@@ -204,6 +210,7 @@ stock Player::LoadData(playerid)
     
     DB::GetDataInt(db_entity, "players", "bitcoin", Player[playerid][pyr::bitcoin], "name = '%q'", name);
     DB::GetDataFloat(db_entity, "players", "money", Player[playerid][pyr::money], "name = '%q'", name);
+    DB::GetDataInt(db_entity, "players", "skinid", Player[playerid][pyr::skinid], "name = '%q'", name);
     DB::GetDataInt(db_entity, "players", "score", Player[playerid][pyr::score], "name = '%q'", name);
     DB::GetDataInt(db_entity, "players", "orgid", Player[playerid][pyr::orgid], "name = '%q'", name);
     DB::GetDataInt(db_entity, "players", "payday_tleft", pdy::Player[playerid][pdy::time_left], "name = '%q'", name);

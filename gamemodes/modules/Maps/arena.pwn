@@ -459,7 +459,7 @@ stock Arena::LoadMap()
     tmpobjid = CreateDynamicObject(19477, -2806.124511, 712.810424, 963.938049, 0.000004, 270.000000, 0.000009, -1, -1, -1, 300.00, 300.00); 
     SetDynamicObjectMaterialText(tmpobjid, 0, "{FFFFFF}Brasil Play", 140, "Ariel", 110, 1, 0x00000000, 0x00000000, 1);
     tmpobjid = CreateDynamicObject(19477, -2841.363769, 712.810424, 963.938049, 0.000007, 990.000000, 179.999877, -1, -1, -1, 300.00, 300.00); 
-    SetDynamicObjectMaterialText(tmpobjid, 0, "{FFFFFF}Brasil Play", 140, "Ariel", 110, 1, 0x00000000, 0x00000000, 1);
+    SetDynamicObjectMaterialText(tmpobjid, 0, "{FFFFFF}Brasil Play\n{48A111}Street", 140, "Ariel", 110, 1, 0x00000000, 0x00000000, 1);
     tmpobjid = CreateDynamicObject(19477, -2823.503662, 690.274963, 968.255554, 0.000027, 270.000000, -90.000091, -1, -1, -1, 300.00, 300.00); 
     SetDynamicObjectMaterialText(tmpobjid, 0, "{48A111}Street", 140, "Ariel", 60, 1, 0x00000000, 0x00000000, 1);
     tmpobjid = CreateDynamicObject(19477, -2823.503662, 690.515197, 968.255554, 0.000027, 270.000000, -90.000091, -1, -1, -1, 300.00, 300.00); 

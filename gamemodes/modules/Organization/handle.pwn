@@ -31,72 +31,6 @@ stock DB::GetIntListStr(const list[], len = sizeof(list))
     return liststr;
 }
 
-YCMD:orgs(playerid, params[], help)
-{
-    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
-
-    new msg[1024], line[128], org::members[MAX_ORGS];
-    
-    foreach(new i : Player)
-    {
-        if(!IsValidPlayer(i) || Player[i][pyr::orgid] == INVALID_ORG_TYPE) continue;
-        org::members[Player[i][pyr::orgid]]++;
-    }
-
-    strcat(msg, "{ff99ff}ID\t{ffffff}Organizacao\t{ff99ff}Lider\t{ffffff}Colider\t{ff99ff}Membros Online\n");
-
-    for(new i = 1; i < MAX_ORGS; i++)
-    {
-        if(!GetFlag(Organization[i][org::flags], FLAG_ORG_CREATED)) continue;
-        
-        format(line, 128, "%d\t{%x}%s\t%s\t%s\t{ffffff}%d membros\n", i, Organization[i][org::color], Organization[i][org::name], 
-        Organization[i][org::leader], Organization[i][org::coleader], org::members[i]);
-        
-        strcat(msg, line);
-    }
-
-    inline no_use_dialog(playerid1, dialogid, response, listitem, string:inputtext[])
-    {
-        #pragma unused playerid1, dialogid, response, listitem, inputtext
-
-        return 1;
-    }
-    
-    Dialog_ShowCallback(playerid, using inline no_use_dialog, DIALOG_STYLE_TABLIST_HEADERS, "Orgs do Servidor", msg, "Fechar");
-   
-    return 1;
-}
-
-YCMD:darlider(playerid, params[], help)
-{
-    if(help)
-    {
-        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Define jogador como lider de uma organização.");
-        return 1;
-    }
-
-    if(!Adm::HasPermission(playerid, ROLE_ADM_CEO)) return 1;
-
-    new name[MAX_PLAYER_NAME], orgid;
-
-    if(sscanf(params, "s[24]", name, orgid)) 
-        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /darlider {ff3333}[ NOME ] <orgid 1 - %d >", MAX_ORGS);
-
-    if(orgid <= 0 || orgid >= MAX_ORGS || !GetFlag(Organization[orgid][org::flags], FLAG_ORG_CREATED))
-        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Parâmetro {ff3333}[ ORGID ] {ffffff}Inválido! Use {ff3333}/allorgs.");
-    
-    new admin_name[MAX_PLAYER_NAME];
-    GetPlayerName(playerid, admin_name);
-
-    new sucess = Org::SetLeader(playerid, name, admin_name, orgid);
-
-    if(sucess)
-        SendClientMessage(playerid, -1, "{33ff33}[ ADMIN ] {ffffff}Jogador {33ff33}%s {ffffff}setado como lider da organizaçõa {33ff33}%s {ffffff}com sucesso.",
-        name, Organization[orgid][org::name]);
-
-    return 1;
-}
-
 stock Org::SetLeader(playerid, const name[], const admin_name[], orgid)
 {
     if(!Player::Exists(name))
@@ -122,7 +56,11 @@ stock Org::SetLeader(playerid, const name[], const admin_name[], orgid)
         SetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_IS_LEADER);
 
         SetPlayerColor(targetid, Organization[orgid][org::color]);
-        //Org::SetMemberRandSkin(targetid);
+        
+        new org::skins[MAX_ORGS_SKINS];
+        Org::GetSkins(Organization[orgid][org::name], org::skins);
+
+        SetPlayerSkin(playerid, org::skins[RandomMinMax(0, MAX_ORGS_SKINS)]);
 
         SendClientMessage(targetid, -1, "{33ff33}[ ORGS ] {ffffff}Parabéns, você agora é {33ff33}líder\
         da organização {%x}%s", Organization[orgid][org::color], Organization[orgid][org::name]);
@@ -151,63 +89,128 @@ stock Org::GetSkins(const name[], output[MAX_ORGS_SKINS])
     return sscanf(buffer, "a<i>["#MAX_ORGS_SKINS"]", output);
 }
 
-// YCMD:darsub(playerid, params[])
-// {
-//     // Apenas Lider da própria org ou Admin
-//     new minhaOrg = Player[playerid][pOrg];
-//     if(Player[playerid][pLider] == 0 && Player[playerid][pAdmin] < 4) return SendClientMessage(playerid, COR_ERRO, "Apenas Lider ou Admin.");
+stock Org::SetCoLeader(playerid, const name[], const admin_name[], orgid)
+{
+    if(!Player::Exists(name))
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Esse jogador provavelmente não existe no {ff3333}banco de dados!");
+        return 0;
+    }
+
+    new flags;
+    DB::GetDataInt(db_entity, "players", "flags", flags, "name = '%q'", name);
+
+    if(GetFlag(flags, FLAG_PLAYER_IS_COLEADER))
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Esse jogador {ff3333}já é lider {ffffff}de uma organização!");
+        return 0;
+    }
+
+    new targetid = GetPlayerIDByName(name);
+
+    if(IsValidPlayer(targetid))
+    {
+        Player[targetid][pyr::orgid] = orgid;
+        SetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_IS_COLEADER);
+
+        SetPlayerColor(targetid, Organization[orgid][org::color]);
+
+        new org::skins[MAX_ORGS_SKINS];
+        Org::GetSkins(Organization[orgid][org::name], org::skins);
+
+        SetPlayerSkin(playerid, org::skins[RandomMinMax(0, MAX_ORGS_SKINS)]);
+
+        SendClientMessage(targetid, -1, "{33ff33}[ ORGS ] {ffffff}Parabéns, você agora é {33ff33}Co-líder\
+        da organização {%x}%s", Organization[orgid][org::color], Organization[orgid][org::name]);
+
+        DB::SetDataInt(db_entity, "players", "orgid", orgid, "name = '%q'", name);
+        DB::SetDataInt(db_entity, "players", "orgid", Player[targetid][pyr::flags], "name = '%q'", name);
+
+        SendClientMessage(targetid, -1, "{ffff33}[ ORGS ] {ffffff}Use {ffff33}/ajudaorg {ffffff}para ver o painel de comandos da sua organização.");
+    }
+
+    DB::SetDataInt(db_entity, "players", "orgid", orgid, "name = '%q'", name);
+    DB::SetDataInt(db_entity, "players", "orgid", flags | FLAG_PLAYER_IS_LEADER, "name = '%q'", name);
+    DB::SetDataString(db_stock, "organizations", "coleader", name, "name = '%q'", Organization[orgid][org::name]);
+
+    printf("[ ORG (DB) ] O admin %s, setou %s como colider da organizacao %s", admin_name, name, Organization[orgid][org::name]);
+    return 1;
+}
+
+
+stock Org::HasPermission(playerid, flag)
+{    
+    if(Player[playerid][pyr::orgid] == INVALID_ORG_TYPE)
+    {   
+        SendClientMessage(playerid, -1, "{ff3333}[ ORGS ] {ffffff}Você não faz parte de uma {ff3333}organização!");
+        return 0;
+    }
+
+    if(GetFlag(Player[playerid][pyr::flags], flag))
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ ORGS ] {ffffff}Você não tem {ff3333}permissão {ffffff}para usar esse comando!");
+        return 0;
+    }
+
+    return 1;
+}
+
+
+stock Org::ValidTargetID(playerid, targetid, bool:self = false)
+{
+    if(!IsValidPlayer(targetid)) 
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}O jogador {ff3333}nao esta online!");
+        return 0;
+    }
+
+    if(!self && (playerid == targetid))
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Voce nao poder aplicar essa acao em {ff3333}si mesmo!");
+        return 0;        
+    }
+
+    // F(ABCD) = !A + B + C && A + !B + C + D 
+    if
+    (  
+        (GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IS_COLEADER) || GetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_IS_LEADER)) &&
+        (GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IS_LEADER) || GetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_IS_LEADER) || GetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_IS_COLEADER))
+    )
+    {
+        if((self && (playerid == targetid))) return 1;
+
+        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Voce nao poder aplicar essa acao ao seu {ff3333}colega/subordinado!");
+        return 0;        
+    }   
+
+    return 1;     
+}
+
+
+// 2. CONVIDAR (Comando de Lider)
+YCMD:convidar(playerid, params[], help)
+{   
+    if(!Org::HasPermission(playerid, FLAG_PLAYER_IS_LEADER | FLAG_PLAYER_IS_COLEADER)) return 1;
+
+    new targetid;
+    if(sscanf(params, "u", targetid)) 
+        return SendClientMessage(playerid, -1, "{ff3333}[ ORGS ] {ffffff}Use: /convidar {ff3333}[ ID ].");
     
-//     new id;
-//     if(sscanf(params, "u", id)) return SendClientMessage(playerid, COR_V_ESCURO, "USE: /darsub [ID]");
-//     if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COR_ERRO, "Jogador offline.");
+    if(!IsValidPlayer(playerid)) 
+        return SendClientMessage(playerid, -1, "{ff3333}[ ORGS ] {ffffff}Esse jogador está {ff3333}Offline.");
     
-//     // Se for Lider, só pode dar sub pra quem é da mesma org
-//     if(Player[playerid][pLider] == 1 && Player[id][pOrg] != minhaOrg) return SendClientMessage(playerid, COR_ERRO, "Este jogador nao e da sua org! Convide ele antes.");
-
-//     // Se for admin, usa a org que o player já está
-//     new orgAlvo = Player[id][pOrg];
-//     if(orgAlvo == 0) return SendClientMessage(playerid, COR_ERRO, "O jogador nao tem organizacao.");
-
-//     // 1. Atualiza Jogador
-//     Player[id][pLider] = 2; // Vamos usar 2 para Sub-Líder
-//     SalvarConta(id);
-
-//     // 2. Atualiza Memória da Org
-//     new nome[MAX_PLAYER_NAME];
-//     GetPlayerName(id, nome, sizeof(nome));
-//     format(OrgInfo[orgAlvo][oSubLider], 24, "%s", nome);
-
-//     // 3. Atualiza MySQL da Org
-//     new query[256];
-//     mysql_format(Conexao, query, sizeof(query), "UPDATE organizacoes SET sublider='%e' WHERE id=%d", nome, OrgInfo[orgAlvo][oID]);
-//     mysql_tquery(Conexao, query);
-
-//     SendClientMessage(playerid, COR_VERDE_NEON, "Sub-Lider definido com sucesso!");
-//     SendClientMessage(id, COR_V_CLARO, "Voce foi promovido a Sub-Lider!");
-//     return 1;
-// }
-
-// // 2. CONVIDAR (Comando de Lider)
-// YCMD:convidar(playerid, params[])
-// {
-//     if(Player[playerid][pLider] == 0) return SendClientMessage(playerid, COR_ERRO, "Voce nao e Lider!");
-//     if(Player[playerid][pOrg] == 0) return SendClientMessage(playerid, COR_ERRO, "Voce nao tem Org!");
-
-//     new id;
-//     if(sscanf(params, "u", id)) return SendClientMessage(playerid, COR_V_ESCURO, "USE: /convidar [ID]");
-//     if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COR_ERRO, "Jogador offline.");
-//     if(Player[id][pOrg] != 0) return SendClientMessage(playerid, COR_ERRO, "Esse jogador ja tem Org/Faccao.");
+    // if(Player[targetid][pOrg] != 0) return SendClientMessage(playerid, COR_ERRO, "Esse jogador ja tem Org/Faccao.");
     
-//     InviteOrg[id] = Player[playerid][pOrg]; // Salva qual org convidou
+    // InviteOrg[targetid] = Player[playerid][pOrg]; // Salva qual org convidou
     
-//     new string[128], nome[24];
-//     GetPlayerName(playerid, nome, 24);
+    // new string[128], nome[24];
+    // GetPlayerName(playerid, nome, 24);
     
-//     format(string, sizeof(string), "O Lider %s te convidou para a %s. Digite /aceitar", nome, GetOrgName(Player[playerid][pOrg]));
-//     SendClientMessage(id, COR_V_CLARO, string);
-//     SendClientMessage(playerid, COR_V_CLARO, "Convite enviado.");
-//     return 1;
-// }
+    // format(string, sizeof(string), "O Lider %s te convidou para a %s. Digite /aceitar", nome, GetOrgName(Player[playerid][pOrg]));
+    // SendClientMessage(id, COR_V_CLARO, string);
+    // SendClientMessage(playerid, COR_V_CLARO, "Convite enviado.");
+    return 1;
+}
 
 
 // YCMD:aceitar(playerid)

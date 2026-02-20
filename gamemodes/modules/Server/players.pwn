@@ -15,7 +15,11 @@ stock Server::UpdatePlayerSeconds()
     {
         Player::UpdatePayday(i);
         Player::UpdateJail(i);
-        SetPlayerTime(i, Server[srv::hour], Server[srv::minute]);
+
+        if(GetFlag(Player[i][pyr::flags], FLAG_PLAYER_IN_PVP))
+            SetPlayerTime(i, 12, 0);
+        else
+            SetPlayerTime(i, Server[srv::hour], Server[srv::minute]);
     }
 
     foreach(new i : Adm_Iter)

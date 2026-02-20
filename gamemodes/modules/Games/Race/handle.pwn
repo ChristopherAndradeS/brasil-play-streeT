@@ -1,19 +1,37 @@
 #include <YSI\YSI_Coding\y_hooks>
 
-hook OnPlayerLogin(playerid)
-{
-    Game::ClearPlayer(playerid);
-    return 1;
-}
-
 hook OnPlayerStateChange(playerid, PLAYER_STATE:newstate, PLAYER_STATE:oldstate)
 {
     if(!GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING)) return 1;
 
+    new raceid = game::Player[playerid][pyr::gameid];
+
+    new data[E_RACE_SEAT];
+    map_get_arr(Race[raceid][race::participant], playerid, data);   
+
     if(oldstate == PLAYER_STATE_DRIVER || oldstate == PLAYER_STATE_PASSENGER)
-        if(IsValidVehicle(race::Player[playerid][race::vehicleid]))
-            PutPlayerInVehicle(playerid, race::Player[playerid][race::vehicleid], 0);
+        if(IsValidVehicle(data[race::vehicleid]))
+            PutPlayerInVehicle(playerid, data[race::vehicleid], 0);
     
+    return 1;
+}
+
+hook OnVehicleStreamIn(vehicleid, forplayerid)
+{
+    printf("Streemou");
+    if(!GetFlag(game::Player[forplayerid][pyr::flags], FLAG_PLAYER_PLAYING)) return 1;
+
+    new raceid = game::Player[forplayerid][pyr::gameid];
+
+    new data[E_RACE_SEAT];
+    map_get_arr(Race[raceid][race::participant], forplayerid, data);   
+
+    if(GetPVarInt(forplayerid, "PutPlayerInVehicle") && vehicleid == data[race::vehicleid])
+    {
+        PutPlayerInVehicle(forplayerid, data[race::vehicleid], 0);
+        DeletePVar(forplayerid, "PutPlayerInVehicle");
+    }
+
     return 1;
 }
 
@@ -21,66 +39,78 @@ hook OnPlayerEnterCheckpoint(playerid)
 {
     if(!GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING)) return 1;
 
-    new gameid = game::Player[playerid][pyr::gameid];
-    new raceid = game::Player[playerid][pyr::raceid];
-    
-    if(gameid == INVALID_GAME_ID || raceid == INVALID_RACE_ID) return 1;
+    new raceid = game::Player[playerid][pyr::gameid];
 
-    new check = race::Player[playerid][race::checkid];
-    new lap   = race::Player[playerid][race::lap];
+    new data[E_RACE_SEAT];
+    map_get_arr(Race[raceid][race::participant], playerid, data);   
 
     DisablePlayerCheckpoint(playerid);
 
-    check++;
+    data[race::checkid]++;
 
-    if(check >= sizeof(Race::gCheckpoints))
+    if(data[race::checkid] >= sizeof(Race::gCheckpoints))
     {
-        PlayerPlaySound(playerid, 1139, 0.0, 0.0, 0.0);
-        
-        check = 0;
-        lap++;
+        data[race::checkid] = 0;
+        data[race::laps]++;
 
-        if(lap == (MAX_LAPS))
-            SendClientMessage(playerid, -1, "{44ff66}[ CORRIDA ] {ffffff}Essa é a última volta!");
+        if(data[race::laps] > Race[raceid][race::lap])
+        {
+            ResetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING);
+            SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED);
+
+            Race[raceid][race::finisheds]++;
+
+            Game::SendMessageToAll(raceid, 
+            "{3399ff}[ CORRIDA ] {3399ff}%s {ffffff}terminou a corrida {3399ff}%s {ffffff}em {3399ff}%d| lugar", 
+            GetPlayerNameStr(playerid), Game[raceid][game::name], Race[raceid][race::finisheds]);
+
+            Game::RemovePlayer(raceid, playerid);
+            
+            new len = list_size(Game[raceid][game::players]);
+
+            if(len <= 0) Game[raceid][game::tick] = 0;
+
+            return 1;
+        }
+
+        else if(data[race::laps] == Race[raceid][race::lap])
+        {
+            GameTextForPlayer(playerid, "~p~ULTIMA VOLTA", 1500, 3);
+            SendClientMessage(playerid, -1, "{3399ff}[ CORRIDA ] Você está na sua {3399ff}última volta!");
+            PlayerPlaySound(playerid, 1139, 0.0, 0.0, 0.0);
+        }
+
+        else
+        {
+            GameTextForPlayer(playerid, "~p~LAP %d/%d", 1500, 3, data[race::laps], Race[raceid][race::lap]);
+            PlayerPlaySound(playerid, 1138, 0.0, 0.0, 0.0);
+        }
     }
 
     else
         PlayerPlaySound(playerid, 1138, 0.0, 0.0, 0.0);
 
-    if(lap > MAX_LAPS)
-    {
-        PlayerPlaySound(playerid, 1057, 0.0, 0.0, 0.0);
-        ResetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING);
-        SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED);
+    Race::UpdatePodium(raceid);
 
-        //Race::RemPodium(playerid, raceid, 0);
-        game::Race[raceid][race::finisheds]++;
+    Race::UpdatePlayerCheck(playerid, data);
 
-        RemovePlayerFromVehicle(playerid);
-        Veh::Destroy(race::Player[playerid][race::vehicleid]);
-        SetPlayerInterior(playerid, 0);
-        SetPlayerVirtualWorld(playerid, 0);
-        Player::Spawn(playerid, true);
+    return 1;
+}
 
-        if(game::Race[raceid][race::finisheds] >= 1 && game::Race[raceid][race::finisheds] <= 3)
-        {
-            SendClientMessage(playerid, -1, "{44ff66}[ CORRIDA ] {ffffff}Parabéns você terminou em {44ff66}%d| lugar{ffffff}, aguarde a corrida para receber seu prêmio.", game::Race[raceid][race::finisheds]);
-        }
-        else
-            SendClientMessage(playerid, -1, "{ff5533}[ CORRIDA ] {ffffff}Infelizmente você não se classificou :( tente novamente para receber prêmios!");
+stock Race::UpdatePlayerCheck(playerid, data[E_RACE_SEAT])
+{
+    new raceid = game::Player[playerid][pyr::gameid];
 
-        Game::SendMessageToAll(gameid, "{44ff66}[ CORRIDA ] {44ff66}%s {ffffff}terminou a corrida {44ff66}%s {ffffff}em {44ff66}%d| lugar", GetPlayerNameStr(playerid), game::Race[raceid][race::name], game::Race[raceid][race::finisheds]);
+    SetPlayerCheckpoint(playerid,
+    Race::gCheckpoints[data[race::checkid]][0], 
+    Race::gCheckpoints[data[race::checkid]][1], 
+    Race::gCheckpoints[data[race::checkid]][2], 25.0);
 
-        new count = list_size(game::Race[raceid][race::podium]);
+    map_set_arr(Race[raceid][race::participant], playerid, data);
 
-        if(game::Race[raceid][race::finisheds] >= count)
-            Game[gameid][game::start_time] = 0;
-        
-        return 1;
-    }
-
-    Race::UpdatePodium(gameid);
-    Race::UpdatePlayerCheck(playerid, lap, check);
+    SendClientMessage(playerid, -1, 
+    "{3399ff}[ CORRIDA ] {ffffff}Checkpoint {3399ff}%d/%d {ffffff}| Volta: {3399ff}%d/%d {ffffff}| Posição: {3399ff}%d| Lugar",
+    data[race::checkid] + 1, sizeof(Race::gCheckpoints), data[race::laps], Race[raceid][race::lap], Race::GetPodiumPlace(raceid, playerid));
 
     return 1;
 }

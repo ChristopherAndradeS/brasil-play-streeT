@@ -999,6 +999,67 @@ YCMD:cacs(playerid, params[], help)
     return 1;
 }
 
+YCMD:darlider(playerid, params[], help)
+{
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Define jogador como lider de uma organização.");
+        return 1;
+    }
+
+    if(!Adm::HasPermission(playerid, ROLE_ADM_CEO)) return 1;
+
+    new name[MAX_PLAYER_NAME], orgid;
+
+    if(sscanf(params, "s[24]", name, orgid)) 
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /darlider {ff3333}[ NOME ] <orgid 1 - %d >", MAX_ORGS);
+
+    if(orgid <= 0 || orgid >= MAX_ORGS || !GetFlag(Organization[orgid][org::flags], FLAG_ORG_CREATED))
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Parâmetro {ff3333}[ ORGID ] {ffffff}Inválido! Use {ff3333}/allorgs.");
+    
+    new admin_name[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, admin_name);
+
+    new sucess = Org::SetLeader(playerid, name, admin_name, orgid);
+
+    if(sucess)
+        SendClientMessage(playerid, -1, "{33ff33}[ ADMIN ] {ffffff}Jogador {33ff33}%s {ffffff}setado como lider da organizaçõa {33ff33}%s {ffffff}com sucesso.",
+        name, Organization[orgid][org::name]);
+
+    return 1;
+}
+
+
+YCMD:darsub(playerid, params[], help)
+{
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Define jogador como colider de uma organização.");
+        return 1;
+    }
+
+    if(!Adm::HasPermission(playerid, ROLE_ADM_CEO)) return 1;
+
+    new name[MAX_PLAYER_NAME], orgid;
+
+    if(sscanf(params, "s[24]", name, orgid)) 
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /darsub {ff3333}[ NOME ] <orgid 1 - %d >", MAX_ORGS);
+
+    if(orgid <= 0 || orgid >= MAX_ORGS || !GetFlag(Organization[orgid][org::flags], FLAG_ORG_CREATED))
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Parâmetro {ff3333}[ ORGID ] {ffffff}Inválido! Use {ff3333}/allorgs.");
+    
+    new admin_name[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, admin_name);
+
+    new sucess = Org::SetCoLeader(playerid, name, admin_name, orgid);
+
+    if(sucess)
+        SendClientMessage(playerid, -1, "{33ff33}[ ADMIN ] {ffffff}Jogador {33ff33}%s {ffffff}setado como colider da organização {33ff33}%s {ffffff}com sucesso.",
+        name, Organization[orgid][org::name]);
+
+    return 1;
+}
+
 // YCMD:criarfac(playerid, params[], help)
 // {
 //     if(Player[playerid][pAdmin] < 5) return SendClientMessage(playerid, -1, "Apenas Dono/Fundador.");
