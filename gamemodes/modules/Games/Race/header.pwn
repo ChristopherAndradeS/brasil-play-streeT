@@ -49,6 +49,63 @@ enum _:E_RACE_SEAT
 
 new Race[MAX_GAMES_INSTANCES][E_GAME_RACE];
 
+stock bool:Race::IsRaceVehicle(vehicleid, &raceid = INVALID_GAME_ID, &playerid = INVALID_PLAYER_ID)
+{
+    for(new gid = 0; gid < MAX_GAMES_INSTANCES; gid++)
+    {
+        if(!GetFlag(Game[gid][game::flags], FLAG_GAME_CREATED)) continue;
+        if(Game[gid][game::type] != GAME_TYPE_RACE) continue;
+        if(!map_valid(Race[gid][race::participant])) continue;
+
+        new len = Game::GetPlayersCount(gid);
+        for(new i = 0; i < len; i++)
+        {
+            new pid = list_get(Game[gid][game::players], i);
+            if(!map_has_key(Race[gid][race::participant], pid)) continue;
+
+            new data[E_RACE_SEAT];
+            map_get_arr(Race[gid][race::participant], pid, data);
+
+            if(data[race::vehicleid] != vehicleid) continue;
+
+            raceid = gid;
+            playerid = pid;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+stock Race::ProtectVehicle(vehicleid)
+{
+    if(!IsValidVehicle(vehicleid)) return 0;
+
+    new Float:health;
+    GetVehicleHealth(vehicleid, health);
+
+    if(health < 2000.0)
+        SetVehicleHealth(vehicleid, 2000.0);
+
+    new Float:qw, Float:qx, Float:qy, Float:qz;
+    GetVehicleRotationQuat(vehicleid, qw, qx, qy, qz);
+
+    // m33 < 0: eixo "up" invertido -> veículo tombado/capotado.
+    new Float:m33 = 1.0 - 2.0 * (qx * qx + qy * qy);
+    if(m33 < 0.0)
+    {
+        new Float:x, Float:y, Float:z, Float:a;
+        GetVehiclePos(vehicleid, x, y, z);
+        GetVehicleZAngle(vehicleid, a);
+
+        SetVehiclePos(vehicleid, x, y, z + 0.15);
+        SetVehicleZAngle(vehicleid, a);
+        SetVehicleHealth(vehicleid, 2000.0);
+    }
+
+    return 1;
+}
+
 stock Race::Create(raceid, const args[])
 {
     if(sscanf(args, "iia<f>["#MAX_GAME_PARTICIPANTS"]", Race[raceid][race::modelid], Race[raceid][race::lap], Race[raceid][race::rewards]))
@@ -70,7 +127,7 @@ stock Race::Destroy(raceid)
     if(!list_valid(Race[raceid][race::podium]))      return 0;
     if(!map_valid(Race[raceid][race::participant]))  return 0;
 
-    new len = Game::GetPlayersCount(raceid),
+    new len = Race::GetPlayersCount(raceid),
         playerid,
         data[E_RACE_SEAT]
     ;
@@ -123,8 +180,14 @@ stock Race::QuitPlayer(raceid, playerid)
     if(!map_valid(Race[raceid][race::participant]))  return 0;
     
     new data[E_RACE_SEAT];
-    map_get_arr(Race[raceid][race::participant], playerid, data);   
-    Veh::Destroy(data[race::vehicleid]);
+    if(map_has_key(Race[raceid][race::participant], playerid))
+    {
+        map_get_arr(Race[raceid][race::participant], playerid, data);
+        if(IsValidVehicle(data[race::vehicleid]))
+            Veh::Destroy(data[race::vehicleid]);
+
+        map_remove(Race[raceid][race::participant], playerid);
+    }
     
     //Game::SendMessageToAll(raceid, "{ff3333}[ CORRIDA ] {ffffff}%s {ff3333}saiu {ffffff}da corrida", GetPlayerNameStr(playerid));
     
@@ -242,6 +305,17 @@ stock Race::Update(raceid, tick)
         Game::ShowTextForAll(raceid, "~r~%02d~w~:~r~%02d", (tick <= 10) ? 600 : 990, 4, floatround(tick/60), tick % 60);
     }
 
+    for(new i = 0; i < len; i++)
+    {
+        new playerid = list_get(Race[raceid][race::podium], i);
+        if(!map_has_key(Race[raceid][race::participant], playerid)) continue;
+
+        new data[E_RACE_SEAT];
+        map_get_arr(Race[raceid][race::participant], playerid, data);
+
+        Race::ProtectVehicle(data[race::vehicleid]);
+    }
+
     Race::UpdatePodium(raceid);
 
     return 1;
@@ -261,7 +335,8 @@ stock Race::Finish(raceid)
 
         if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED))
         {
-            new Float:reward = Race[raceid][race::rewards][i];
+            new place = Race::GetPodiumPlace(raceid, playerid) - 1;
+            new Float:reward = (place >= 0 && place < MAX_GAME_PARTICIPANTS) ? Race[raceid][race::rewards][place] : 0.0;
 
             if(reward > 0.0)
             {
@@ -369,4 +444,10 @@ stock Race::GetPodiumPlace(raceid, playerid)
 {
     if(!list_valid(Race[raceid][race::podium])) return 0;
     return (list_find(Race[raceid][race::podium], playerid) + 1);
+}
+
+stock Race::GiveRewards(raceid)
+{
+    #pragma unused raceid
+    return 1;
 }

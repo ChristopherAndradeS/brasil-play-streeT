@@ -33,6 +33,7 @@
 #include "../gamemodes/modules/Games/header.pwn"
     /* GAMES */
 #include "../gamemodes/modules/Games/Race/header.pwn"
+#include "../gamemodes/modules/Games/Arena/header.pwn"
 /*                          HANDLE                          */
 #include "../gamemodes/modules/DB/handle.pwn"
 #include "../gamemodes/modules/Server/handle.pwn"
@@ -45,6 +46,7 @@
 #include "../gamemodes/modules/Games/handle.pwn"
     /* GAMES */
 #include "../gamemodes/modules/Games/Race/handle.pwn"
+#include "../gamemodes/modules/Games/Arena/handle.pwn"
 /*                          SERVER                          */
 #include "../gamemodes/modules/Server/wheather.pwn"
 #include "../gamemodes/modules/Server/players.pwn"

@@ -7,6 +7,7 @@ enum GAME_TYPES
 {
     INVALID_GAME_TYPE       = 0,
     GAME_TYPE_RACE          = 1,
+    GAME_TYPE_ARENA         = 2,
 }
 
 enum GAME_STATES
@@ -70,7 +71,8 @@ new const Game::gStateName[][32] =
 new const Game::gTypeName[][32] =
 {
     {"{cdcdcd}Tipo invalido"},
-    {"{ff9999}Corrida"}
+    {"{ff9999}Corrida"},
+    {"{ff3333}Arena"}
 };
 
 forward Game_Update(gameid);
@@ -113,6 +115,7 @@ stock Game::Create(const name[], const creator[], GAME_TYPES:type, minparts, max
     switch(type)
     {
         case GAME_TYPE_RACE: return Race::Create(gameid, Game[gameid][game::args]);
+        case GAME_TYPE_ARENA: return Arena::Create(gameid, Game[gameid][game::args]);
 
         default: return 0;
     }
@@ -139,6 +142,8 @@ stock Game::Destroy(gameid)
 
     new GAME_TYPES:type = Game[gameid][game::type];
  
+    Game::ClearPlayers(gameid);
+
     Game[gameid][game::name]     = '\0';
     Game[gameid][game::args]     = '\0';
     Game[gameid][game::type]     = INVALID_GAME_TYPE;
@@ -150,13 +155,12 @@ stock Game::Destroy(gameid)
     Game[gameid][game::minparts] = 0;
     Game[gameid][game::maxparts] = 0;
 
-    Game::ClearPlayers(gameid);
-
     printf("[ EVENTO ] Evento %d destruido com sucesso\n", gameid);
 
     switch(type)
     {
         case GAME_TYPE_RACE: return Race::Destroy(gameid);
+        case GAME_TYPE_ARENA: return Arena::Destroy(gameid);
 
         default: return 0;
     }
@@ -195,6 +199,7 @@ stock Game::InsertPlayer(gameid, playerid)
         switch(Game[gameid][game::type])
         {
             case GAME_TYPE_RACE: return Race::SendPlayer(playerid, gameid);
+            case GAME_TYPE_ARENA: return Arena::SendPlayer(playerid, gameid);
             default: return 0;
         }
 
@@ -217,7 +222,8 @@ stock Game::RemovePlayer(gameid, playerid)
         switch(Game[gameid][game::type])
         {
             case GAME_TYPE_RACE: Race::QuitPlayer(gameid, playerid);
-            default: return 1;
+            case GAME_TYPE_ARENA: Arena::QuitPlayer(gameid, playerid);
+            default: ;
         }
 
         list_remove(Game[gameid][game::players], idx); 
@@ -232,6 +238,7 @@ stock Game::SetPlayersReady(gameid)
     switch(Game[gameid][game::type])
     {
         case GAME_TYPE_RACE: return Race::Ready(gameid);
+        case GAME_TYPE_ARENA: return Arena::Ready(gameid);
         default: return 0;
     }
 }
@@ -241,6 +248,7 @@ stock Game::StartPlayers(gameid, tick, &new_tick = 0)
     switch(Game[gameid][game::type])
     {
         case GAME_TYPE_RACE: return Race::Start(gameid, tick, new_tick);
+        case GAME_TYPE_ARENA: return Arena::Start(gameid, tick, new_tick);
         default: return 0;
     }
 }
@@ -250,6 +258,7 @@ stock Game::UpdatePlayers(gameid, tick)
     switch(Game[gameid][game::type])
     {
         case GAME_TYPE_RACE: return Race::Update(gameid, tick);
+        case GAME_TYPE_ARENA: return Arena::Update(gameid, tick);
         default: return 0;
     }
 }
@@ -259,6 +268,7 @@ stock Game::FinishPlayers(gameid)
     switch(Game[gameid][game::type])
     {
         case GAME_TYPE_RACE: return Race::Finish(gameid);
+        case GAME_TYPE_ARENA: return Arena::Finish(gameid);
         default: return 0;
     }
 }
@@ -268,6 +278,7 @@ stock Game::GivePlayerRewards(gameid)
     switch(Game[gameid][game::type])
     {
         case GAME_TYPE_RACE: return Race::GiveRewards(gameid);
+        case GAME_TYPE_ARENA: return Arena::GiveRewards(gameid);
         default: return 0;
     }    
 }
@@ -465,4 +476,3 @@ public Game_Update(gameid)
 
     return;
 }
-
