@@ -109,6 +109,14 @@ stock Veh::AddToRegion(vehicleid, regionid)
 
     if(regionid < 0 || regionid >= REGION_COUNT) return 0;
 
+    new count = linked_list_size(veh::Region[regionid]);
+    for(new i = 0; i < count; i++)
+        if(linked_list_get(veh::Region[regionid], i) == vehicleid)
+        {
+            Vehicle[vehicleid][veh::regionid] = regionid;
+            return 1;
+        }
+
     linked_list_add(veh::Region[regionid], vehicleid);
     Vehicle[vehicleid][veh::regionid] = regionid;
 
@@ -146,6 +154,14 @@ stock Player::AddToRegion(playerid, regionid)
 
     if(regionid < 0 || regionid >= REGION_COUNT) return 0;
 
+    new count = linked_list_size(pyr::Region[regionid]);
+    for(new i = 0; i < count; i++)
+        if(linked_list_get(pyr::Region[regionid], i) == playerid)
+        {
+            Player[playerid][pyr::regionid] = regionid;
+            return 1;
+        }
+
     linked_list_add(pyr::Region[regionid], playerid);
     Player[playerid][pyr::regionid] = regionid;
 
@@ -179,19 +195,34 @@ stock Player::GetPlayersIntoRange(Float:x, Float:y, Float:z, Float:radius, playe
 
     if(regionid == INVALID_REGION_ID) return count;
 
-    new len = linked_list_size(pyr::Region[regionid]);
+    new cx = GetRegionCellX(regionid);
+    new cy = GetRegionCellY(regionid);
 
-    for(new i = 0; i < len; i++)
+    for(new ny = cy - 1; ny <= cy + 1; ny++)
     {
-        new playerid = linked_list_get(pyr::Region[regionid], i);
-        
-        if(!IsValidPlayer(playerid)) continue;
-        
-        new Float:dist = GetPlayerDistanceFromPoint(playerid, x, y, z);
-        if(dist <= radius)
+        if(ny < 0 || ny >= REGION_GRID_SIZE) continue;
+
+        for(new nx = cx - 1; nx <= cx + 1; nx++)
         {
-            playerid_list[count] = playerid;
-            count++;
+            if(nx < 0 || nx >= REGION_GRID_SIZE) continue;
+
+            new neighbor_region = (ny * REGION_GRID_SIZE) + nx;
+            new len = linked_list_size(pyr::Region[neighbor_region]);
+
+            for(new i = 0; i < len; i++)
+            {
+                if(count >= MAX_PLAYERS) return count;
+
+                new playerid = linked_list_get(pyr::Region[neighbor_region], i);
+                if(!IsValidPlayer(playerid)) continue;
+
+                new Float:dist = GetPlayerDistanceFromPoint(playerid, x, y, z);
+                if(dist <= radius)
+                {
+                    playerid_list[count] = playerid;
+                    count++;
+                }
+            }
         }
     }
 

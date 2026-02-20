@@ -1,5 +1,21 @@
 #include <YSI\YSI_Coding\y_hooks>
 
+hook OnVehicleHealthChance(vehicleid, Float:new_health, Float:old_health)
+{
+    #pragma unused old_health
+
+    new raceid, playerid;
+    if(!Race::IsRaceVehicle(vehicleid, raceid, playerid)) return 1;
+
+    if(Game[raceid][game_state] != GAME_STATE_STARTED)
+        return 1;
+
+    if(new_health < 2000.0)
+        Race::ProtectVehicle(vehicleid);
+
+    return 1;
+}
+
 hook OnPlayerStateChange(playerid, PLAYER_STATE:newstate, PLAYER_STATE:oldstate)
 {
     if(!GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING)) return 1;
@@ -18,7 +34,6 @@ hook OnPlayerStateChange(playerid, PLAYER_STATE:newstate, PLAYER_STATE:oldstate)
 
 hook OnVehicleStreamIn(vehicleid, forplayerid)
 {
-    printf("Streemou");
     if(!GetFlag(game::Player[forplayerid][pyr::flags], FLAG_PLAYER_PLAYING)) return 1;
 
     new raceid = game::Player[forplayerid][pyr::gameid];

@@ -23,6 +23,12 @@ hook OnPlayerStateChange(playerid, PLAYER_STATE:newstate, PLAYER_STATE:oldstate)
 
 hook OnVehicleHealthChance(vehicleid, Float:new_health, Float:old_health)
 {
+    #pragma unused old_health
+
+    new raceid, playerid;
+    if(Race::IsRaceVehicle(vehicleid, raceid, playerid) && Game[raceid][game_state] == GAME_STATE_STARTED)
+        return 1;
+
     if((!IsFlagSet(Vehicle[vehicleid][veh::flags], FLAG_VEH_IS_DEAD)) && new_health <= 250.0)
     {
         SetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_IS_DEAD);
@@ -38,6 +44,8 @@ hook OnVehicleHealthChance(vehicleid, Float:new_health, Float:old_health)
             RemovePlayerFromVehicle(i);
         }
     }
+
+    return 1;
 }
 
 public OnSpeedOMeterUpdate(playerid)
