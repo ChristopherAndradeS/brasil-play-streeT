@@ -44,6 +44,9 @@
 #define race::              race_
 #define Arena::             ARN_
 #define arena::             arn_
+#define Ammu::              AMM_
+#define House::             HOS_
+
 
 /*          DEFINES          */
 #define DISCORD_LINK        "https://discord.gg/Czq6DWDvcB"

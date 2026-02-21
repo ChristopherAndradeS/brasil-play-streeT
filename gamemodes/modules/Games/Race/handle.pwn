@@ -70,6 +70,7 @@ hook OnPlayerEnterCheckpoint(playerid)
 
         if(data[race::laps] > Race[raceid][race::lap])
         {
+            ResetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME);
             ResetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING);
             SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED);
 
@@ -80,11 +81,7 @@ hook OnPlayerEnterCheckpoint(playerid)
             GetPlayerNameStr(playerid), Game[raceid][game::name], Race[raceid][race::finisheds]);
 
             Game::RemovePlayer(raceid, playerid);
-            
-            new len = list_size(Game[raceid][game::players]);
-
-            if(len <= 0) Game[raceid][game::tick] = 0;
-
+        
             return 1;
         }
 

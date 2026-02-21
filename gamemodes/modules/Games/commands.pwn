@@ -51,7 +51,8 @@ YCMD:sair(playerid, params[], help)
     if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED))
         return SendClientMessage(playerid, -1, "{ff3333}[ EVENTO ] {ffffff}Você está esperando uma partida a qual você já se classificou terminar!");
 
+    SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_ELIMINATED);
     Game::RemovePlayer(game::Player[playerid][pyr::gameid], playerid);
-
+    
     return 1;
 }

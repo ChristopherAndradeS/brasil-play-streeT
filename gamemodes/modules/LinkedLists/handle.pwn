@@ -195,34 +195,19 @@ stock Player::GetPlayersIntoRange(Float:x, Float:y, Float:z, Float:radius, playe
 
     if(regionid == INVALID_REGION_ID) return count;
 
-    new cx = GetRegionCellX(regionid);
-    new cy = GetRegionCellY(regionid);
+    new len = linked_list_size(pyr::Region[regionid]);
 
-    for(new ny = cy - 1; ny <= cy + 1; ny++)
+    for(new i = 0; i < len; i++)
     {
-        if(ny < 0 || ny >= REGION_GRID_SIZE) continue;
-
-        for(new nx = cx - 1; nx <= cx + 1; nx++)
+        new playerid = linked_list_get(pyr::Region[regionid], i);
+        
+        if(!IsValidPlayer(playerid)) continue;
+        
+        new Float:dist = GetPlayerDistanceFromPoint(playerid, x, y, z);
+        if(dist <= radius)
         {
-            if(nx < 0 || nx >= REGION_GRID_SIZE) continue;
-
-            new neighbor_region = (ny * REGION_GRID_SIZE) + nx;
-            new len = linked_list_size(pyr::Region[neighbor_region]);
-
-            for(new i = 0; i < len; i++)
-            {
-                if(count >= MAX_PLAYERS) return count;
-
-                new playerid = linked_list_get(pyr::Region[neighbor_region], i);
-                if(!IsValidPlayer(playerid)) continue;
-
-                new Float:dist = GetPlayerDistanceFromPoint(playerid, x, y, z);
-                if(dist <= radius)
-                {
-                    playerid_list[count] = playerid;
-                    count++;
-                }
-            }
+            playerid_list[count] = playerid;
+            count++;
         }
     }
 

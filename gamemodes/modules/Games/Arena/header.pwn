@@ -1,14 +1,13 @@
-new const Float:Arena::gSpawns[MAX_GAME_PARTICIPANTS][4] =
+new const Float:Arena::gSpawns[][4] =
 {
-    {-2823.6047, 689.5715, 969.9802, 180.0},
-    {-2810.5000, 689.5715, 969.9802, 180.0},
-    {-2798.0000, 689.5715, 969.9802, 180.0},
-    {-2785.5000, 689.5715, 969.9802, 180.0},
-    {-2773.0000, 689.5715, 969.9802, 180.0}
+    {-2823.7285, 737.5068, 969.2119, 180.0},    // ESPEC 1
+    {-2823.5251, 690.0143, 969.2119, 0.0},      // ESPEC 2
+    {-2841.5415, 712.7768, 964.9241, 270.0},    // player 1
+    {-2805.7141, 712.7639, 964.9241, 90.0}      // player 2
 };
 
-#define ARENA_MATCH_TIME      (300)
-#define ARENA_RESPAWN_TIME_MS (5000)
+#define ARENA_MATCH_TIME      (10)
+#define ARENA_RESPAWN_TIME_MS (2170)
 
 enum (<<= 1)
 {
@@ -83,13 +82,17 @@ stock Arena::SendPlayer(playerid, gameid)
 
     map_add_arr(Arena[gameid][arena::participant], playerid, data);
 
+    if(TryPercentage(50))
+        SetSpawnInfo(playerid, 1, Player[playerid][pyr::skinid], -2823.7285 + Float:RandomFloatMinMax(-1.5, 1.5), 737.5068 + Float:RandomFloatMinMax(-1.5, 1.5), 969.2119, 180.0);
+    else
+        SetSpawnInfo(playerid, 1, Player[playerid][pyr::skinid], -2823.5251 + Float:RandomFloatMinMax(-1.5, 1.5), 690.0143 + Float:RandomFloatMinMax(-1.5, 1.5), 969.2119, 0.0);
+
     SetPlayerVirtualWorld(playerid, Game[gameid][game::vw]);
     SetPlayerInterior(playerid, 0);
     ResetPlayerWeapons(playerid);
+    SetCameraBehindPlayer(playerid);
 
-    new idx = (Game::GetPlayersCount(gameid) - 1) % MAX_GAME_PARTICIPANTS;
-    SetPlayerPos(playerid, Arena::gSpawns[idx][0], Arena::gSpawns[idx][1], Arena::gSpawns[idx][2]);
-    SetPlayerFacingAngle(playerid, Arena::gSpawns[idx][3]);
+    SpawnPlayer(playerid);
 
     return 1;
 }
@@ -109,15 +112,15 @@ stock Arena::QuitPlayer(gameid, playerid)
         map_remove(Arena[gameid][arena::participant], playerid);
     }
 
-    ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_PVP);
-    ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH);
+    ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INGAME);
+    ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_DEATH);
 
     SetPlayerVirtualWorld(playerid, 0);
     SetPlayerInterior(playerid, 0);
     TogglePlayerControllable(playerid, true);
 
     if(IsPlayerConnected(playerid))
-        Player::Spawn(playerid);
+        Player::Spawn(playerid, true);
 
     return 1;
 }
@@ -141,19 +144,23 @@ stock Arena::Ready(gameid)
 
         ResetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_WAITING);
         SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING);
-        SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_PVP);
-        ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH);
+        SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INGAME);
+        ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_DEATH);
 
         ResetPlayerWeapons(playerid);
-        GivePlayerWeapon(playerid, WEAPON_M4, 400);
-        GivePlayerWeapon(playerid, WEAPON_DEAGLE, 120);
-        GivePlayerWeapon(playerid, WEAPON_GRENADE, 2);
+        GivePlayerWeapon(playerid, WEAPON_M4, 1000);
+        GivePlayerWeapon(playerid, WEAPON_DEAGLE, 1000);
+        GivePlayerWeapon(playerid, WEAPON_UZI, 1000);
 
         SetPlayerHealth(playerid, 100.0);
         SetPlayerArmour(playerid, 100.0);
+        Player[playerid][pyr::health] = 200.0;
 
-        SetPlayerPos(playerid, Arena::gSpawns[i][0], Arena::gSpawns[i][1], Arena::gSpawns[i][2]);
-        SetPlayerFacingAngle(playerid, Arena::gSpawns[i][3]);
+        new idx = RandomMinMax(2, 4);
+
+        SetPlayerPos(playerid, Arena::gSpawns[idx][0], Arena::gSpawns[idx][1], Arena::gSpawns[idx][2]);
+        SetPlayerFacingAngle(playerid, Arena::gSpawns[idx][3]);
+        SetCameraBehindPlayer(playerid);
         SetPlayerInterior(playerid, 0);
         SetPlayerVirtualWorld(playerid, Game[gameid][game::vw]);
 
@@ -191,11 +198,14 @@ stock Arena::Start(gameid, tick, &new_tick)
 
 stock Arena::Update(gameid, tick)
 {
-    if(tick == 60)
-        Game::SendMessageToAll(gameid, "{ff3333}[ ARENA ] {ffffff}Falta {ff3333}1 minuto{ffffff} para encerrar!");
+    if(tick <= 60)
+    {
+        if(tick == 60)
+            Game::SendMessageToAll(gameid, "{ff3333}[ ARENA ] {ffffff}Falta {ff3333}1 minuto{ffffff} para encerrar!");
 
-    Game::ShowTextForAll(gameid, "~r~%02d~w~:~r~%02d", (tick <= 10) ? 600 : 990, 4, floatround(tick / 60), tick % 60);
-
+        Game::ShowTextForAll(gameid, "~r~%02d~w~:~r~%02d", (tick <= 10) ? 600 : 990, 4, floatround(tick / 60), tick % 60);
+    }
+    
     return 1;
 }
 
@@ -234,7 +244,11 @@ stock Arena::RespawnPlayer(playerid, gameid)
     if(!map_has_key(Arena[gameid][arena::participant], playerid)) return 1;
 
     new data[E_ARENA_SEAT];
+
     map_get_arr(Arena[gameid][arena::participant], playerid, data);
+ 
+    if(IsValidTimer(data[arena::respawn_timer]))
+        KillTimer(data[arena::respawn_timer]);
 
     data[arena::respawn_timer] = INVALID_TIMER;
     data[arena::is_alive] = true;
@@ -243,20 +257,25 @@ stock Arena::RespawnPlayer(playerid, gameid)
 
     TogglePlayerSpectating(playerid, false);
 
-    new idx = random(MAX_GAME_PARTICIPANTS);
-    SetPlayerPos(playerid, Arena::gSpawns[idx][0], Arena::gSpawns[idx][1], Arena::gSpawns[idx][2]);
-    SetPlayerFacingAngle(playerid, Arena::gSpawns[idx][3]);
+    //new idx = RandomMinMax(3, 4);
+
+    // if(TryPercentage(50))
+    //     SetSpawnInfo(playerid, 1, Player[playerid][pyr::skinid], -2823.7285 + Float:RandomFloatMinMax(-1.5, 1.5), 737.5068 + Float:RandomFloatMinMax(-1.5, 1.5), 969.2119, 180.0);
+    // else
+    //     SetSpawnInfo(playerid, 1, Player[playerid][pyr::skinid], -2823.5251 + Float:RandomFloatMinMax(-1.5, 1.5), 690.0143 + Float:RandomFloatMinMax(-1.5, 1.5), 969.2119, 0.0);
+
     SetPlayerVirtualWorld(playerid, Game[gameid][game::vw]);
     SetPlayerInterior(playerid, 0);
     SetCameraBehindPlayer(playerid);
 
     ResetPlayerWeapons(playerid);
-    GivePlayerWeapon(playerid, WEAPON_M4, 350);
-    GivePlayerWeapon(playerid, WEAPON_DEAGLE, 90);
+    GivePlayerWeapon(playerid, WEAPON_M4, 1000);
+    GivePlayerWeapon(playerid, WEAPON_DEAGLE, 1000);
+    GivePlayerWeapon(playerid, WEAPON_UZI, 1000);
 
     SetPlayerHealth(playerid, 100.0);
-    SetPlayerArmour(playerid, 50.0);
-    ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH);
+    SetPlayerArmour(playerid, 100.0);
+    Player[playerid][pyr::health] = 200.0;
 
     return 1;
 }
@@ -280,30 +299,23 @@ stock Arena::RegisterDeath(playerid, killerid, WEAPON:reason)
     victim[arena::last_killer] = killerid;
     victim[arena::is_alive] = false;
     victim[arena::is_respawning] = true;
-
-    if(IsValidTimer(victim[arena::respawn_timer]))
-        KillTimer(victim[arena::respawn_timer]);
-
+  
     if(IsValidPlayer(killerid)
     && map_has_key(Arena[gameid][arena::participant], killerid)
     && killerid != playerid)
     {
+     
         new killer[E_ARENA_SEAT];
         map_get_arr(Arena[gameid][arena::participant], killerid, killer);
+   
         killer[arena::kills]++;
         map_set_arr(Arena[gameid][arena::participant], killerid, killer);
 
         SendDeathMessage(killerid, playerid, reason);
-        PlayerSpectatePlayer(playerid, killerid);
     }
     else
         SendDeathMessage(INVALID_PLAYER_ID, playerid, reason);
-
-    TogglePlayerSpectating(playerid, true);
-    SetPlayerHealth(playerid, 100.0);
-    Player[playerid][pyr::health] = 100.0;
-
-    victim[arena::respawn_timer] = SetTimerEx("ARN_DoRespawn", ARENA_RESPAWN_TIME_MS, false, "ii", playerid, gameid);
+    
     map_set_arr(Arena[gameid][arena::participant], playerid, victim);
 
     return 1;

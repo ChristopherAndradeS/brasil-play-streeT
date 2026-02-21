@@ -52,11 +52,35 @@ hook OnPlayerPasswordVerify(playerid, bool:success)
     return 1;
 }
 
+
+#if defined ON_DEBUG_MODE
+hook OnPlayerConnect(playerid)
+{
+    return 1;
+}
+
+hook OnPlayerRequestClass(playerid, classid)
+{
+    Login::UnSetPlayer(playerid);
+
+    return 1;
+}
+#else
 hook OnPlayerConnect(playerid)
 {
     Login::SetPlayer(playerid);
     return 1;
 }
+
+hook OnPlayerRequestClass(playerid, classid)
+{
+    if(!IsValidPlayer(playerid)) return 1;
+
+    Player::Spawn(playerid);
+
+    return 1;
+}
+#endif
 
 hook OnPlayerClickTextDraw(playerid, Text:clickedid)
 {
@@ -212,6 +236,7 @@ stock Login::UnSetPlayer(playerid)
     Player::LoadData(playerid);
     StopAudioStreamForPlayer(playerid);
     TogglePlayerSpectating(playerid, false);
+    TogglePlayerControllable(playerid, true);
     TogglePlayerClock(playerid, true);
     Player::SetCPF(playerid);
 

@@ -9,6 +9,8 @@
 
 #define CGEN_MEMORY 20000
 
+#define ON_DEBUG_MODE
+
 #include <YSI\YSI_Data\y_iterate>
 #include <YSI\YSI_Coding\y_va>
 #include <YSI\YSI_Coding\y_inline>
@@ -61,6 +63,8 @@
 #include "../gamemodes/modules/Maps/store.pwn"
 #include "../gamemodes/modules/Maps/prision.pwn"
 #include "../gamemodes/modules/Maps/arena.pwn"
+#include "../gamemodes/modules/Maps/ammu.pwn"
+#include "../gamemodes/modules/Maps/house.pwn"
 /*                          TEXTDRAWS                       */
 #include "../gamemodes/modules/TextDraws/gui/login.pwn"
 #include "../gamemodes/modules/TextDraws/gui/acs_editor.pwn"
@@ -236,65 +240,65 @@ stock SendMessageToNearPlayer(Float:pX, Float:pY, Float:pZ, const msg[], GLOBAL_
     return 1;
 }
 
-forward ARN_SendPlayer(playerid);
+// forward ARN_SendPlayer(playerid);
 
-public ARN_SendPlayer(playerid)
-{
-    Player[playerid][pyr::health] = 100.0;
-    SetPlayerHealth(playerid, 100.0);
-    ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH);
+// public ARN_SendPlayer(playerid)
+// {
+//     Player[playerid][pyr::health] = 100.0;
+//     SetPlayerHealth(playerid, 100.0);
+//     ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH);
 
-    SpawnPlayer(playerid);
+//     SpawnPlayer(playerid);
 
-    SetPlayerWeather(playerid, 1);
-    GivePlayerWeapon(playerid, WEAPON_DEAGLE, 1000);
-    GivePlayerWeapon(playerid, WEAPON_M4, 1000);
-    GivePlayerWeapon(playerid, WEAPON_UZI, 1000);
+//     SetPlayerWeather(playerid, 1);
+//     GivePlayerWeapon(playerid, WEAPON_DEAGLE, 1000);
+//     GivePlayerWeapon(playerid, WEAPON_M4, 1000);
+//     GivePlayerWeapon(playerid, WEAPON_UZI, 1000);
 
-    if(TryPercentage(50))
-        SetPlayerPos(playerid, -2805.7141 + Float:RandomFloatMinMax(-2.0, 2.0), 712.7639 + Float:RandomFloatMinMax(-2.0, 2.0), 964.9241); 
-    else
-        SetPlayerPos(playerid, -2841.5415 + Float:RandomFloatMinMax(-2.0, 2.0), 712.7768 + Float:RandomFloatMinMax(-2.0, 2.0), 964.9241); 
+//     if(TryPercentage(50))
+//         SetPlayerPos(playerid, -2805.7141 + Float:RandomFloatMinMax(-2.0, 2.0), 712.7639 + Float:RandomFloatMinMax(-2.0, 2.0), 964.9241); 
+//     else
+//         SetPlayerPos(playerid, -2841.5415 + Float:RandomFloatMinMax(-2.0, 2.0), 712.7768 + Float:RandomFloatMinMax(-2.0, 2.0), 964.9241); 
      
-    Player::KillTimer(playerid, pyr::TIMER_SEND_ARENA);
+//     Player::KillTimer(playerid, pyr::TIMER_SEND_ARENA);
     
-    return 1;
-}
+//     return 1;
+// }
 
-YCMD:pvp(playerid, params[], help)
-{
-    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_PVP))
-        return SendClientMessage(playerid, -1, "{ff3333}[ PVP ] {ffffff}Voce ja esta no PvP");
+// YCMD:pvp(playerid, params[], help)
+// {
+//     if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_PVP))
+//         return SendClientMessage(playerid, -1, "{ff3333}[ PVP ] {ffffff}Voce ja esta no PvP");
 
-    SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_PVP);
+//     SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_PVP);
 
-    SetPlayerTeam(playerid, 1);
+//     SetPlayerTeam(playerid, 1);
 
-    if(TryPercentage(50))
-        SetSpawnInfo(playerid, 1, Player[playerid][pyr::skinid], -2823.7285 + Float:RandomFloatMinMax(-2.0, 2.0), 737.5068 + Float:RandomFloatMinMax(-2.0, 2.0), 969.2119, 180.0);
-    else
-        SetSpawnInfo(playerid, 1, Player[playerid][pyr::skinid], -2823.5251 + Float:RandomFloatMinMax(-2.0, 2.0), 690.0143 + Float:RandomFloatMinMax(-2.0, 2.0), 969.2119, 0.0);
+//     if(TryPercentage(50))
+//         SetSpawnInfo(playerid, 1, Player[playerid][pyr::skinid], -2823.7285 + Float:RandomFloatMinMax(-2.0, 2.0), 737.5068 + Float:RandomFloatMinMax(-2.0, 2.0), 969.2119, 180.0);
+//     else
+//         SetSpawnInfo(playerid, 1, Player[playerid][pyr::skinid], -2823.5251 + Float:RandomFloatMinMax(-2.0, 2.0), 690.0143 + Float:RandomFloatMinMax(-2.0, 2.0), 969.2119, 0.0);
     
-    SpawnPlayer(playerid);
-    Player::CreateTimer(playerid, pyr::TIMER_SEND_ARENA, "ARN_SendPlayer", 2000, false, "i", playerid);
+//     SpawnPlayer(playerid);
+//     Player::CreateTimer(playerid, pyr::TIMER_SEND_ARENA, "ARN_SendPlayer", 2000, false, "i", playerid);
 
-    SendClientMessage(playerid, -1, "{33ff33}[ PVP ] {ffffff}Voce entrou na arena PvP. Para sair digite {33ff33}/sairpvp");
-    return 1;
-}
+//     SendClientMessage(playerid, -1, "{33ff33}[ PVP ] {ffffff}Voce entrou na arena PvP. Para sair digite {33ff33}/sairpvp");
+//     return 1;
+// }
 
-YCMD:sairpvp(playerid, params[], help)
-{
-    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_PVP))
-        return SendClientMessage(playerid, -1, "{ff3333}[ PVP ] {ffffff}Voce ja esta fora do PvP");
+// YCMD:sairpvp(playerid, params[], help)
+// {
+//     if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_PVP))
+//         return SendClientMessage(playerid, -1, "{ff3333}[ PVP ] {ffffff}Voce ja esta fora do PvP");
 
-    SetPlayerWeather(playerid, Server[srv::g_weatherid]);
-    ResetPlayerWeapons(playerid);
-    Player::Spawn(playerid);
+//     SetPlayerWeather(playerid, Server[srv::g_weatherid]);
+//     ResetPlayerWeapons(playerid);
+//     Player::Spawn(playerid);
 
-    ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_PVP);
+//     ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_PVP);
 
-    return 1;
-}
+//     return 1;
+// }
 
 // YCMD:pos1(playerid, params[], help)
 // {
@@ -302,11 +306,12 @@ YCMD:sairpvp(playerid, params[], help)
 //     return 1;
 // }
 
-// YCMD:pos3(playerid, params[], help)
-// {
-//     SetPlayerPos(playerid,-2841.5415,712.7768,964.9241); // player 2
-//     return 1;
-// }
+YCMD:pos3(playerid, params[], help)
+{
+    GivePlayerWeapon(playerid, WEAPON_DEAGLE, 1000);
+    SetPlayerPos(playerid,-2841.5415,712.7768,964.9241); // player 2
+    return 1;
+}
 
 // YCMD:pos4(playerid, params[], help)
 // {
@@ -316,6 +321,7 @@ YCMD:sairpvp(playerid, params[], help)
 
 YCMD:teste(playerid, params[], help)
 {
-    printf("%d", GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME));
+    SetPlayerPos(playerid,1321.260742, -1120.900024, 20.432008);
+    //printf("%d", GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME));
     return 1;
 }

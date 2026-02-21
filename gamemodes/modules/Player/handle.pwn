@@ -1,14 +1,15 @@
 #include <YSI\YSI_Coding\y_hooks>
 
 forward OnPlayerDied(playerid, killerid, WEAPON:reason);
+forward PYR_RefreshDeath(playerid);
 
 hook OnPlayerConnect(playerid)
 {
-    Player::ClearAllData(playerid);
-
     if(IsPlayerNPC(playerid)) return -1;
-        
+            
     ClearChat(playerid, 20);
+
+    Player::ClearAllData(playerid);
 
     new name[MAX_PLAYER_NAME], issue;
     GetPlayerName(playerid, name);
@@ -71,7 +72,7 @@ hook OnPlayerDisconnect(playerid, reason)
         Player::KillTimer(playerid, pyr::TIMER_JAIL); 
     }
 
-    else if(IsFlagSet(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME) || IsFlagSet(Player[playerid][pyr::flags], FLAG_PLAYER_IN_PVP)) 
+    else if(IsFlagSet(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME)) 
         return 1;
 
     else
@@ -130,24 +131,9 @@ hook OnPlayerLogin(playerid)
     return 1;
 }
 
-hook OnPlayerRequestClass(playerid, classid)
+hook OnPlayerGiveDamage(playerid, damagedid, Float:amount, WEAPON:weaponid, bodypart)
 {
-    if(!IsValidPlayer(playerid)) return 1;
-    
-    Player::Spawn(playerid);
-
-    return 1;
-}
-
-public OnPlayerWeaponShot(playerid, WEAPON:weaponid, BULLET_HIT_TYPE:hittype, hitid, Float:fX, Float:fY, Float:fZ)
-{
-    if(!IsValidPlayer(playerid)) return 1;
-    return 1;
-}
-
-public OnPlayerGiveDamage(playerid, damagedid, Float:amount, WEAPON:weaponid, bodypart)
-{
-    //if(GetPlayerTeam(playerid) == GetPlayerTeam(damagedid)) return 1;
+    if(GetFlag(Player[damagedid][pyr::flags], FLAG_PLAYER_INVUNERABLE)) return -1;
 
     Player::UpdateDamage(damagedid, playerid, amount, weaponid, bodypart);
     
@@ -158,42 +144,43 @@ stock Player::UpdateDamage(playerid, issuerid, Float:damage, WEAPON:weaponid, bo
 {
     if(!IsValidPlayer(playerid) && !IsValidPlayer(issuerid)) return 1;
 
-    if(GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH))  
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_DEATH))  
     {
-        GameTextForPlayer(issuerid, "~r~OVERKILL", 1000, 4);
+        GameTextForPlayer(issuerid, "~r~~h~OVERKILL", 1000, 4);
         return 1;
     }
 
     if(bodypart == 9)
     {
-        GameTextForPlayer(issuerid, "~r~HEADSHOOT", 1000, 4);
+        GameTextForPlayer(issuerid, "~r~H~h~E~h~~h~A~g~~h~~h~D~g~~h~S~b~~h~~h~H~b~O~b~O~p~T", 1000, 4);
         PlayerPlaySound(issuerid, 1139);
     }
 
-    Player[playerid][pyr::health] = floatclamp(Player[playerid][pyr::health] - damage, 1.0, 100.0);
-    SetPlayerHealth(playerid, Player[playerid][pyr::health]);
-
+    Player[playerid][pyr::health] = floatclamp(Player[playerid][pyr::health] - damage, 1.0, 200.0);
+    
+    SetPlayerHealth(playerid, floatclamp(Player[playerid][pyr::health], 1.0, 100.0));
+    SetPlayerArmour(playerid, Player[playerid][pyr::health] <= 100.0 ? 0.0 : Player[playerid][pyr::health] - 100.0);
 
     if(Player[playerid][pyr::health] <= 1.0)
     {   
-        //SetPlayerHealth(playerid, 1.0);
-        SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH);
+        GameTextForPlayer(issuerid, "~h~MATOU", 500, 4);
+        GameTextForPlayer(playerid, "~r~~h~MORREU", 500, 4);
+        SetPlayerHealth(playerid, 1.0);
+        SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_DEATH);
         CallLocalFunction("OnPlayerDied", "iii", playerid, issuerid, WEAPON:weaponid);
     }
 
     return 1;
 }
 
-
 hook OnPlayerDeath(playerid, killerid, WEAPON:reason)
 {
     if(!IsValidPlayer(playerid)) return 1;
 
-    if(GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH))
-        return 1;
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_DEATH)) return 1;
 
     if(killerid == INVALID_PLAYER_ID) 
-        if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH))
+        if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_DEATH))
             if(reason != WEAPON_DROWN && reason != WEAPON_COLLISION && reason != REASON_EXPLOSION)
             {
                 printf("[ PVP ] Morte suspeita: %s (ID: %d) morreu sem assassino. Motivo: %d", GetPlayerNameStr(playerid), playerid, _:reason);
@@ -203,34 +190,41 @@ hook OnPlayerDeath(playerid, killerid, WEAPON:reason)
     return 1;
 }
 
+stock Player::AplyRandomDeathAnim(playerid, &time)
+{
+    switch(RandomMax(100))
+    {
+        case 0..33:     ApplyAnimation(playerid, "CRACK", "crckdeth1", 4.1, false, false, false, false, 2170, SYNC_ALL), time = 2170; 
+        case 34..66:    ApplyAnimation(playerid, "CRACK", "crckdeth3", 4.1, false, false, false, false, 2170, SYNC_ALL), time = 2170;
+        case 67..100:   ApplyAnimation(playerid, "CRACK", "crckdeth4", 4.1, false, false, false, false, 2170, SYNC_ALL), time = 1670;
+        default: time = 2000;
+    }
+}
+
+public PYR_RefreshDeath(playerid)
+{
+    Player[playerid][pyr::health] = 100.0;
+    SetPlayerHealth(playerid, 100.0);
+    ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_DEATH);
+
+    //TogglePlayerControllable(playerid, true);
+    SpawnPlayer(playerid);
+
+    Player::KillTimer(playerid, pyr::TIMER_DEATH);
+
+    return 1;
+}
+
 hook OnPlayerDied(playerid, killerid, WEAPON:reason)
 {
     if(!IsValidPlayer(playerid) && !IsValidPlayer(killerid)) return 1;
 
-    new gameid = game::Player[playerid][pyr::gameid];
-    if(gameid != INVALID_GAME_ID && Game[gameid][game::type] == GAME_TYPE_ARENA)
-        return 1;
-    
-    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_PVP))   
-    {
-        SendDeathMessage(killerid, playerid, reason);
-
-        ApplyAnimation(playerid, "CRACK", "crckdeth3", 4.1, false, false, false, false, 2170, SYNC_ALL); 
+    new time;
+    Player::AplyRandomDeathAnim(playerid, time);
+    //TogglePlayerControllable(playerid, false);
+    Player::CreateTimer(playerid, pyr::TIMER_DEATH, "PYR_RefreshDeath", time, false, "i", playerid);
         
-        Player::CreateTimer(playerid, pyr::TIMER_SEND_ARENA, "ARN_SendPlayer", 2170, false, "i", playerid);
-        
-        SendClientMessage(playerid, -1, "{ff3333}[ PVP ] {ffffff}Voce foi morto por {ff3333}%s", GetPlayerNameStr(killerid));
-        SendClientMessage(playerid, -1, "{ff9933}[ PVP ] {ffffff}Enviando você para a arena novamente. {ff9933}Aguarde...");
-        
-        return 1;
-    }
-
-    else if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_WAITING) || GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING))
-    {
-        SetPlayerHealth(playerid, 100.0);
-        Player[playerid][pyr::health] = 100;
-    }
-
+    //SendClientMessage(playerid, -1, "{ff3333}[ PVP ] {ffffff}Voce foi morto por {ff3333}%s", GetPlayerNameStr(killerid));
    
     return 1;
 }
@@ -238,8 +232,6 @@ hook OnPlayerDied(playerid, killerid, WEAPON:reason)
 hook OnPlayerSpawn(playerid)
 {    
     if(IsPlayerNPC(playerid)) return -1;
-
-    ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH);
 
     if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) 
     {

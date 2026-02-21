@@ -2,32 +2,21 @@
 
 hook OnPlayerDied(playerid, killerid, WEAPON:reason)
 {
-    if(!IsValidPlayer(playerid)) return 1;
-
     new gameid = game::Player[playerid][pyr::gameid];
 
-    if(gameid == INVALID_GAME_ID) return 1;
-    if(Game[gameid][game::type] != GAME_TYPE_ARENA) return 1;
-
+    if(!IsValidPlayer(playerid) || gameid == INVALID_GAME_ID || Game[gameid][game::type] != GAME_TYPE_ARENA) return 1;
+    
     Arena::RegisterDeath(playerid, killerid, reason);
+    SendDeathMessage(killerid, playerid, reason);
+    Game::SendMessageToAll(gameid, "{ff5577}[ ARENA ] {ffffff}%s {ff5577}matou {ffffff}%s");
 
-    return 1;
-}
+    TogglePlayerSpectating(playerid, true);
+    PlayerSpectatePlayer(playerid, killerid);
 
-hook OnPlayerDeath(playerid, killerid, WEAPON:reason)
-{
-    if(!IsValidPlayer(playerid)) return 1;
-
-    new gameid = game::Player[playerid][pyr::gameid];
-
-    if(gameid == INVALID_GAME_ID) return 1;
-    if(Game[gameid][game::type] != GAME_TYPE_ARENA) return 1;
-
-    if(killerid == INVALID_PLAYER_ID && reason != WEAPON_DROWN && reason != WEAPON_COLLISION && reason != REASON_EXPLOSION)
-    {
-        printf("[ ARENA ] Morte suspeita barrada no OnPlayerDeath: %s (%d), motivo: %d", GetPlayerNameStr(playerid), playerid, _:reason);
-        return 0;
-    }
+    new victim[E_ARENA_SEAT];
+    map_get_arr(Arena[gameid][arena::participant], playerid, victim);
+    victim[arena::respawn_timer] = SetTimerEx("ARN_DoRespawn", ARENA_RESPAWN_TIME_MS, false, "ii", playerid, gameid);
+    map_set_arr(Arena[gameid][arena::participant], playerid, victim);
 
     return 1;
 }

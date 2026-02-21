@@ -1,11 +1,12 @@
 #define MAX_GAMES_INSTANCES     (5)
 #define MAX_GAME_PARTICIPANTS   (5)
-#define GAME_TIME_WAIT          (30)
+#define GAME_TIME_WAIT          (25)
 #define INVALID_GAME_ID         (-1)
+
+#define INVALID_GAME_TYPE       (GAME_TYPES:0)
 
 enum GAME_TYPES
 {
-    INVALID_GAME_TYPE       = 0,
     GAME_TYPE_RACE          = 1,
     GAME_TYPE_ARENA         = 2,
 }
@@ -133,6 +134,7 @@ stock Game::Clear(gameid)
     type    = Game[gameid][game::type];
 
     Game::Destroy(gameid);
+    
     return Game::Create(name, "Server", type, minp, maxp, true, args);
 }
 
@@ -159,7 +161,7 @@ stock Game::Destroy(gameid)
 
     switch(type)
     {
-        case GAME_TYPE_RACE: return Race::Destroy(gameid);
+        case GAME_TYPE_RACE:  return Race::Destroy(gameid);
         case GAME_TYPE_ARENA: return Arena::Destroy(gameid);
 
         default: return 0;
@@ -193,6 +195,9 @@ stock Game::InsertPlayer(gameid, playerid)
         list_add(Game[gameid][game::players], playerid);
 
         game::Player[playerid][pyr::gameid] = gameid;
+        
+        SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
+
         SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME);
         SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_WAITING);
         
@@ -221,13 +226,25 @@ stock Game::RemovePlayer(gameid, playerid)
     {
         switch(Game[gameid][game::type])
         {
-            case GAME_TYPE_RACE: Race::QuitPlayer(gameid, playerid);
-            case GAME_TYPE_ARENA: Arena::QuitPlayer(gameid, playerid);
-            default: ;
+            case GAME_TYPE_RACE: 
+            {
+                Race::QuitPlayer(gameid, playerid);
+                if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_ELIMINATED))
+                    Game::SendMessageToAll(gameid, "{ff3333}[ CORRIDA ] {ffffff}%s {ff3333}saiu {ffffff}da corrida", GetPlayerNameStr(playerid));
+            }
+            case GAME_TYPE_ARENA: 
+            {
+                Arena::QuitPlayer(gameid, playerid);
+                if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_ELIMINATED))
+                    Game::SendMessageToAll(gameid, "{ff3333}[ ARENA ] {ffffff}%s {ff3333}saiu {ffffff}da arena", GetPlayerNameStr(playerid));
+            }
         }
 
-        list_remove(Game[gameid][game::players], idx); 
-        Game::ClearPlayer(playerid); 
+        if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_ELIMINATED))
+        {
+            list_remove(Game[gameid][game::players], idx); 
+            Game::ClearPlayer(playerid); 
+        }
     }
 
     return 1;
@@ -368,15 +385,25 @@ public Game_Update(gameid)
             if(count >= Game[gameid][game::minparts])
             {
                 Game[gameid][game::tick] = GAME_TIME_WAIT;
-                Game::SendMessageToAll(gameid, "{3399ff}[ EVENTO ] {ffffff}O número mínimo de jogadores foi atingido!");
-                Game::SendMessageToAll(gameid, "{3399ff}[ EVENTO ] {ffffff}Iniciando evento em {ff5533}%d {ffffff}segundos", Game[gameid][game::tick]);
+                Game::SendMessageToAll(gameid, "{3399ff}[ EVENTO ] {ffffff}O número {3399ff}mínimo {ffffff}de jogadores foi atingido!");
+                Game::SendMessageToAll(gameid, "{3399ff}[ EVENTO ] {ffffff}Iniciando evento em {3399ff}%d {ffffff}segundos", Game[gameid][game::tick]);
                 Game[gameid][game_state] = GAME_STATE_WAIT_FILL;
-                return;
             }   
 
-            Game::ShowTextForAll(gameid, "~p~Aguardando...~n~%d de %d jogadores", 
-            1000, 4, count, Game[gameid][game::minparts]);
-            Game[gameid][game_state] = GAME_STATE_FINISHED;
+            else if(count >= Game[gameid][game::maxparts])
+            {
+                Game[gameid][game::tick] = 10;
+                Game::SendMessageToAll(gameid, "{3399ff}[ EVENTO ] {ffffff}O número {3399ff}máximo {ffffff}de jogadores foi atingido!");
+                Game[gameid][game_state] = GAME_STATE_WAIT_FILL;
+            }
+
+            else
+            {
+                Game::ShowTextForAll(gameid, "~p~Aguardando...~n~%d de %d jogadores", 
+                1000, 4, count, Game[gameid][game::minparts]);
+                Game[gameid][game_state] = GAME_STATE_FINISHED;
+            }
+
             return;
         }
 
@@ -386,7 +413,7 @@ public Game_Update(gameid)
 
             if(time <= 0)
             {
-                Game::ShowTextForAll(gameid, "~y~Iniciando...", 1000, 4);
+                Game::ShowTextForAll(gameid, "~h~Iniciando Evento", 1000, 4);
                 Game::SetPlayersReady(gameid);  
                 Game[gameid][game::tick] = 5; 
                 Game[gameid][game_state] = GAME_STATE_STARTING;
@@ -395,16 +422,23 @@ public Game_Update(gameid)
 
             else
             {
-                if( Game::GetPlayersCount(gameid) < Game[gameid][game::minparts])
+                new count = Game::GetPlayersCount(gameid);
+
+                if(count < Game[gameid][game::minparts])
                 {
-                    Game::SendMessageToAll(gameid, "{ff3333}[ EVENTO ] {ffffff}Contagem parou! \
-                    Precisamos de {ff3333}%d jogadores {ffffff}para iniciar o evento", 
-                    Game[gameid][game::minparts]);        
+                    Game::SendMessageToAll(gameid, "{ff3333}[ EVENTO ] {ffffff}Contagem parou! Precisamos de {ff3333}%d jogadores {ffffff}para iniciar!", Game[gameid][game::minparts]);        
                     Game[gameid][game::tick] = 0;
                     Game[gameid][game_state] = GAME_STATE_FINISHED;
                     return;
                 }
-                Game::ShowTextForAll(gameid, "~g~~h~~h~Esperando %02d:%02d", (time <= 10) ? 600 : 990, 4, floatround(time/60), time % 60);
+
+                else if(count >= Game[gameid][game::maxparts] && Game[gameid][game::tick] > 10)
+                {
+                    Game[gameid][game::tick] = 10;
+                    Game::SendMessageToAll(gameid, "{3399ff}[ EVENTO ] {ffffff}O número {3399ff}máximo {ffffff}de jogadores foi atingido!");
+                }
+
+                Game::ShowTextForAll(gameid, "~g~~h~~h~Esperando~n~%02d:%02d", (time <= 10) ? 600 : 990, 4, floatround(time/60), time % 60);
                 Game[gameid][game::tick]--;
                 Game[gameid][game_state] = GAME_STATE_WAIT_FILL;
                 return;   
@@ -424,18 +458,6 @@ public Game_Update(gameid)
 
             else
             {
-                new count = Game::GetPlayersCount(gameid);
-
-                if(count < Game[gameid][game::minparts])
-                {
-                    Game::SendMessageToAll(gameid, "{ff3333}[ EVENTO ] {ffffff}Contagem parou! \
-                    Precisamos de {ff3333}%d jogadores {ffffff}para iniciar o evento", 
-                    Game[gameid][game::minparts]);        
-                    Game[gameid][game::tick] = 0;
-                    Game[gameid][game_state] = GAME_STATE_FINISHED;
-                    return;
-                }
-
                 Game::StartPlayers(gameid, time); 
                 Game[gameid][game_state] = GAME_STATE_STARTING;
                 return;
@@ -456,7 +478,7 @@ public Game_Update(gameid)
 
             else
             {
-                Game::ShowTextForAll(gameid, "~r~~h~Terminou", 990, 3);
+                Game::ShowTextForAll(gameid, "~h~~h~Terminou", 990, 4);
                 Game::FinishPlayers(gameid);
                 Game[gameid][game::tick] = 0;
                 Game[gameid][game_state] = GAME_STATE_FINISHING;
@@ -466,7 +488,6 @@ public Game_Update(gameid)
 
         case GAME_STATE_FINISHING:
         {
-            SendClientMessageToAll(-1, "{ff3333}[ EVENTO ] {ffffff}O evento {ff3333}%s {ffffff}acabou!", Game[gameid][game::name]);
             Game::Clear(gameid);
             return;
         }

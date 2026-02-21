@@ -2,17 +2,15 @@
 
 hook OnGameModeInit()
 {
-    Game::Create("[ EVENTO AUTO ] Corrida ", "Server", GAME_TYPE_RACE, 2, 5, true, "571 2 100.0 75.0 50.0 25.0 0.0");
-    Game::Create("[ EVENTO AUTO ] Arena ", "Server", GAME_TYPE_ARENA, 2, 5, true, "");
+    Game::Create("[ SERVER ] Corrida", "Server", GAME_TYPE_RACE, 1, 2, false, "571 1 100.0 0.0 0.0 0.0 0.0");
+    Game::Create("[ SERVER ] Arena", "Server", GAME_TYPE_ARENA, 2, 5, false, "");
 
     return 1;
 }
 
 hook OnGameModeExit()
 {
-    for(new i = 0; i < MAX_GAMES_INSTANCES; i++)
-        Game::Destroy(i);
-    
+    for(new i = 0; i < MAX_GAMES_INSTANCES; i++) Game::Destroy(i);
     return 1;
 }
 
@@ -24,12 +22,12 @@ hook OnPlayerConnect(playerid)
 
 hook OnPlayerDisconnect(playerid, reason)
 {
-    printf("teste");
-
     new gameid = game::Player[playerid][pyr::gameid];
 
     if(gameid != INVALID_GAME_ID)
+    {
+        SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_ELIMINATED);
         Game::RemovePlayer(gameid, playerid);
-
+    }
     return 1;
 }
