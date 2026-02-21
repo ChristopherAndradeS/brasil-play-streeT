@@ -240,88 +240,16 @@ stock SendMessageToNearPlayer(Float:pX, Float:pY, Float:pZ, const msg[], GLOBAL_
     return 1;
 }
 
-// forward ARN_SendPlayer(playerid);
-
-// public ARN_SendPlayer(playerid)
-// {
-//     Player[playerid][pyr::health] = 100.0;
-//     SetPlayerHealth(playerid, 100.0);
-//     ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_DEATH);
-
-//     SpawnPlayer(playerid);
-
-//     SetPlayerWeather(playerid, 1);
-//     GivePlayerWeapon(playerid, WEAPON_DEAGLE, 1000);
-//     GivePlayerWeapon(playerid, WEAPON_M4, 1000);
-//     GivePlayerWeapon(playerid, WEAPON_UZI, 1000);
-
-//     if(TryPercentage(50))
-//         SetPlayerPos(playerid, -2805.7141 + Float:RandomFloatMinMax(-2.0, 2.0), 712.7639 + Float:RandomFloatMinMax(-2.0, 2.0), 964.9241); 
-//     else
-//         SetPlayerPos(playerid, -2841.5415 + Float:RandomFloatMinMax(-2.0, 2.0), 712.7768 + Float:RandomFloatMinMax(-2.0, 2.0), 964.9241); 
-     
-//     Player::KillTimer(playerid, pyr::TIMER_SEND_ARENA);
-    
-//     return 1;
-// }
-
-// YCMD:pvp(playerid, params[], help)
-// {
-//     if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_PVP))
-//         return SendClientMessage(playerid, -1, "{ff3333}[ PVP ] {ffffff}Voce ja esta no PvP");
-
-//     SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_PVP);
-
-//     SetPlayerTeam(playerid, 1);
-
-//     if(TryPercentage(50))
-//         SetSpawnInfo(playerid, 1, Player[playerid][pyr::skinid], -2823.7285 + Float:RandomFloatMinMax(-2.0, 2.0), 737.5068 + Float:RandomFloatMinMax(-2.0, 2.0), 969.2119, 180.0);
-//     else
-//         SetSpawnInfo(playerid, 1, Player[playerid][pyr::skinid], -2823.5251 + Float:RandomFloatMinMax(-2.0, 2.0), 690.0143 + Float:RandomFloatMinMax(-2.0, 2.0), 969.2119, 0.0);
-    
-//     SpawnPlayer(playerid);
-//     Player::CreateTimer(playerid, pyr::TIMER_SEND_ARENA, "ARN_SendPlayer", 2000, false, "i", playerid);
-
-//     SendClientMessage(playerid, -1, "{33ff33}[ PVP ] {ffffff}Voce entrou na arena PvP. Para sair digite {33ff33}/sairpvp");
-//     return 1;
-// }
-
-// YCMD:sairpvp(playerid, params[], help)
-// {
-//     if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_PVP))
-//         return SendClientMessage(playerid, -1, "{ff3333}[ PVP ] {ffffff}Voce ja esta fora do PvP");
-
-//     SetPlayerWeather(playerid, Server[srv::g_weatherid]);
-//     ResetPlayerWeapons(playerid);
-//     Player::Spawn(playerid);
-
-//     ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_PVP);
-
-//     return 1;
-// }
-
-// YCMD:pos1(playerid, params[], help)
-// {
-//     SetPlayerPos(playerid, -2823.7285,737.5068,969.2119); //  ESPEC 1
-//     return 1;
-// }
-
-YCMD:pos3(playerid, params[], help)
-{
-    GivePlayerWeapon(playerid, WEAPON_DEAGLE, 1000);
-    SetPlayerPos(playerid,-2841.5415,712.7768,964.9241); // player 2
-    return 1;
-}
-
-// YCMD:pos4(playerid, params[], help)
-// {
-//     SetPlayerPos(playerid,-2823.5251,690.0143,969.2119); // ESPEC 2
-//     return 1;
-// }
-
 YCMD:teste(playerid, params[], help)
 {
-    SetPlayerPos(playerid,1321.260742, -1120.900024, 20.432008);
-    //printf("%d", GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME));
+    new Float:pX, Float:pY, Float:pZ;
+    GetPlayerPos(playerid, pX, pY, pZ);
+
+    RemovePlayerAttachedObject(playerid, MAX_PLAYER_ACESSORYS + 1);
+    new objectid = CreateDynamicObject(18688, pX, pY, pZ, 0.0, 0.0, 0.0, .worldid = GetPlayerVirtualWorld(playerid), .interiorid = 0, .playerid = -1);
+    AttachDynamicObjectToPlayer(objectid, playerid, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0);
+    //printf("%f, %f, %f",  pX, pY, pZ);
+    //SetPlayerPos(playerid,1321.260742, -1120.900024, 20.432008);
+    //printf("%d", GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED));
     return 1;
 }

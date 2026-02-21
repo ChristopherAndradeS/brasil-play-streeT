@@ -1,7 +1,8 @@
 #include <YSI\YSI_Coding\y_hooks>
 
 forward OnPlayerDied(playerid, killerid, WEAPON:reason);
-forward PYR_RefreshDeath(playerid);
+forward OnPlayerSpawnAfterDied(playerid, killerid, WEAPON:reason);
+forward PYR_RefreshDeath(playerid, killerid, WEAPON:reason);
 
 hook OnPlayerConnect(playerid)
 {
@@ -201,19 +202,21 @@ stock Player::AplyRandomDeathAnim(playerid, &time)
     }
 }
 
-public PYR_RefreshDeath(playerid)
+public PYR_RefreshDeath(playerid, killerid, WEAPON:reason)
 {
     Player[playerid][pyr::health] = 100.0;
     SetPlayerHealth(playerid, 100.0);
     ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_DEATH);
 
-    //TogglePlayerControllable(playerid, true);
     SpawnPlayer(playerid);
 
     Player::KillTimer(playerid, pyr::TIMER_DEATH);
 
+    CallLocalFunction("OnPlayerSpawnAfterDied", "iii", playerid, killerid, reason);
+
     return 1;
 }
+
 
 hook OnPlayerDied(playerid, killerid, WEAPON:reason)
 {
@@ -221,11 +224,9 @@ hook OnPlayerDied(playerid, killerid, WEAPON:reason)
 
     new time;
     Player::AplyRandomDeathAnim(playerid, time);
-    //TogglePlayerControllable(playerid, false);
-    Player::CreateTimer(playerid, pyr::TIMER_DEATH, "PYR_RefreshDeath", time, false, "i", playerid);
-        
-    //SendClientMessage(playerid, -1, "{ff3333}[ PVP ] {ffffff}Voce foi morto por {ff3333}%s", GetPlayerNameStr(killerid));
-   
+
+    Player::CreateTimer(playerid, pyr::TIMER_DEATH, "PYR_RefreshDeath", time, false, "iii", playerid, killerid, reason);
+
     return 1;
 }
 

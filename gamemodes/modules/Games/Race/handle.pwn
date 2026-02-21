@@ -22,6 +22,10 @@ hook OnPlayerStateChange(playerid, PLAYER_STATE:newstate, PLAYER_STATE:oldstate)
 
     new raceid = game::Player[playerid][pyr::gameid];
 
+    if(raceid == INVALID_GAME_ID) return 0;
+    if(!map_valid(Race[raceid][race::participant])) return 0;
+    if(!map_has_key(Race[raceid][race::participant], playerid)) return 0;
+
     new data[E_RACE_SEAT];
     map_get_arr(Race[raceid][race::participant], playerid, data);   
 
@@ -37,6 +41,10 @@ hook OnVehicleStreamIn(vehicleid, forplayerid)
     if(!GetFlag(game::Player[forplayerid][pyr::flags], FLAG_PLAYER_PLAYING)) return 1;
 
     new raceid = game::Player[forplayerid][pyr::gameid];
+
+    if(raceid == INVALID_GAME_ID) return 0;
+    if(!map_valid(Race[raceid][race::participant])) return 0;
+    if(!map_has_key(Race[raceid][race::participant], forplayerid)) return 0;
 
     new data[E_RACE_SEAT];
     map_get_arr(Race[raceid][race::participant], forplayerid, data);   
@@ -55,6 +63,10 @@ hook OnPlayerEnterCheckpoint(playerid)
     if(!GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING)) return 1;
 
     new raceid = game::Player[playerid][pyr::gameid];
+
+    if(raceid == INVALID_GAME_ID) return 0;
+    if(!map_valid(Race[raceid][race::participant])) return 0;
+    if(!map_has_key(Race[raceid][race::participant], playerid)) return 0;
 
     new data[E_RACE_SEAT];
     map_get_arr(Race[raceid][race::participant], playerid, data);   

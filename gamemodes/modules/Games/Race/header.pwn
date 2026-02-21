@@ -147,7 +147,7 @@ stock Race::Destroy(raceid)
 
 stock Race::SendPlayer(playerid, raceid)
 {
-    SetPlayerPos(playerid, -1403.0116, -250.4526, 1043.5341);
+    SetPlayerPos(playerid, -1403.0116 + RandomFloatMinMax(-2.0, 2.0), -250.4526 + RandomFloatMinMax(-2.0, 2.0), 1043.5341);
     SetPlayerInterior(playerid, Race::gInteriorID);
     SetPlayerVirtualWorld(playerid, Game[raceid][game::vw]);
 
