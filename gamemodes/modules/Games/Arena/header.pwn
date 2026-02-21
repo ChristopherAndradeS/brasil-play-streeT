@@ -26,6 +26,8 @@ enum (<<= 1)
 enum E_GAME_ARENA
 {
     arena::flags,
+    arena::weapons[3],
+    arena::ammos[3],
     Float:arena::rewards[MAX_GAME_PARTICIPANTS],
     arena::best_player,
     arena::best_kill,
@@ -46,7 +48,11 @@ new Arena[MAX_GAMES_INSTANCES][E_GAME_ARENA];
 
 stock Arena::Create(gameid, const args[])
 {
-    if(sscanf(args, "a<f>["#MAX_GAME_PARTICIPANTS"]", Arena[gameid][arena::rewards]))
+    if(sscanf(args, "iiiiiia<f>["#MAX_GAME_PARTICIPANTS"]",
+        Arena[gameid][arena::weapons][0], Arena[gameid][arena::ammos][0],
+        Arena[gameid][arena::weapons][1], Arena[gameid][arena::ammos][1],
+        Arena[gameid][arena::weapons][2], Arena[gameid][arena::ammos][2],
+        Arena[gameid][arena::rewards]))
     {
         printf("[ EVENTO ] Houve erro de argumento no sscanf ao tentar criar evento de arena");
         return 0;
@@ -81,6 +87,11 @@ stock Arena::Destroy(gameid)
     Arena[gameid][arena::best_player] = INVALID_PLAYER_ID;
     Arena[gameid][arena::flags] = 0;
     Arena[gameid][arena::best_kill] = 0;
+    for(new i = 0; i < 3; i++)
+    {
+        Arena[gameid][arena::weapons][i] = 0;
+        Arena[gameid][arena::ammos][i] = 0;
+    }
     DestroyDynamicObject(Arena[gameid][arena::objectid]);
 
     return 1;
@@ -169,9 +180,14 @@ stock Arena::Ready(gameid)
         ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
 
         ResetPlayerWeapons(playerid);
-        GivePlayerWeapon(playerid, WEAPON_M4, 1000);
-        GivePlayerWeapon(playerid, WEAPON_DEAGLE, 1000);
-        GivePlayerWeapon(playerid, WEAPON_UZI, 1000);
+        for(new j = 0; j < 3; j++)
+        {
+            new weaponid = Arena[gameid][arena::weapons][j];
+            new ammo = Arena[gameid][arena::ammos][j];
+
+            if(weaponid > 0 && ammo > 0)
+                GivePlayerWeapon(playerid, weaponid, ammo);
+        }
 
         SetPlayerHealth(playerid, 100.0);
         SetPlayerArmour(playerid, 100.0);
@@ -272,6 +288,12 @@ stock Arena::Finish(gameid)
 {
     if(!map_valid(Arena[gameid][arena::participant])) return 1;
 
+    new players[MAX_GAME_PARTICIPANTS],
+        kills[MAX_GAME_PARTICIPANTS],
+        deaths[MAX_GAME_PARTICIPANTS],
+        count
+    ;
+
     new len = Game::GetPlayersCount(gameid);
 
     for(new i = len - 1; i >= 0; i--)
@@ -283,11 +305,60 @@ stock Arena::Finish(gameid)
         new data[E_ARENA_SEAT];
         map_get_arr(Arena[gameid][arena::participant], playerid, data);
 
+        if(count < MAX_GAME_PARTICIPANTS)
+        {
+            players[count] = playerid;
+            kills[count] = data[arena::kills];
+            deaths[count] = data[arena::deaths];
+            count++;
+        }
+
         SendClientMessage(playerid, -1,
         "{ff3333}[ ARENA ] {ffffff}Resultado -> Kills: {33ff33}%d {ffffff}| Mortes: {ff3333}%d",
         data[arena::kills], data[arena::deaths]);
 
         Game::RemovePlayer(gameid, playerid);
+    }
+
+    for(new i = 0; i < count - 1; i++)
+    {
+        for(new j = i + 1; j < count; j++)
+        {
+            if(kills[j] > kills[i] || (kills[j] == kills[i] && deaths[j] < deaths[i]))
+            {
+                new temp;
+
+                temp = players[i];
+                players[i] = players[j];
+                players[j] = temp;
+
+                temp = kills[i];
+                kills[i] = kills[j];
+                kills[j] = temp;
+
+                temp = deaths[i];
+                deaths[i] = deaths[j];
+                deaths[j] = temp;
+            }
+        }
+    }
+
+    if(count > 0 && IsValidPlayer(players[0]))
+        SendClientMessageToAll(-1, "{ff3333}[ ARENA ] {ffffff}Jogador %s foi MVP da arena %s", GetPlayerNameStr(players[0]), Game[gameid][game::name]);
+
+    for(new i = 0; i < count; i++)
+    {
+        new playerid = players[i];
+        if(!IsValidPlayer(playerid)) continue;
+
+        new Float:reward = (i >= 0 && i < MAX_GAME_PARTICIPANTS) ? Arena[gameid][arena::rewards][i] : 0.0;
+
+        if(reward <= 0.0) continue;
+
+        Player::GiveMoney(playerid, reward);
+        SendClientMessage(playerid, -1,
+        "{ff3333}[ ARENA ] {ffffff}Premiação da arena: {33ff33}R$ %.2f{ffffff} por terminar em {33ff33}%dº lugar{ffffff}.",
+        reward, i + 1);
     }
 
     return 1;
@@ -331,9 +402,14 @@ stock Arena::RespawnPlayer(playerid, gameid)
     SetCameraBehindPlayer(playerid);
 
     ResetPlayerWeapons(playerid);
-    GivePlayerWeapon(playerid, WEAPON_M4, 1000);
-    GivePlayerWeapon(playerid, WEAPON_DEAGLE, 1000);
-    GivePlayerWeapon(playerid, WEAPON_UZI, 1000);
+    for(new i = 0; i < 3; i++)
+    {
+        new weaponid = Arena[gameid][arena::weapons][i];
+        new ammo = Arena[gameid][arena::ammos][i];
+
+        if(weaponid > 0 && ammo > 0)
+            GivePlayerWeapon(playerid, weaponid, ammo);
+    }
 
     SetPlayerHealth(playerid, 100.0);
     SetPlayerArmour(playerid, 100.0);
