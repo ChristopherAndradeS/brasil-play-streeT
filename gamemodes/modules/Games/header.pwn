@@ -1,6 +1,6 @@
 #define MAX_GAMES_INSTANCES     (5)
 #define MAX_GAME_PARTICIPANTS   (5)
-#define GAME_TIME_WAIT          (25)
+#define GAME_TIME_WAIT          (60)
 #define INVALID_GAME_ID         (-1)
 
 #define INVALID_GAME_TYPE       (GAME_TYPES:0)

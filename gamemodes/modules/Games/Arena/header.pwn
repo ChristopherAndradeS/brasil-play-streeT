@@ -15,7 +15,7 @@ new const Float:Arena::gSpec[][4] =
     {-2823.5251, 690.0143, 969.2119, 0.0}      // ESPEC 2
 };
 
-#define ARENA_MATCH_TIME      (120)
+#define ARENA_MATCH_TIME      (300)
 #define ARENA_RESPAWN_TIME_MS (6000)
 
 enum (<<= 1)

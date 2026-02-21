@@ -1,3 +1,9 @@
+enum VEHICLE_OWNER_TYPE
+{
+    VEH_OWNER_SERVER = 0,
+    VEH_OWNER_PLAYER,
+    VEH_OWNER_ORG
+}
 enum (<<= 1)
 {
     FLAG_VEH_IS_DEAD = 1,
@@ -17,6 +23,8 @@ enum (<<= 1)
 enum E_VEHICLES
 {
     veh::regionid,
+    veh::owner_type,
+    veh::ownerid,
     veh::flags,
     veh::params,
     Float:veh::health,

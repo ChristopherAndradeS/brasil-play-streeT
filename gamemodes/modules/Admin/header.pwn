@@ -55,7 +55,6 @@ enum E_ADMIN
     adm::flags,
     adm::lvl,
     adm::spectateid,
-    adm::vehicleid
 }
 
 new Admin[MAX_PLAYERS][E_ADMIN];
@@ -196,7 +195,6 @@ stock Adm::Load(playerid)
     SetFlag(Admin[playerid][adm::flags], FLAG_IS_ADMIN);
     Admin[playerid][adm::lvl] = level;
     Admin[playerid][adm::spectateid] = INVALID_PLAYER_ID; 
-    Admin[playerid][adm::vehicleid] = INVALID_VEHICLE_ID; 
 
     return 1;   
 }

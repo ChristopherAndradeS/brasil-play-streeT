@@ -240,16 +240,14 @@ stock SendMessageToNearPlayer(Float:pX, Float:pY, Float:pZ, const msg[], GLOBAL_
     return 1;
 }
 
-YCMD:teste(playerid, params[], help)
-{
-    new Float:pX, Float:pY, Float:pZ;
-    GetPlayerPos(playerid, pX, pY, pZ);
+// YCMD:teste(playerid, params[], help)
+// {
+//     new Float:health;
+//     GetVehicleHealth(GetPlayerVehicleID(playerid),health);
 
-    RemovePlayerAttachedObject(playerid, MAX_PLAYER_ACESSORYS + 1);
-    new objectid = CreateDynamicObject(18688, pX, pY, pZ, 0.0, 0.0, 0.0, .worldid = GetPlayerVirtualWorld(playerid), .interiorid = 0, .playerid = -1);
-    AttachDynamicObjectToPlayer(objectid, playerid, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0);
-    //printf("%f, %f, %f",  pX, pY, pZ);
-    //SetPlayerPos(playerid,1321.260742, -1120.900024, 20.432008);
-    //printf("%d", GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED));
-    return 1;
-}
+//     SendClientMessage(playerid, -1, "%f",health);
+//     //printf("%f, %f, %f",  pX, pY, pZ);
+//     //SetPlayerPos(playerid,1321.260742, -1120.900024, 20.432008);
+//     //printf("%d", GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED));
+//     return 1;
+// }

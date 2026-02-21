@@ -35,7 +35,7 @@ hook OnGameModeInit()
     Ammu::LoadMap();
     print("[ MAPA ] Mapa da Arena PvP carregado com sucesso\n");
     House::LoadMap();
-    print("[ MAPA ] Mapa Predio carregado com sucesso\n");
+    print("[ MAPA ] Mapa do Predio carregado com sucesso\n");
     /* HANDLE CARREGAMENTO GERAL */
 
     return 1;

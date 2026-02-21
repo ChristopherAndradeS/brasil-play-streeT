@@ -89,6 +89,9 @@ hook OnPlayerDisconnect(playerid, reason)
         pX, pY, pZ, pA, name);
     }
 
+    if(IsValidVehicle(Player[playerid][pyr::vehicleid]))
+        Veh::Destroy(Player[playerid][pyr::vehicleid]);
+        
     Player::DestroyCpfTag(playerid);
     Adm::RemSpectatorInList(playerid, 1);
     Player::ClearAllData(playerid);
@@ -134,6 +137,7 @@ hook OnPlayerLogin(playerid)
     GameTextForPlayer(playerid, "~g~~h~~h~Bem Vindo", 2000, 3);
 
     SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
+    Player[playerid][pyr::vehicleid] = INVALID_VEHICLE_ID; 
 
     return 1;
 }
@@ -250,7 +254,6 @@ hook OnPlayerSpawn(playerid)
     if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING))
     {
         ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING);  
-        printf("oiiiiii");
         Adm::AddSpectatorInList(playerid); 
         SetPlayerWeather(playerid, Server[srv::g_weatherid]);
 

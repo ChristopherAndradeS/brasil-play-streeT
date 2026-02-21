@@ -19,7 +19,7 @@ enum E_PLAYER
     pyr::orgid,
     pyr::flags,
     pyr::regionid,
-    
+    pyr::vehicleid,
     Text3D:pyr::cpf_tag,
 }
 

@@ -24,11 +24,7 @@ hook OnPlayerLogin(playerid)
 hook OnPlayerDisconnect(playerid, reason)
 {
     Adm::UnSet(playerid);
-    if(IsValidVehicle(Admin[playerid][adm::vehicleid]))
-        DestroyVehicle(Admin[playerid][adm::vehicleid]);
-    
-    Admin[playerid][adm::vehicleid] = INVALID_VEHICLE_ID;
-    
+
     return 1;
 }
 

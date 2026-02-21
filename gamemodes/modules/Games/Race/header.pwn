@@ -19,7 +19,7 @@ new const Float:Race::gCheckpoints[][3] =
     {-1395.7150, -216.3227, 1042.4036}          // check1
 };
 
-new const Race::gModels[] = { 424, 441, 462, 468, 509, 571, 574 };
+//new const Race::gModels[] = { 424, 441, 462, 468, 509, 571, 574 };
 new const Race::gInteriorID = 7;
 
 enum (<<= 1)
@@ -260,7 +260,7 @@ stock Race::Start(raceid, tick, &new_tick)
 
         Game::ShowTextForAll(raceid, "~r~VAI...", 1000, 3);
         Game::PlaySoundForAll(raceid, 1057);
-        new_tick = 120; 
+        new_tick = 250; 
     }
 
     else

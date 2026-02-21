@@ -846,60 +846,59 @@ YCMD:cgps(playerid, params[], help)
     return 1;
 }
 
+// YCMD:veh(playerid, params[], help)
+// {
+//     if(help)
+//     {
+//         SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Cria um veículo particular.");
+//         return 1;
+//     }
 
-YCMD:veh(playerid, params[], help)
-{
-    if(help)
-    {
-        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Cria um veículo particular.");
-        return 1;
-    }
+//     if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER, false)) return 1;
 
-    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER, false)) return 1;
+//     if(IsValidVehicle(Admin[playerid][adm::vehicleid]))
+//         return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Você já possui um veículo criado. Use {ff3333}/dveh {ffffff}para destrui-lo e criar outro!");
 
-    if(IsValidVehicle(Admin[playerid][adm::vehicleid]))
-        return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Você já possui um veículo criado. Use {ff3333}/dveh {ffffff}para destrui-lo e criar outro!");
+//     if(GetPlayerInterior(playerid))
+//         return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Você não pode criar veículos aqui!");
 
-    if(GetPlayerInterior(playerid))
-        return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Você não pode criar veículos aqui!");
-
-    new modelid;
-    if(sscanf(params, "i", modelid)) 
-        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /veh {ff3333}[ MODELID ]");
+//     new modelid;
+//     if(sscanf(params, "i", modelid)) 
+//         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /veh {ff3333}[ MODELID ]");
     
-    if(modelid < 400 || modelid > 605) 
-        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Parâmetro {ff3333}[ MODELID ] {ffffff}Inválido!");
+//     if(modelid < 400 || modelid > 605) 
+//         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Parâmetro {ff3333}[ MODELID ] {ffffff}Inválido!");
     
-    new Float:pX, Float:pY, Float:pZ;
-    GetPlayerPos(playerid, pX, pY, pZ);
+//     new Float:pX, Float:pY, Float:pZ;
+//     GetPlayerPos(playerid, pX, pY, pZ);
 
-    Admin[playerid][adm::vehicleid] = CreateVehicle(modelid, pX, pY, pZ, 0.0, RandomMinMax(0, 10), RandomMinMax(0, 10), -1);
-    PutPlayerInVehicle(playerid, Admin[playerid][adm::vehicleid], 0);
+//     Admin[playerid][adm::vehicleid] = CreateVehicle(modelid, pX, pY, pZ, 0.0, RandomMinMax(0, 10), RandomMinMax(0, 10), -1);
+//     PutPlayerInVehicle(playerid, Admin[playerid][adm::vehicleid], 0);
 
-    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Veículo criado com sucesso!");
+//     SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Veículo criado com sucesso!");
 
-    return 1;
-}
+//     return 1;
+// }
 
-YCMD:dveh(playerid, params[], help)
-{
-    if(help)
-    {
-        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Destroí o veículo particular.");
-        return 1;
-    }
+// YCMD:dveh(playerid, params[], help)
+// {
+//     if(help)
+//     {
+//         SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Destroí o veículo particular.");
+//         return 1;
+//     }
 
-    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER, false)) return 1;
+//     if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER, false)) return 1;
 
-    if(!IsValidVehicle(Admin[playerid][adm::vehicleid]))
-        return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Você precisa criar um veículo antes. Use {ff3333}/veh [ MODELID ] {ffffff}para isso!");
+//     if(!IsValidVehicle(Admin[playerid][adm::vehicleid]))
+//         return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Você precisa criar um veículo antes. Use {ff3333}/veh [ MODELID ] {ffffff}para isso!");
 
-    DestroyVehicle(Admin[playerid][adm::vehicleid]);
+//     DestroyVehicle(Admin[playerid][adm::vehicleid]);
 
-    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Veículo destruído com sucesso!");
+//     SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Veículo destruído com sucesso!");
 
-    return 1;
-}
+//     return 1;
+// }
 
 YCMD:gmx(playerid, params[], help)
 {

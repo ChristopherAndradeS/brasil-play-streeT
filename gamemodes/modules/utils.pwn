@@ -203,3 +203,16 @@ stock GetPlayerNameStr(playerid)
 	GetPlayerName(playerid, name, MAX_PLAYER_NAME - 1);
 	return name;
 }
+
+stock GetVehicleModelByName(const name[]) 
+{
+    if (isnull(name)) return -1;
+
+    for (new i = 0; i < sizeof(g_arrVehicleNames); i++) 
+    {
+        if (strfind(g_arrVehicleNames[i], name, true) != -1) {
+            return i + 400;
+        }
+    }
+    return -1;
+}

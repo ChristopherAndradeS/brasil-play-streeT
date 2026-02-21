@@ -1,11 +1,28 @@
 #include <YSI\YSI_Coding\y_hooks>
 
+#define INVALID_OWNER_ID (-1)
+
 forward OnSpeedOMeterUpdate(playerid);
 
 hook OnPlayerStateChange(playerid, PLAYER_STATE:newstate, PLAYER_STATE:oldstate)
 {
     if(newstate == PLAYER_STATE_DRIVER || newstate == PLAYER_STATE_PASSENGER)
     {
+        new vehicleid = GetPlayerVehicleID(playerid);
+
+        if(IsFlagSet(Vehicle[vehicleid][veh::flags], FLAG_VEH_IS_DEAD))
+        {
+            SendClientMessage(playerid, -1, "{ff9933}[ ! ] {ffffff}Este veículo está quebrado! Chame um mecânico");
+            RemovePlayerFromVehicle(playerid);
+            return 1;
+        }
+
+        if(IsValidVehicle(vehicleid))
+        {
+            if(!(Vehicle[vehicleid][veh::params] & FLAG_PARAM_ENGINE))
+                SendClientMessage(playerid, -1, "{ffff99}[ VEH ] {ffffff}Aperte {ffff99}'N' {ffffff}ou digite {ffff99}/motor {ffffff}para ligar o motor.");
+        }
+
         Baseboard::HideTDForPlayer(playerid);
         Veh::ShowTDForPlayer(playerid);
         Player::CreateTimer(playerid, pyr::TIMER_SPEEDOMETER, "OnSpeedOMeterUpdate", 32, true, "i", playerid);
@@ -29,22 +46,41 @@ hook OnVehicleHealthChance(vehicleid, Float:new_health, Float:old_health)
     if(Race::IsRaceVehicle(vehicleid, raceid, playerid) && Game[raceid][game_state] == GAME_STATE_STARTED)
         return 1;
 
-    if((!IsFlagSet(Vehicle[vehicleid][veh::flags], FLAG_VEH_IS_DEAD)) && new_health <= 250.0)
+    if(!IsFlagSet(Vehicle[vehicleid][veh::flags], FLAG_VEH_IS_DEAD))
     {
-        SetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_IS_DEAD);
-        
-        Veh::UpdateParams(vehicleid, FLAG_PARAM_ENGINE, 0);
-
-        SetVehicleHealth(vehicleid, 390);
-        SetVehicleVelocity(vehicleid, 0.0, 0.0, 0.0);
-
-        foreach (new i : VehicleOccupant[vehicleid])
+        if(new_health <= 250.0)
         {
-            SendClientMessage(i, -1, "{ff9933}[ ! ] {ffffff}Este veículo está quebrado! Chame um mecânico");
-            RemovePlayerFromVehicle(i);
+            new Float:qw, Float:qx, Float:qy, Float:qz;
+            GetVehicleRotationQuat(vehicleid, qw, qx, qy, qz);
+
+            // m33 < 0: eixo "up" invertido -> veículo tombado/capotado.
+            new Float:m33 = 1.0 - 2.0 * (qx * qx + qy * qy);
+            if(m33 < 0.0)
+            {
+                new Float:x, Float:y, Float:z, Float:a;
+                GetVehiclePos(vehicleid, x, y, z);
+                GetVehicleZAngle(vehicleid, a);
+                SetVehiclePos(vehicleid, x, y, z + 0.15);
+                SetVehicleZAngle(vehicleid, a);
+            }
+
+            SetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_IS_DEAD);
+            
+            Veh::UpdateParams(vehicleid, FLAG_PARAM_ENGINE, 0);
+
+            SetVehicleHealth(vehicleid, 390.0);
+            Vehicle[vehicleid][veh::health] = 390.0;
+
+            SetVehicleVelocity(vehicleid, 0.0, 0.0, 0.0);
+
+            foreach (new i : VehicleOccupant[vehicleid])
+            {
+                SendClientMessage(i, -1, "{ff9933}[ ! ] {ffffff}Este veículo está quebrado! Chame um mecânico");
+                RemovePlayerFromVehicle(i);
+            }
         }
     }
-
+    
     return 1;
 }
 
@@ -182,11 +218,30 @@ stock Veh::Create(modelid, Float:x, Float:y, Float:z, Float:rotation, c1, c2, in
     Veh::UpdateParams(vehicleid, FLAG_PARAM_BOOT, flags & FLAG_PARAM_BOOT);
     Veh::UpdateParams(vehicleid, FLAG_PARAM_OBJECTIVE, flags & FLAG_PARAM_OBJECTIVE);
 
-    LinkVehicleToInterior(vehicleid, interiorid);
+    Vehicle[vehicleid][veh::health] = 1500.0;
+    SetVehicleHealth(vehicleid, 1500.0);
+    ResetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_IS_DEAD);
 
+    LinkVehicleToInterior(vehicleid, interiorid);
     SetVehicleVirtualWorld(vehicleid, vw);
 
     return vehicleid;
+}
+
+stock Veh::Clear(vehicleid)
+{
+    Vehicle[vehicleid][veh::regionid] = INVALID_REGION_ID;
+    Vehicle[vehicleid][veh::owner_type] = 0;
+    Vehicle[vehicleid][veh::ownerid] = INVALID_OWNER_ID;
+    Vehicle[vehicleid][veh::flags] = 0;
+    Vehicle[vehicleid][veh::params] = 0;
+    Vehicle[vehicleid][veh::health] = 0.0;
+}
+
+stock Veh::SetOwner(vehicleid, ownerid, type)
+{
+    Vehicle[vehicleid][veh::ownerid] = ownerid;
+    Vehicle[vehicleid][veh::owner_type] = type;
 }
 
 hook function CreateVehicle(modelid, Float:x, Float:y, Float:z, Float:rotation, colour1, colour2, respawn_delay, bool:add_siren = false)
@@ -210,7 +265,8 @@ stock Veh::Destroy(&vehicleid)
 {
     if(IsValidVehicle(vehicleid))
         DestroyVehicle(vehicleid);
-        
+    
+    Veh::Clear(vehicleid);
     vehicleid = INVALID_VEHICLE_ID;
 }
 

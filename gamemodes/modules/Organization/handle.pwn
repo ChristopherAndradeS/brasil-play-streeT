@@ -2,11 +2,27 @@
 
 hook OnGameModeInit()
 {
-    // Org::Create("Groove Street", ORG_TYPE:1, "SERVER", "Andrade", "Andrew", 
-    // {65, 105, 106, 195}, 0x33FF33FF, 2495.33, -1690.26, 4.76);
+    // Org::Create("StreeT Gangue",  ORG_TYPE:3, "SERVER", "SEM LIDER", "SEM COLIDER", {65, 105, 106, 195}, 0x33FF33FF, 2495.33, -1690.26, 4.76);
+    // Org::Create("Policia StreeT", ORG_TYPE:4, "SERVER", "SEM LIDER", "SEM COLIDER", {0,0,0,0}, 0x33FFFFFF, 2495.33, -1690.26, 4.76);
     
     return 1;
 }
+
+// stock Org::Load(orgid);
+// {
+//     if(DB::Exists(db_stock, "organizations", "orgid = %d", orgid))
+//       return 1;
+
+//     org::name[32],
+//     org::color,
+//     org::type,
+//     org::skin,
+//     org::flags,
+//     org::leader[MAX_PLAYER_NAME],
+//     org::coleader[MAX_PLAYER_NAME],
+//     org::funds,
+//     Float:org::sX, Float:org::sY, Float:org::sZ,
+// }
 
 stock Org::Create(const name[], ORG_TYPE:type, const creator[], const leader[], const coleader[], const skins[MAX_ORGS_SKINS], color, Float:sX, Float:sY, Float:sZ)
 {
@@ -136,7 +152,6 @@ stock Org::SetCoLeader(playerid, const name[], const admin_name[], orgid)
     printf("[ ORG (DB) ] O admin %s, setou %s como colider da organizacao %s", admin_name, name, Organization[orgid][org::name]);
     return 1;
 }
-
 
 stock Org::HasPermission(playerid, flag)
 {    

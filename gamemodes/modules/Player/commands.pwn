@@ -103,13 +103,13 @@ YCMD:orgs(playerid, params[], help)
         org::members[Player[i][pyr::orgid]]++;
     }
 
-    strcat(msg, "{ff99ff}ID\t{ffffff}Organizacao\t{ff99ff}Lider\t{ffffff}Colider\t{ff99ff}Membros Online\n");
+    strcat(msg, "{ffffff}Organizacao\t{ff99ff}Lider\t{ffffff}Colider\t{ff99ff}Membros Online\n");
 
     for(new i = 1; i < MAX_ORGS; i++)
     {
         if(!GetFlag(Organization[i][org::flags], FLAG_ORG_CREATED)) continue;
         
-        format(line, 128, "%d\t{%x}%s\t%s\t%s\t{ffffff}%d membros\n", i, Organization[i][org::color], Organization[i][org::name], 
+        format(line, 128, "{%x}%s\t%s\t%s\t{ffffff}%d membros\n", Organization[i][org::color], Organization[i][org::name], 
         Organization[i][org::leader], Organization[i][org::coleader], org::members[i]);
         
         strcat(msg, line);
@@ -122,7 +122,56 @@ YCMD:orgs(playerid, params[], help)
         return 1;
     }
     
+
     Dialog_ShowCallback(playerid, using inline no_use_dialog, DIALOG_STYLE_TABLIST_HEADERS, "Orgs do Servidor", msg, "Fechar");
    
+    return 1;
+}
+
+YCMD:veh(playerid, params[], help)
+{
+    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+
+    if(IsValidVehicle(Player[playerid][pyr::vehicleid]))
+        return SendClientMessage(playerid, -1, "{ff3333}[ VEH ] {ffffff}Você já possui um veículo criado. Use {ff3333}/dveh {ffffff}para destrui-lo e criar outro!");
+
+    if(GetPlayerInterior(playerid) || GetPlayerVirtualWorld(playerid))
+        return SendClientMessage(playerid, -1, "{ff3333}[ VEH ] {ffffff}Você não pode criar veículos aqui!");
+
+    new modelid, veh_name[32];
+    if(sscanf(params, "i", modelid)) 
+    {
+        if(sscanf(params, "s[32]", veh_name)) 
+            return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /veh {ff3333}[ MODELID ou NOME]");
+        
+        modelid = GetVehicleModelByName(veh_name);
+    }
+
+    if(modelid < 400 || modelid > 605) 
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Parâmetro {ff3333}[ MODELID ou NOME ] {ffffff}Inválido!");
+    
+    new Float:pX, Float:pY, Float:pZ, Float:pA;
+    GetPlayerPos(playerid, pX, pY, pZ);
+    GetPlayerFacingAngle(playerid, pA);
+
+    Player[playerid][pyr::vehicleid] = Veh::Create(modelid, pX, pY, pZ, pA, RandomMinMax(0, 10), RandomMinMax(0, 10), 0, 0, 0);
+    PutPlayerInVehicle(playerid, Player[playerid][pyr::vehicleid], 0);
+
+    SendClientMessage(playerid, -1, "{33ff33}[ VEH ] {ffffff}Veículo criado com sucesso!");
+
+    return 1;
+}
+
+YCMD:dveh(playerid, params[], help)
+{
+    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+
+    if(!IsValidVehicle(Player[playerid][pyr::vehicleid]))
+        return SendClientMessage(playerid, -1, "{ff3333}[ VEH ] {ffffff}Você precisa criar um veículo antes. Use {ff3333}/veh [ MODELID ou NOME ] {ffffff}para isso!");
+
+    Veh::Destroy(Player[playerid][pyr::vehicleid]);
+
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Veículo destruído com sucesso!");
+
     return 1;
 }
