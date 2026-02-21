@@ -3,7 +3,7 @@
 hook OnGameModeInit()
 {
     Game::Create("[ SERVER ] Corrida", "Server", GAME_TYPE_RACE, 1, 2, false, "571 1 100.0 0.0 0.0 0.0 0.0");
-    Game::Create("[ SERVER ] Arena", "Server", GAME_TYPE_ARENA, 2, 5, false, "200.0 40.0 0.0 0.0 0.0");
+    Game::Create("[ SERVER ] Arena", "Server", GAME_TYPE_ARENA, 2, 5, false, "4 24 29 1 500 500 200.0 0.0 0.0 0.0 0.0");
 
     return 1;
 }

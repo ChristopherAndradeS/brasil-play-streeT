@@ -444,9 +444,3 @@ stock Race::GetPodiumPlace(raceid, playerid)
     if(!list_valid(Race[raceid][race::podium])) return 0;
     return (list_find(Race[raceid][race::podium], playerid) + 1);
 }
-
-stock Race::GiveRewards(raceid)
-{
-    #pragma unused raceid
-    return 1;
-}

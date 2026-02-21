@@ -9,7 +9,7 @@
 
 #define CGEN_MEMORY 20000
 
-#define ON_DEBUG_MODE
+//#define ON_DEBUG_MODE
 
 #include <YSI\YSI_Data\y_iterate>
 #include <YSI\YSI_Coding\y_va>

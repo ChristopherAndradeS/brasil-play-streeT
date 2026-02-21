@@ -124,10 +124,16 @@ hook OnPlayerLogin(playerid)
     // CPF
     Player::SetCPF(playerid);
 
+    ApplyAnimation(playerid, "ped", "null", 0.0, false, false, false, false, 0); 
+    ApplyAnimation(playerid, "DANCING", "null", 0.0, false, false, false, false, 0); 
+    ApplyAnimation(playerid, "CRACK", "null", 0.0, false, false, false, false, 0); 
+
     // RODAPÉ
     Baseboard::ShowTDForPlayer(playerid);
 
     GameTextForPlayer(playerid, "~g~~h~~h~Bem Vindo", 2000, 3);
+
+    SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
 
     return 1;
 }
@@ -244,9 +250,7 @@ hook OnPlayerSpawn(playerid)
     if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING))
     {
         ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING);  
-        ApplyAnimation(playerid, "ped", "null", 0.0, false, false, false, false, 0); 
-        ApplyAnimation(playerid, "DANCING", "null", 0.0, false, false, false, false, 0); 
-        ApplyAnimation(playerid, "CRACK", "null", 0.0, false, false, false, false, 0); 
+        printf("oiiiiii");
         Adm::AddSpectatorInList(playerid); 
         SetPlayerWeather(playerid, Server[srv::g_weatherid]);
 
