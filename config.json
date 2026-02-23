@@ -36,7 +36,7 @@
         "use_instagib": false,
         "use_manual_engine_and_lights": true,
         "use_nametag_los": true,
-        "use_nametags": true,
+        "use_nametags": false,
         "use_player_marker_draw_radius": false,
         "use_player_ped_anims": true,
         "use_stunt_bonuses": false,

@@ -59,8 +59,8 @@ YCMD:acessorios(playerid, params[], help)
 {
     if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
     
-    // if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME) && !GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED))
-    //     return SendClientMessage(playerid, -1, "{ff5533}[ ERRO ] {ffffff}Você não pode mexer com acessórios durante o evento!");
+    if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME) && !GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED))
+        return SendClientMessage(playerid, -1, "{ff5533}[ ERRO ] {ffffff}Você não pode mexer com acessórios durante o evento!");
 
     acs::ClearData(playerid);
 
@@ -99,18 +99,18 @@ YCMD:orgs(playerid, params[], help)
     
     foreach(new i : Player)
     {
-        if(!IsValidPlayer(i) || Player[i][pyr::orgid] == INVALID_ORG_TYPE) continue;
-        org::members[Player[i][pyr::orgid]]++;
+        if(!IsValidPlayer(i) || org::Player[i][pyr::orgid] == INVALID_ORG_ID) continue;
+        org::members[org::Player[i][pyr::orgid]]++;
     }
 
-    strcat(msg, "{ffffff}Organizacao\t{ff99ff}Lider\t{ffffff}Colider\t{ff99ff}Membros Online\n");
+    strcat(msg, "{ffffff}Organizacao\t{ff99ff}Tipo\t{ffffff}Lider\t{ff99ff}Membros Online\n");
 
     for(new i = 1; i < MAX_ORGS; i++)
     {
-        if(!GetFlag(Organization[i][org::flags], FLAG_ORG_CREATED)) continue;
+        if(!GetFlag(Org[i][org::flags], FLAG_ORG_CREATED)) continue;
         
-        format(line, 128, "{%x}%s\t%s\t%s\t{ffffff}%d membros\n", Organization[i][org::color], Organization[i][org::name], 
-        Organization[i][org::leader], Organization[i][org::coleader], org::members[i]);
+        format(line, 128, "{%06x}%s\t%s\t%s\t{99ff99}%d {ffffff}membros\n", Org[i][org::color] >>> 8, Org[i][org::name], 
+        Org::gTypeNames[_:Org[i][org::type]], Org[i][org::leader], org::members[i]);
         
         strcat(msg, line);
     }
@@ -122,7 +122,6 @@ YCMD:orgs(playerid, params[], help)
         return 1;
     }
     
-
     Dialog_ShowCallback(playerid, using inline no_use_dialog, DIALOG_STYLE_TABLIST_HEADERS, "Orgs do Servidor", msg, "Fechar");
    
     return 1;

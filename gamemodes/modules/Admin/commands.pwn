@@ -1013,7 +1013,7 @@ YCMD:darlider(playerid, params[], help)
     if(sscanf(params, "s[24]", name, orgid)) 
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /darlider {ff3333}[ NOME ] <orgid 1 - %d >", MAX_ORGS);
 
-    if(orgid <= 0 || orgid >= MAX_ORGS || !GetFlag(Organization[orgid][org::flags], FLAG_ORG_CREATED))
+    if(orgid <= 0 || orgid >= MAX_ORGS || !GetFlag(Org[orgid][org::flags], FLAG_ORG_CREATED))
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Parâmetro {ff3333}[ ORGID ] {ffffff}Inválido! Use {ff3333}/allorgs.");
     
     new admin_name[MAX_PLAYER_NAME];
@@ -1023,7 +1023,7 @@ YCMD:darlider(playerid, params[], help)
 
     if(sucess)
         SendClientMessage(playerid, -1, "{33ff33}[ ADMIN ] {ffffff}Jogador {33ff33}%s {ffffff}setado como lider da organizaçõa {33ff33}%s {ffffff}com sucesso.",
-        name, Organization[orgid][org::name]);
+        name, Org[orgid][org::name]);
 
     return 1;
 }
@@ -1044,7 +1044,7 @@ YCMD:darsub(playerid, params[], help)
     if(sscanf(params, "s[24]", name, orgid)) 
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /darsub {ff3333}[ NOME ] <orgid 1 - %d >", MAX_ORGS);
 
-    if(orgid <= 0 || orgid >= MAX_ORGS || !GetFlag(Organization[orgid][org::flags], FLAG_ORG_CREATED))
+    if(orgid <= 0 || orgid >= MAX_ORGS || !GetFlag(Org[orgid][org::flags], FLAG_ORG_CREATED))
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Parâmetro {ff3333}[ ORGID ] {ffffff}Inválido! Use {ff3333}/allorgs.");
     
     new admin_name[MAX_PLAYER_NAME];
@@ -1054,7 +1054,7 @@ YCMD:darsub(playerid, params[], help)
 
     if(sucess)
         SendClientMessage(playerid, -1, "{33ff33}[ ADMIN ] {ffffff}Jogador {33ff33}%s {ffffff}setado como colider da organização {33ff33}%s {ffffff}com sucesso.",
-        name, Organization[orgid][org::name]);
+        name, Org[orgid][org::name]);
 
     return 1;
 }

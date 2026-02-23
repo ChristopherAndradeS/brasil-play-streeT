@@ -16,7 +16,6 @@ enum E_PLAYER
     pyr::skinid,
     pyr::gender,
     pyr::score,
-    pyr::orgid,
     pyr::flags,
     pyr::regionid,
     pyr::vehicleid,
@@ -34,8 +33,6 @@ enum (<<= 1)
     MASK_PLAYER_CHECKPOINT,
     FLAG_PLAYER_DEATH,
     FLAG_PLAYER_INVUNERABLE,
-    FLAG_PLAYER_IS_LEADER,
-    FLAG_PLAYER_IS_COLEADER,
 }
 
 new Player[MAX_PLAYERS][E_PLAYER];
@@ -160,7 +157,6 @@ stock Player::ClearData(playerid)
     Player[playerid][pyr::money]         = 0.0;
     Player[playerid][pyr::flags]         = 0x00000000;
     Player[playerid][pyr::score]         = 0;
-    Player[playerid][pyr::orgid]         = 0;
 }
 
 stock lgn::ClearData(playerid)
@@ -212,7 +208,6 @@ stock Player::LoadData(playerid)
     DB::GetDataFloat(db_entity, "players", "money", Player[playerid][pyr::money], "name = '%q'", name);
     DB::GetDataInt(db_entity, "players", "skinid", Player[playerid][pyr::skinid], "name = '%q'", name);
     DB::GetDataInt(db_entity, "players", "score", Player[playerid][pyr::score], "name = '%q'", name);
-    DB::GetDataInt(db_entity, "players", "orgid", Player[playerid][pyr::orgid], "name = '%q'", name);
     DB::GetDataInt(db_entity, "players", "payday_tleft", pdy::Player[playerid][pdy::time_left], "name = '%q'", name);
 
     return 1;
@@ -380,8 +375,8 @@ stock Player::Spawn(playerid, spawn_default = false)
 stock Player::SetCPF(playerid)
 {
     new str[64];
-    format(str, 64, "{33ff33}CPF: {ffffff}[ {33ff33}%d {ffffff}]", playerid);
-    new Text3D:label = CreateDynamic3DTextLabel(str, -1, 0.0, 0.0, 0.0, 25.0, playerid, INVALID_VEHICLE_ID, 1);
-    Attach3DTextLabelToPlayer(label, playerid, 0.0, 0.0, 0.4);
+    format(str, 64, "{99ff99}%s {ffffff}[ {{99ff99}%d {ffffff}]", GetPlayerNameStr(playerid), playerid);
+    new Text3D:label = CreateDynamic3DTextLabel(str, -1, 0.0, 0.0, 0.0, 70.0, playerid, INVALID_VEHICLE_ID, 1);
+    Attach3DTextLabelToPlayer(label, playerid, 0.0, 0.0, 0.5);
     Player[playerid][pyr::cpf_tag] = label;
 }
