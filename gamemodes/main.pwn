@@ -244,10 +244,9 @@ stock SendMessageToNearPlayer(Float:pX, Float:pY, Float:pZ, const msg[], GLOBAL_
 
 YCMD:teste(playerid, params[], help)
 {
+    new vehicleid = GetPlayerVehicleID(playerid);
+    RepairVehicle(vehicleid);
+    SetVehicleHealth(vehicleid, Vehicle[vehicleid][veh::health]);
 
-    CreateDynamic3DTextLabel("{99FF99}[ GRV ]", -1, 0.0, 0.0, 0.25, 25.0, playerid);
-    
-    SetPlayerColor(playerid, 0x99FF99FF);
-    SetPlayerName(playerid, GetPlayerNameStr(playerid));
     return 1;
 }

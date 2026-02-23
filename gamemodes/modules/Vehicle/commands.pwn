@@ -10,28 +10,7 @@ YCMD:trancar(playerid, params[], help)
     if(vehicleid == INVALID_VEHICLE_ID || distance > 2.0) 
         return SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Chegue perto de um veiculo!");
 
-    Veh::UpdateParams(vehicleid, FLAG_PARAM_DOORS, 1);
-    
-    GameTextForPlayer(playerid, "~r~~h~Trancado", 2000, 3);
-    PlayerPlaySound(playerid, 21001, 0.0, 0.0, 0.0);
-
-    return 1;
-}
-
-YCMD:abrir(playerid, params[], help)
-{
-    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
-
-    new Float:distance;
-    new vehicleid = GetClosestVehicle(playerid, distance);
-
-    if(vehicleid == INVALID_VEHICLE_ID || distance > 2.0) 
-        return SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Chegue perto de um veiculo!");
-
-    Veh::UpdateParams(vehicleid, FLAG_PARAM_DOORS, 0);
-    
-    GameTextForPlayer(playerid, "~g~~h~Aberto", 2000, 3);
-    PlayerPlaySound(playerid, 21000, 0.0, 0.0, 0.0);
+    Veh::ToogleDoor(playerid, vehicleid);
 
     return 1;
 }
@@ -45,25 +24,8 @@ YCMD:motor(playerid, params[], help)
 
     new vehicleid = GetPlayerVehicleID(playerid);
 
-    if(IsFlagSet(Vehicle[vehicleid][veh::flags], FLAG_VEH_IS_DEAD))
-    {
-        SendClientMessage(playerid, -1, "{ff9933}[ ! ] {ffffff}Este veículo está quebrado! Chame um mecânico");
-        return 1;
-    }
-
-    if(GetFlag(Vehicle[vehicleid][veh::params], FLAG_PARAM_ENGINE))
-    {
-        Veh::UpdateParams(vehicleid, FLAG_PARAM_ENGINE, 0);
-        GameTextForPlayer(playerid, "~r~~h~Motor OFF", 1500, 3);
-        PlayerPlaySound(playerid, 21000, 0.0, 0.0, 0.0);
-    }
-
-    else
-    {
-        Veh::UpdateParams(vehicleid, FLAG_PARAM_ENGINE, 1);
-        GameTextForPlayer(playerid, "~g~~h~Motor ON", 1500, 3);
-        PlayerPlaySound(playerid, 21001, 0.0, 0.0, 0.0);
-    } 
+    if(IsValidVehicle(vehicleid))
+        Veh::ToogleEngine(playerid, GetPlayerVehicleID(playerid));
 
     return 1;
 }
