@@ -1010,7 +1010,7 @@ YCMD:darlider(playerid, params[], help)
 
     new name[MAX_PLAYER_NAME], orgid;
 
-    if(sscanf(params, "s[24]", name, orgid)) 
+    if(sscanf(params, "s[24]i", name, orgid)) 
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /darlider {ff3333}[ NOME ] <orgid 1 - %d >", MAX_ORGS);
 
     if(orgid <= 0 || orgid >= MAX_ORGS || !GetFlag(Org[orgid][org::flags], FLAG_ORG_CREATED))
@@ -1041,7 +1041,7 @@ YCMD:darsub(playerid, params[], help)
 
     new name[MAX_PLAYER_NAME], orgid;
 
-    if(sscanf(params, "s[24]", name, orgid)) 
+    if(sscanf(params, "s[24]i", name, orgid)) 
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /darsub {ff3333}[ NOME ] <orgid 1 - %d >", MAX_ORGS);
 
     if(orgid <= 0 || orgid >= MAX_ORGS || !GetFlag(Org[orgid][org::flags], FLAG_ORG_CREATED))

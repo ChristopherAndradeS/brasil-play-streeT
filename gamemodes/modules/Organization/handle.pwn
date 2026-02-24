@@ -128,26 +128,28 @@ stock Org::SetLeader(playerid, const name[], const admin_name[], orgid)
     if(IsValidPlayer(targetid))
     {
         org::Player[targetid][pyr::orgid] = orgid;
+        org::Player[targetid][pyr::role] = ORG_ROLE_LEADER;
         SetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_LEADER);
+        SetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_MEMBER);
 
         SetPlayerColor(targetid, Org[orgid][org::color]);
         
         new skins[MAX_ORGS_SKINS];
         Org::GetSkins(orgid, skins);
 
-        SetPlayerSkin(playerid, skins[RandomMinMax(0, MAX_ORGS_SKINS)]);
+        SetPlayerSkin(targetid, skins[RandomMinMax(0, MAX_ORGS_SKINS - 1)]);
 
         SendClientMessage(targetid, -1, "{33ff33}[ ORGS ] {ffffff}Parabéns, você agora é {33ff33}líder\
         da organização {%x}%s", Org[orgid][org::color], Org[orgid][org::name]);
 
         DB::SetDataInt(db_entity, "players", "orgid", orgid, "name = '%q'", name);
-        DB::SetDataInt(db_entity, "players", "orgid", Player[targetid][pyr::flags], "name = '%q'", name);
+        DB::SetDataInt(db_entity, "players", "flags", Player[targetid][pyr::flags], "name = '%q'", name);
 
         SendClientMessage(targetid, -1, "{ffff33}[ ORGS ] {ffffff}Use {ffff33}/ajudaorg {ffffff}para ver o painel de comandos da sua organização.");
     }
 
     DB::SetDataInt(db_entity, "players", "orgid", orgid, "name = '%q'", name);
-    DB::SetDataInt(db_entity, "players", "orgid", flags | FLAG_PLAYER_LEADER, "name = '%q'", name);
+    DB::SetDataInt(db_entity, "players", "flags", flags | FLAG_PLAYER_MEMBER | FLAG_PLAYER_LEADER, "name = '%q'", name);
     DB::SetDataString(db_stock, "organizations", "leader", name, "name = '%q'", Org[orgid][org::name]);
 
     printf("[ ORG (DB) ] O admin %s, setou %s como lider da organizacao %s", admin_name, name, Org[orgid][org::name]);
@@ -176,26 +178,28 @@ stock Org::SetCoLeader(playerid, const name[], const admin_name[], orgid)
     if(IsValidPlayer(targetid))
     {
         org::Player[targetid][pyr::orgid] = orgid;
+        org::Player[targetid][pyr::role] = ORG_ROLE_COLEADER;
         SetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_COLEADER);
+        SetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_MEMBER);
 
         SetPlayerColor(targetid, Org[orgid][org::color]);
 
         new skins[MAX_ORGS_SKINS];
-        Org::GetSkins(Org[orgid][org::name], skins);
+        Org::GetSkins(orgid, skins);
 
-        SetPlayerSkin(playerid, skins[RandomMinMax(0, MAX_ORGS_SKINS)]);
+        SetPlayerSkin(targetid, skins[RandomMinMax(0, MAX_ORGS_SKINS - 1)]);
 
         SendClientMessage(targetid, -1, "{33ff33}[ ORGS ] {ffffff}Parabéns, você agora é {33ff33}Co-líder\
         da organização {%x}%s", Org[orgid][org::color], Org[orgid][org::name]);
 
         DB::SetDataInt(db_entity, "players", "orgid", orgid, "name = '%q'", name);
-        DB::SetDataInt(db_entity, "players", "orgid", Player[targetid][pyr::flags], "name = '%q'", name);
+        DB::SetDataInt(db_entity, "players", "flags", Player[targetid][pyr::flags], "name = '%q'", name);
 
         SendClientMessage(targetid, -1, "{ffff33}[ ORGS ] {ffffff}Use {ffff33}/ajudaorg {ffffff}para ver o painel de comandos da sua organização.");
     }
 
     DB::SetDataInt(db_entity, "players", "orgid", orgid, "name = '%q'", name);
-    DB::SetDataInt(db_entity, "players", "orgid", flags | FLAG_PLAYER_LEADER, "name = '%q'", name);
+    DB::SetDataInt(db_entity, "players", "flags", flags | FLAG_PLAYER_MEMBER | FLAG_PLAYER_COLEADER, "name = '%q'", name);
     DB::SetDataString(db_stock, "organizations", "coleader", name, "name = '%q'", Org[orgid][org::name]);
 
     printf("[ ORG (DB) ] O admin %s, setou %s como colider da organizacao %s", admin_name, name, Org[orgid][org::name]);
@@ -203,14 +207,14 @@ stock Org::SetCoLeader(playerid, const name[], const admin_name[], orgid)
 }
 
 stock Org::HasPermission(playerid, flag)
-{    
+{
     if(org::Player[playerid][pyr::orgid] == INVALID_ORG_ID)
     {   
         SendClientMessage(playerid, -1, "{ff3333}[ ORGS ] {ffffff}Você não faz parte de uma {ff3333}organização!");
         return 0;
     }
 
-    if(GetFlag(Player[playerid][pyr::flags], flag))
+    if(!GetFlag(Player[playerid][pyr::flags], flag))
     {
         SendClientMessage(playerid, -1, "{ff3333}[ ORGS ] {ffffff}Você não tem {ff3333}permissão {ffffff}para usar esse comando!");
         return 0;
@@ -283,6 +287,16 @@ stock Org::SetPlayer(playerid, orgid, uniform = false)
 {
     org::Player[playerid][pyr::orgid] = orgid;
     org::Player[playerid][pyr::invite] = INVALID_ORG_ID;
+    org::Player[playerid][pyr::role] = ORG_ROLE_NOVICE;
+
+    SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_MEMBER);
+    ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_NOVICE | FLAG_PLAYER_JUNIOR | FLAG_PLAYER_SENIOR | FLAG_PLAYER_COLEADER | FLAG_PLAYER_LEADER);
+    SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_NOVICE);
+
+    new name[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, name);
+    DB::SetDataInt(db_entity, "players", "orgid", orgid, "name = '%q'", name);
+    DB::SetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", name);
 
     if(uniform)
     {
@@ -292,7 +306,7 @@ stock Org::SetPlayer(playerid, orgid, uniform = false)
 
         if(!Org::IsPlayerUsingUniform(playerid, orgid))
         {
-            Player[playerid][pyr::skinid] = Org[orgid][org::skins][RandomMax(MAX_ORGS_SKINS)];
+            Player[playerid][pyr::skinid] = Org[orgid][org::skins][RandomMinMax(0, MAX_ORGS_SKINS - 1)];
             SetPlayerSkin(playerid, Player[playerid][pyr::skinid]);
         }
     }
@@ -300,8 +314,33 @@ stock Org::SetPlayer(playerid, orgid, uniform = false)
 
 stock Org::UnSetPlayer(playerid)
 {
+    new orgid = org::Player[playerid][pyr::orgid];
+    new role = _:org::Player[playerid][pyr::role];
+
+    if(orgid != INVALID_ORG_ID)
+    {
+        if(role == ORG_ROLE_LEADER)
+        {
+            format(Org[orgid][org::leader], MAX_PLAYER_NAME, "%s", NO_LEADER_NAME);
+            DB::SetDataString(db_stock, "organizations", "leader", NO_LEADER_NAME, "orgid = %d", orgid);
+        }
+        else if(role == ORG_ROLE_COLEADER)
+        {
+            format(Org[orgid][org::coleader], MAX_PLAYER_NAME, "%s", NO_COLEADER_NAME);
+            DB::SetDataString(db_stock, "organizations", "coleader", NO_COLEADER_NAME, "orgid = %d", orgid);
+        }
+    }
+
     org::Player[playerid][pyr::orgid] = INVALID_ORG_ID;
     org::Player[playerid][pyr::invite] = INVALID_ORG_ID;
+    org::Player[playerid][pyr::role] = ORG_ROLE_NOVICE;
+
+    ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_MEMBER | FLAG_PLAYER_NOVICE | FLAG_PLAYER_JUNIOR | FLAG_PLAYER_SENIOR | FLAG_PLAYER_COLEADER | FLAG_PLAYER_LEADER);
+
+    new name[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, name);
+    DB::SetDataInt(db_entity, "players", "orgid", INVALID_ORG_ID, "name = '%q'", name);
+    DB::SetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", name);
 
     DestroyDynamic3DTextLabel(org::Player[playerid][pyr::labelid]);
 
