@@ -238,7 +238,6 @@ stock Login::UnSetPlayer(playerid)
     TogglePlayerSpectating(playerid, false);
     TogglePlayerControllable(playerid, true);
     TogglePlayerClock(playerid, true);
-    Player::SetCPF(playerid);
 
     CallLocalFunction("OnPlayerLogin", "i", playerid);
 
@@ -252,10 +251,10 @@ stock Login::RegisterPlayer(playerid)
     GetPlayerIp(playerid, ip);
 
     new status = DB::Insert(db_entity, "players", 
-    "name, pass, ip, payday_tleft, bitcoin, money, pX, pY, pZ, pA, score, skinid, orgid", 
-    "'%q', '%q', '%q', %i, %i, %f, %f, %f, %f, %f, %i, %i, %i", name, Player[playerid][pyr::pass], ip, 
+    "name, pass, ip, payday_tleft, bitcoin, money, pX, pY, pZ, pA, score, skinid", 
+    "'%q', '%q', '%q', %i, %i, %f, %f, %f, %f, %f, %i, %i", name, Player[playerid][pyr::pass], ip, 
     3600000, 0, 500.0, 834.28 + RandomFloat(2.0), -1834.89 + RandomFloat(2.0), 12.502, 180.0,
-    1, random(300), 0);
+    1, random(300));
 
     if(status)
     {

@@ -19,8 +19,7 @@ hook OnGameModeInit()
         pX FLOAT, pY FLOAT, pZ FLOAT,\
         pA              FLOAT,\
         score           INTEGER,\
-        skinid          INTEGER,\
-        orgid           INTEGER");
+        skinid          INTEGER");
 
         DB::CreateTable(db_entity, "punishments", 
         "name       VARCHAR(24) NOT NULL UNIQUE,\
@@ -58,6 +57,13 @@ hook OnGameModeInit()
         promoter     VARCHAR(24),\
         promote_date VARCHAR(32)\
         ");
+
+        DB::CreateTable(db_entity, "members", 
+        "name        VARCHAR(24),\
+        orgid        INTEGER,\
+        flags        INTEGER,\
+        skinid       INTEGER,\
+        role         INTEGER");
     }
 
     else db_entity = DB_Open("entitys.db");
@@ -87,10 +93,10 @@ hook OnGameModeInit()
         pX FLOAT, pY FLOAT, pZ FLOAT");
 
         DB::CreateTable(db_stock, "organizations", 
-        "orgid INT NOT NULL UNIQUE,\
+        "orgid INT UNIQUE,\
         name VARCHAR(32),\
         type INTEGER,\
-        tag VARCHAR(3),\
+        tag VARCHAR(4),\
         creator VARCHAR(24),\
         leader VARCHAR(24),\
         coleader VARCHAR(24),\

@@ -1008,22 +1008,25 @@ YCMD:darlider(playerid, params[], help)
 
     if(!Adm::HasPermission(playerid, ROLE_ADM_CEO)) return 1;
 
-    new name[MAX_PLAYER_NAME], orgid;
+    new targetid, orgid;
 
-    if(sscanf(params, "s[24]i", name, orgid)) 
+    if(sscanf(params, "ui", targetid, orgid)) 
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /darlider {ff3333}[ NOME ] <orgid 1 - %d >", MAX_ORGS);
 
-    if(orgid <= 0 || orgid >= MAX_ORGS || !GetFlag(Org[orgid][org::flags], FLAG_ORG_CREATED))
+    if(orgid < 0 || orgid >= MAX_ORGS || !GetFlag(Org[orgid][org::flags], FLAG_ORG_CREATED))
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Parâmetro {ff3333}[ ORGID ] {ffffff}Inválido! Use {ff3333}/allorgs.");
     
-    new admin_name[MAX_PLAYER_NAME];
-    GetPlayerName(playerid, admin_name);
-
-    new sucess = Org::SetLeader(playerid, name, admin_name, orgid);
+    if(org::Player[targetid][pyr::role] >= ORG_ROLE_COLEADER)
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Esse jogador {ff3333}já é um (Co)Líder {ffffff}demita-o antes de usar esse comando!");
+    
+    if(!DB::Exists(db_stock, "organizations", "orgid = %d AND leader = '%q'", orgid, NO_LEADER_NAME))
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}A organização {ff3333}%s {ffffff}já possui um líder, para alterar, remove o atual!", Org[orgid][org::name]);
+    
+    new sucess = Org::SetMember(playerid, targetid, orgid, ORG_ROLE_LEADER);
 
     if(sucess)
-        SendClientMessage(playerid, -1, "{33ff33}[ ADMIN ] {ffffff}Jogador {33ff33}%s {ffffff}setado como lider da organizaçõa {33ff33}%s {ffffff}com sucesso.",
-        name, Org[orgid][org::name]);
+        SendClientMessage(playerid, -1, "{33ff33}[ ADMIN ] {ffffff}Jogador {33ff33}%s {ffffff}foi setado como lider da organização {33ff33}%s",
+        GetPlayerNameStr(targetid), Org[orgid][org::name]);
 
     return 1;
 }
@@ -1039,148 +1042,25 @@ YCMD:darsub(playerid, params[], help)
 
     if(!Adm::HasPermission(playerid, ROLE_ADM_CEO)) return 1;
 
-    new name[MAX_PLAYER_NAME], orgid;
+    new targetid, orgid;
 
-    if(sscanf(params, "s[24]i", name, orgid)) 
+    if(sscanf(params, "Ui", targetid, orgid)) 
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /darsub {ff3333}[ NOME ] <orgid 1 - %d >", MAX_ORGS);
 
-    if(orgid <= 0 || orgid >= MAX_ORGS || !GetFlag(Org[orgid][org::flags], FLAG_ORG_CREATED))
+    if(orgid < 0 || orgid >= MAX_ORGS || !GetFlag(Org[orgid][org::flags], FLAG_ORG_CREATED))
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Parâmetro {ff3333}[ ORGID ] {ffffff}Inválido! Use {ff3333}/allorgs.");
     
-    new admin_name[MAX_PLAYER_NAME];
-    GetPlayerName(playerid, admin_name);
+    if(org::Player[targetid][pyr::role] >= ORG_ROLE_COLEADER)
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Esse jogador {ff3333}já é um (Co)Líder {ffffff}demita-o antes de usar esse comando!");
 
-    new sucess = Org::SetCoLeader(playerid, name, admin_name, orgid);
+    if(!DB::Exists(db_stock, "organizations", "orgid = %d AND coleader = '%q'", orgid, NO_COLEADER_NAME))
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}A organização {ff3333}%s {ffffff}já possui um colíder, para alterar, remove o atual!", Org[orgid][org::name]);
+    
+    new sucess = Org::SetMember(playerid, targetid, orgid, ORG_ROLE_COLEADER);
 
     if(sucess)
-        SendClientMessage(playerid, -1, "{33ff33}[ ADMIN ] {ffffff}Jogador {33ff33}%s {ffffff}setado como colider da organização {33ff33}%s {ffffff}com sucesso.",
-        name, Org[orgid][org::name]);
+        SendClientMessage(playerid, -1, "{33ff33}[ ADMIN ] {ffffff}Jogador {33ff33}%s {ffffff}setado como colider da organização {33ff33}%s",
+        GetPlayerNameStr(targetid), Org[orgid][org::name]);
 
     return 1;
 }
-
-// YCMD:criarfac(playerid, params[], help)
-// {
-//     if(Player[playerid][pAdmin] < 5) return SendClientMessage(playerid, -1, "Apenas Dono/Fundador.");
-
-//     new corHex, tipo, skin, name[30];
-    
-//     // Sintaxe Nova: /criarfac [Cor] [Tipo] [Skin] [Nome]
-//     // h = Hex, d = Int, i = Int, s = String
-//     if(sscanf(params, "hdis[30]", corHex, tipo, skin, name))
-//     {
-//         SendClientMessage(playerid, COR_V_ESCURO, "USE: /criarfac [CorHEX] [Funcao] [SkinID] [Nome]");
-//         SendClientMessage(playerid, COR_BRANCO, "FUNCOES: 1=Lavagem | 2=Desmanche | 3=Comum");
-//         return 1;
-//     }
-
-//     if(tipo < 1 || tipo > 3) return SendClientMessage(playerid, -1, "Tipo invalido! Use 1, 2 ou 3.");
-//     if(skin < 0 || skin > 311) return SendClientMessage(playerid, -1, "ID de Skin invalido (0-311).");
-
-//     // Procura vaga na memória
-//     new id = -1;
-//     for(new i=1; i < MAX_ORGS; i++) {
-//         if(OrgInfo[i][oCriada] == 0) { id = i; break; }
-//     }
-//     if(id == -1) return SendClientMessage(playerid, -1, "Limite de Orgs atingido!");
-
-//     new Float:x, Float:y, Float:z;
-//     GetPlayerPos(playerid, x, y, z);
-
-//     // INSERE NO MYSQL (COM A SKIN AGORA)
-//     new query[300];
-//     mysql_format(Conexao, query, sizeof(query), 
-//         "INSERT INTO organizacoes (name, cor, tipo, skin, pos_x, pos_y, pos_z) VALUES ('%e', %d, %d, %d, %f, %f, %f)",
-//         name, corHex, tipo, skin, x, y, z
-//     );
-//     mysql_tquery(Conexao, query, "OnFacCriada", "d", id);
-
-//     // Define visualmente temporário
-//     OrgInfo[id][oCriada] = 1;
-//     format(OrgInfo[id][oNome], 30, name);
-//     OrgInfo[id][oCor] = corHex;
-//     OrgInfo[id][oTipo] = tipo;
-//     OrgInfo[id][oSkin] = skin; // Salva a skin na memória
-//     OrgInfo[id][oX] = x; OrgInfo[id][oY] = y; OrgInfo[id][oZ] = z;
-    
-//     // Cria Pickup e Texto
-//     OrgInfo[id][oPickup] = CreatePickup(1239, 1, x, y, z, -1);
-    
-//     new label[128], funcaoStr[20];
-//     if(tipo == 1) funcaoStr = "LAVAGEM";
-//     else if(tipo == 2) funcaoStr = "DESMANCHE";
-//     else funcaoStr = "GUERRA";
-
-//     format(label, sizeof(label), "{FFFFFF}HQ: %s\nFuncao: {FFFF00}%s\n{FFFFFF}Lider: Ninguem", name, funcaoStr);
-//     OrgInfo[id][oLabel] = Create3DTextLabel(label, corHex, x, y, z+0.5, 20.0, 0, 0);
-
-//     new msg[144];
-//     format(msg, sizeof(msg), "Faccao criada! ID: %d | Skin Padrao: %d", id, skin);
-//     SendClientMessage(playerid, COLOR_SUCESS, msg);
-//     return 1;
-// }
-
-
-// YCMD:criarorg(playerid, params[], help)
-// {
-//     if(Player[playerid][pAdmin] < 5) return SendClientMessage(playerid, -1, "Apenas Dono.");
-
-//     new name[30], corHex;
-//     // Ex: /criarorg 0xFF0000AA PCC (Cor Vermelha, Nome PCC)
-//     if(sscanf(params, "xs[30]", corHex, name)) 
-//     {
-//         SendClientMessage(playerid, COR_V_ESCURO, "USE: /criarorg [CorHEX] [Nome]");
-//         SendClientMessage(playerid, COR_BRANCO, "Exemplos de Cores: Vermelho(FFFF0000) Azul(FF0000FF) Verde(FF00FF00)");
-//         return 1;
-//     }
-
-//     // Procura um ID livre (slot vazio)
-//     new id = -1;
-//     for(new i=1; i < MAX_ORGS; i++)
-//     {
-//         if(OrgInfo[i][oCriada] == 0)
-//         {
-//             id = i;
-//             break;
-//         }
-//     }
-
-//     if(id == -1) return SendClientMessage(playerid, -1, "Limite de Orgs atingido!");
-
-//     // Pega a posição do admin
-//     new Float:x, Float:y, Float:z;
-//     GetPlayerPos(playerid, x, y, z);
-
-//     // Salva na Memória
-//     format(OrgInfo[id][oNome], 30, name);
-//     OrgInfo[id][oCor] = corHex;
-//     OrgInfo[id][oX] = x;
-//     OrgInfo[id][oY] = y;
-//     OrgInfo[id][oZ] = z;
-//     OrgInfo[id][oCriada] = 1;
-
-//     // Salva no Arquivo
-//     new file[64];
-//     format(file, sizeof(file), PASTA_ORGS, id);
-//     DOF2_CreateFile(file);
-//     DOF2_SetString(file, "Nome", name);
-//     DOF2_SetInt(file, "Cor", corHex);
-//     DOF2_SetFloat(file, "X", x);
-//     DOF2_SetFloat(file, "Y", y);
-//     DOF2_SetFloat(file, "Z", z);
-//     DOF2_SaveFile();
-
-//     // Cria o visual no jogo na hora
-//     OrgInfo[id][oPickup] = CreatePickup(1239, 1, x, y, z, -1);
-    
-//     new label[100];
-//     format(label, sizeof(label), "{FFFFFF}HQ: %s\n{FFFF00}Digite /menuorg", name);
-//     Create3DTextLabel(label, corHex, x, y, z+0.5, 20.0, 0, 0);
-    
-//     SetPlayerMapIcon(playerid, id, x, y, z, 31, 0, MAPICON_GLOBAL);
-
-//     new msg[128];
-//     format(msg, sizeof(msg), "Org %s (ID %d) criada com sucesso na sua posicao!", name, id);
-//     SendClientMessage(playerid, COLOR_SUCESS, msg);
-//     return 1;
-// }

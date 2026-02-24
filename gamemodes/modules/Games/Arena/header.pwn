@@ -154,7 +154,7 @@ stock Arena::QuitPlayer(gameid, playerid)
     SetPlayerArmour(playerid, 0.0);
 
     if(IsPlayerConnected(playerid))
-        Player::Spawn(playerid, true);
+        Player::Spawn(playerid);
 
     return 1;
 }

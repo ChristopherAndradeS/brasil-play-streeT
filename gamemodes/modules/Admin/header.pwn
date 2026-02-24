@@ -394,7 +394,7 @@ stock Adm::ValidTargetID(playerid, targetid, bool:can_equal = false, bool:sendms
     if((Admin[playerid][adm::lvl] <= Admin[targetid][adm::lvl]))
     {
         if((can_equal && (playerid == targetid))) return 1;
-
+        
         if(sendmsg)
             SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Voce nao poder aplicar essa acao ao seu {ff3333}colega/subordinado!");
         return 0;        

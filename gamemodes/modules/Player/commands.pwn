@@ -2,8 +2,8 @@ YCMD:spawn(playerid, params[], help)
 {
     if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
 
-    Player::Spawn(playerid, true);
-    SendClientMessage(playerid, -1, "[ BPS ] {ffffff}Você foi enviado ao spawn!");
+    Player::Spawn(playerid);
+    SendClientMessage(playerid, -1, "{99ff99}[ BPS ] {ffffff}Você foi enviado ao spawn!");
     return 1;
 }
 
@@ -105,7 +105,7 @@ YCMD:orgs(playerid, params[], help)
 
     strcat(msg, "{ffffff}Organizacao\t{ff99ff}Tipo\t{ffffff}Lider\t{ff99ff}Membros Online\n");
 
-    for(new i = 1; i < MAX_ORGS; i++)
+    for(new i = 0; i < MAX_ORGS; i++)
     {
         if(!GetFlag(Org[i][org::flags], FLAG_ORG_CREATED)) continue;
         

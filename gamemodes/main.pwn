@@ -9,7 +9,7 @@
 
 #define CGEN_MEMORY 20000
 
-#define ON_DEBUG_MODE
+//#define ON_DEBUG_MODE
 
 #include "YSI/YSI_Data/y_iterate"
 #include <YSI/YSI_Coding/y_va>
@@ -27,10 +27,10 @@
 #include "./gamemodes/modules/LinkedLists/header.pwn"
 #include "./gamemodes/modules/Vehicle/header.pwn"
 #include "./gamemodes/modules/Server/header.pwn" 
-#include "./gamemodes/modules/Organization/header.pwn"
 #include "./gamemodes/modules/TextDraws/header.pwn"
 #include "./gamemodes/modules/Player/header.pwn"
 #include "./gamemodes/modules/Admin/header.pwn"
+#include "./gamemodes/modules/Organization/header.pwn"
 #include "./gamemodes/modules/Maps/header.pwn"
 #include "./gamemodes/modules/Games/header.pwn"
     /* GAMES */
@@ -237,16 +237,6 @@ stock SendMessageToNearPlayer(Float:pX, Float:pY, Float:pZ, const msg[], GLOBAL_
         
         SendClientMessage(playerid, -1, formated_msg); 
     }
-
-    return 1;
-}
-
-
-YCMD:teste(playerid, params[], help)
-{
-    new vehicleid = GetPlayerVehicleID(playerid);
-    RepairVehicle(vehicleid);
-    SetVehicleHealth(vehicleid, Vehicle[vehicleid][veh::health]);
 
     return 1;
 }

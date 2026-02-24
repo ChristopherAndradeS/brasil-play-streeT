@@ -110,12 +110,6 @@ new acs::Player[MAX_PLAYERS][E_PLAYER_ACESSORY];
 
 new const gNameIssue[][32] = { {"INVALID_ISSUE"}, {"contem caracter ilegal"}, {"tem tamanho invalido"} };
 
-// new const Register::gValidsSkin[2][] = 
-// {
-//     {2, 4, 7, 170, 188, 250, 259},
-//     {12, 13, 41, 56, 65, 93, 193}
-// };
-
 /*                  PLAYER FORWARDS                 */
 forward Player::Kick(playerid, timerid, const msg[]);
 
@@ -326,57 +320,9 @@ stock Login::IsValidPassword(const text[], &issue)
     return 1;
 }
 
-
-stock Player::Spawn(playerid, spawn_default = false)
-{
-    new name[MAX_PLAYER_NAME];
-    GetPlayerName(playerid, name);
-
-    if(!DB::Exists(db_entity, "players", "name = '%q'", name))
-    {
-        SendClientMessage(playerid, -1, "{ff3333}[ ERRO FATAL ] {ffffff}Sua conta {ff3333}nao esta registrada {ffffff}houve um erro grave ao spawnar, avise um {ff3333}moderador!");
-        Kick(playerid);
-        printf("[ DB (ERRO) ] Erro ao tentar carregar posições de spawn do jogador!");
-        return 0;
-    }
-
-    new skinid, Float:pX, Float:pY, Float:pZ, Float:pA;
-    DB::GetDataInt(db_entity, "players", "skinid", skinid, "name = '%q'", name);
-    DB::GetDataFloat(db_entity, "players", "pX", pX, "name = '%q'", name);
-    DB::GetDataFloat(db_entity, "players", "pY", pY, "name = '%q'", name);
-    DB::GetDataFloat(db_entity, "players", "pZ", pZ, "name = '%q'", name);
-    DB::GetDataFloat(db_entity, "players", "pA", pA, "name = '%q'", name);
-
-    if(pX == 0.0 && pY == 0.0 && pZ == 0.0) spawn_default = true;
-
-    /* SET SPAWN */
-
-    if(!spawn_default)
-        SetSpawnInfo(playerid, 0, skinid, pX, pY, pZ, pA, 
-        WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0);
-    else
-    {
-        SetSpawnInfo(playerid, 0, skinid, 
-        834.28 + RandomFloat(2.0), -1834.89 + RandomFloat(2.0), 12.502, 180.0, 
-        WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0);
-
-        // DB::Update(db_entity, "players", 
-        // "pX = %f, pY = %f, pZ = %f, pA = %f WHERE name = '%q'",
-        // 834.28 + RandomFloat(2.0), -1834.89 + RandomFloat(2.0), 12.502, 180.0, name);
-
-        //SendClientMessage(playerid, -1, "{ff9933}[ SERVER ] {ffffff}Seu Spawn anterior era inválido, enviado para spawn civil padrão!");
-    }
-    
-    SpawnPlayer(playerid);
-
-    return 1;
-}
-
 stock Player::SetCPF(playerid)
 {
     new str[64];
-    format(str, 64, "{99ff99}%s {ffffff}[ {{99ff99}%d {ffffff}]", GetPlayerNameStr(playerid), playerid);
-    new Text3D:label = CreateDynamic3DTextLabel(str, -1, 0.0, 0.0, 0.0, 70.0, playerid, INVALID_VEHICLE_ID, 1);
-    Attach3DTextLabelToPlayer(label, playerid, 0.0, 0.0, 0.5);
-    Player[playerid][pyr::cpf_tag] = label;
+    format(str, 64, "{99ff99}%s {ffffff}[ {99ff99}%d {ffffff}]", GetPlayerNameStr(playerid), playerid);
+    Player[playerid][pyr::cpf_tag]  = CreateDynamic3DTextLabel(str, -1, 0.0, 0.0, 0.0, 70.0, playerid, INVALID_VEHICLE_ID, 1);
 }

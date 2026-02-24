@@ -284,8 +284,58 @@ hook OnPlayerEnterCheckpoint(playerid)
 stock Player::DestroyCpfTag(playerid)
 {
     if(IsValidDynamic3DTextLabel(Player[playerid][pyr::cpf_tag]))
+        DestroyDynamic3DTextLabel(Player[playerid][pyr::cpf_tag]);    
+
+    Player[playerid][pyr::cpf_tag] = INVALID_3DTEXT_ID;
+}
+
+stock Player::Spawn(playerid)
+{
+    new name[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, name);
+
+    if(!DB::Exists(db_entity, "players", "name = '%q'", name))
     {
-        DestroyDynamic3DTextLabel(Player[playerid][pyr::cpf_tag]);
-        Player[playerid][pyr::cpf_tag] = INVALID_3DTEXT_ID;
+        SendClientMessage(playerid, -1, "{ff3333}[ ERRO FATAL ] {ffffff}Sua conta {ff3333}nao esta registrada {ffffff}houve um erro grave ao spawnar, avise um {ff3333}moderador!");
+        Kick(playerid);
+        printf("[ DB (ERRO) ] Erro ao tentar carregar posições de spawn do jogador!");
+        return 0;
     }
+
+    if(DB::Exists(db_entity, "members", "name = '%q'", GetPlayerNameStr(playerid)))
+    {
+        new orgid, flag;
+
+        DB::GetDataInt(db_entity, "members", "orgid", orgid, "name = '%q'", GetPlayerNameStr(playerid));
+        DB::GetDataInt(db_entity, "members", "flags", flag, "name = '%q'", GetPlayerNameStr(playerid));
+
+        printf("%d", orgid);
+        
+        if(GetFlag(flag, FLAG_PLAYER_ON_WORK))
+        {
+            SetSpawnInfo(playerid, 1, org::Player[playerid][pyr::skinid], 
+            Org[orgid][org::sX] + RandomFloat(2.0), 
+            Org[orgid][org::sY] + RandomFloat(2.0), 
+            Org[orgid][org::sZ] + RandomFloat(2.0), 
+            Org[orgid][org::sA], WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0);
+
+            SendClientMessage(playerid, -1, "{99ff99}[ ORG ] {ffffff}Você estava em {99ff99}modo de trabalho {ffffff}antes de sair!");
+        }
+
+        else
+        {
+            SetSpawnInfo(playerid, 1, Player[playerid][pyr::skinid], 
+            Org[orgid][org::sX] + RandomFloat(2.0), 
+            Org[orgid][org::sY] + RandomFloat(2.0), 
+            Org[orgid][org::sZ] + RandomFloat(2.0), 
+            Org[orgid][org::sA], WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0);
+        }
+    }
+
+    else
+        SetSpawnInfo(playerid, 1, Player[playerid][pyr::skinid], 834.28 + RandomFloat(2.0), -1834.89 + RandomFloat(2.0), 12.502, 180.0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0);
+    
+    SpawnPlayer(playerid);
+
+    return 1;
 }
