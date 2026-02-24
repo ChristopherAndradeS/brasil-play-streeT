@@ -37,7 +37,7 @@ YCMD:aceitar(playerid, params[], help)
     if(orgid == INVALID_ORG_ID) 
         return SendClientMessage(playerid, -1, "{ff3333}[ ORG ] {ffffff}Você não possui convite aberto");
     
-    if(GetFlag(Org[orgid][org::flags], FLAG_ORG_CREATED))    
+    if(!GetFlag(Org[orgid][org::flags], FLAG_ORG_CREATED))    
         return SendClientMessage(playerid, -1, "{ff3333}[ ORG ] {ffffff}A organização que te convidou {ff3333}não existe mais!");
 
     Org::SetPlayer(playerid, orgid, true);
@@ -60,7 +60,7 @@ YCMD:demitir(playerid, params[], help)
 
     new orgid = org::Player[playerid][pyr::orgid];
 
-    switch(org::Player[playerid][pyr::role])
+    switch(org::Player[targetid][pyr::role])
     {
         case ORG_ROLE_LEADER:
         {
@@ -75,7 +75,7 @@ YCMD:demitir(playerid, params[], help)
         }
     }
 
-    Org::UnSetPlayer(playerid);
+    Org::UnSetPlayer(targetid);
 
     SendClientMessage(targetid, -1, "{ff3333}[ ORG ] {fffff}Você foi {ff3333}expulso {ffffff}da sua organização!");
    
