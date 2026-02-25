@@ -2,6 +2,17 @@
 
 hook OnGameModeInit()
 {
+    CA_Init();
+
+    med_npcid = NPC_Create("Medico");
+
+    NPC_Spawn(med_npcid);
+    NPC_SetPos(med_npcid, 0.0, 0.0, 3.0);
+    NPC_SetSkin(med_npcid, 308);
+    NPC_SetInvulnerable(med_npcid, true);
+
+    CreateDynamic3DTextLabel("{ff9933}[ SOS ]", -1, 0.0, 0.0, 0.1, 60.0, med_npcid);
+
     Server[srv::timestamp] = gettime();
  
     TimestampToDate(Server[srv::timestamp], 

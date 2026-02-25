@@ -1,6 +1,6 @@
 #include <YSI\YSI_Coding\y_hooks>
 
-hook OnPlayerSpawnAfterDied(playerid, killerid, WEAPON:reason)
+hook OnPlayerInjury(playerid, killerid, WEAPON:reason)
 {
     new gameid = game::Player[playerid][pyr::gameid];
 

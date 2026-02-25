@@ -15,38 +15,44 @@ enum (<<= 1)
     FLAG_PLAYER_SPECTATING,
     FLAG_PLAYER_IN_JAIL,
     FLAG_PLAYER_CHECKPOINT,
-    FLAG_PLAYER_DEATH,
+    FLAG_PLAYER_INJURED,
     FLAG_PLAYER_INVUNERABLE,
+    FLAG_PLAYER_GENDER
 }
 
 enum E_PLAYER 
 {
     pyr::pass[BCRYPT_HASH_LENGTH],
     pyr::bitcoin,
+    pyr::vipcoin,
     Float:pyr::money,
     Float:pyr::health,
+    pyr::death_tick,
     pyr::skinid,
-    pyr::gender,
     pyr::score,
     pyr::flags,
     pyr::regionid,
     pyr::vehicleid,
-    Text3D:pyr::cpf_tag,
+    Text3D:pyr::nametag,
+    Text3D:pyr::deathtag
 }
 
 new Player[MAX_PLAYERS][E_PLAYER];
 
+
 /*                  PLAYER TIMERS                 */
 
-enum _:E_PLAYER_TIMERS
+enum E_PLAYER_TIMERS
 {
     pyr::TIMER_LOGIN_KICK,
     pyr::TIMER_PAYDAY,
     pyr::TIMER_JAIL,
     pyr::TIMER_SPEEDOMETER,
-    pyr::TIMER_DEATH
+    pyr::TIMER_INJURY,
 }
 
 new pyr::Timer[MAX_PLAYERS][E_PLAYER_TIMERS];
 
-forward Player::Kick(playerid, timerid, const msg[]);
+forward Player::Kick(playerid, E_PLAYER_TIMERS:timerid, const msg[]);
+
+new med_npcid;

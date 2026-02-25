@@ -153,3 +153,68 @@ stock GetPlayerNameStr(playerid)
 	GetPlayerName(playerid, name, MAX_PLAYER_NAME - 1);
 	return name;
 }
+
+#define MAX_POSITION_ATTEMPTS 15
+#define MAX_HEIGHT_DIFFERENCE 3.0
+
+stock bool:GetRandomPositionAround(
+    Float:originX,
+    Float:originY,
+    Float:originZ,
+    Float:range_min,
+    Float:range_max,
+    &Float:outX,
+    &Float:outY,
+    &Float:outZ
+)
+{
+    new Float:angle;
+    new Float:distance;
+    new Float:testX, Float:testY;
+    new Float:hitX, Float:hitY, Float:hitZ;
+
+    for(new i = 0; i < MAX_POSITION_ATTEMPTS; i++)
+    {
+        // Ângulo aleatório (0 a 360 graus)
+        angle = floatsub(floatmul(float(random(10000)), 0.036), 180.0);
+
+        // Distância aleatória dentro da coroa circular
+        distance = floatadd(
+            range_min,
+            floatmul(
+                float(random(10000)) / 10000.0,
+                (range_max - range_min)
+            )
+        );
+
+        // Converter para coordenadas
+        testX = floatadd(originX, floatmul(distance, floatsin(angle, degrees)));
+        testY = floatadd(originY, floatmul(distance, floatcos(angle, degrees)));
+
+        // Raycast do alto até baixo
+        if(CA_RayCastLine(
+            testX,
+            testY,
+            originZ + 50.0,
+            testX,
+            testY,
+            originZ - 50.0,
+            hitX,
+            hitY,
+            hitZ
+        ))
+        {
+            // Validar diferença de altura
+            if(floatabs(floatsub(hitZ, originZ)) <= MAX_HEIGHT_DIFFERENCE)
+            {
+                outX = hitX;
+                outY = hitY;
+                outZ = hitZ;
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}

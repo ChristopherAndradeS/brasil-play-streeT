@@ -61,40 +61,6 @@ hook OnPlayerPasswordVerify(playerid, bool:success)
     return 1;
 }
 
-
-#if defined ON_DEBUG_MODE
-
-hook OnPlayerConnect(playerid)
-{
-    return 1;
-}
-
-hook OnPlayerRequestClass(playerid, classid)
-{
-    Login::UnSetPlayer(playerid);
-
-    return 1;
-}
-
-#else
-
-hook OnPlayerConnect(playerid)
-{
-    Login::SetPlayer(playerid);
-    return 1;
-}
-
-hook OnPlayerRequestClass(playerid, classid)
-{
-    if(!IsValidPlayer(playerid)) return 1;
-
-    Player::Spawn(playerid);
-
-    return 1;
-}
-
-#endif
-
 hook OnPlayerClickTextDraw(playerid, Text:clickedid)
 {
     if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_REGISTER) && !GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_LOGIN))
@@ -207,7 +173,7 @@ stock Login::SetPlayer(playerid)
 {
     Player::CreateTimer(playerid, pyr::TIMER_LOGIN_KICK, "PYR_Kick", LOGIN_MUSIC_MS, false, "iis", 
     playerid, 
-    pyr::TIMER_LOGIN_KICK, 
+    _:pyr::TIMER_LOGIN_KICK, 
     "Demorou muito para fazer login!");
     
     TogglePlayerSpectating(playerid, true);

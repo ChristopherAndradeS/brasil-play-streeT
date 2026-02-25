@@ -6,6 +6,7 @@
 #include <samp_bcrypt>
 #include <PawnPlus>
 #include <sampvoice>
+#include <colandreas>
 
 #define CGEN_MEMORY 20000
 
@@ -113,6 +114,7 @@
 #include "./gamemodes/modules/LinkedLists/handle.pwn"
 #include "./gamemodes/modules/Maps/handle.pwn"
 #include "./gamemodes/modules/TextDraws/handle.pwn"
+
 #include "./gamemodes/modules/Player/handle.pwn"
 #include "./gamemodes/modules/Organization/handle.pwn"
 #include "./gamemodes/modules/Vehicle/handle.pwn"
@@ -295,3 +297,17 @@ stock SendMessageToNearPlayer(Float:pX, Float:pY, Float:pZ, const msg[], GLOBAL_
 
     return 1;
 }
+
+YCMD:wep(playerid, params[], help)
+{
+    GivePlayerWeapon(playerid, WEAPON:strval(params), 1000);
+    return 1;
+}
+
+YCMD:teste(playerid, params[], help)
+{
+    new Float:pX, Float:pY, Float:pZ;
+    NPC_GetPos(med_npcid, pX, pY, pZ);
+    SetPlayerPos(playerid, pX, pY, pZ);
+    return 1;
+}   

@@ -96,8 +96,7 @@ stock Arena::QuitPlayer(gameid, playerid)
     TogglePlayerSpectating(playerid, false);
 
     ResetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME);
-    ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_DEATH);
-    SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
+    //SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
 
     SetPlayerVirtualWorld(playerid, 0);
     SetPlayerInterior(playerid, 0);
@@ -126,7 +125,6 @@ stock Arena::Ready(gameid)
         ResetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_WAITING);
         SetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING);
         
-        ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_DEATH);
         ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
 
         ResetPlayerWeapons(playerid);

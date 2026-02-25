@@ -1,6 +1,6 @@
 
 /*                  PLAYER PUBLICS                 */
-public Player::Kick(playerid, timerid, const msg[]) 
+public Player::Kick(playerid, E_PLAYER_TIMERS:timerid, const msg[]) 
 {    
     Player::KillTimer(playerid, timerid);
     
@@ -22,21 +22,25 @@ stock IsValidPlayer(playerid)
     return (IsPlayerConnected(playerid) && GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED));
 }
 
-stock Player::ClearAllData(playerid)
-{
-    Player::ClearData(playerid);
-    lgn::ClearData(playerid);
-    pdy::ClearData(playerid);
-    acs::ClearData(playerid);
-}
-
 stock Player::ClearData(playerid)
 {
     Player[playerid][pyr::pass]          = '\0';
     Player[playerid][pyr::bitcoin]       = 0;
+    Player[playerid][pyr::vipcoin]       = 0;
     Player[playerid][pyr::money]         = 0.0;
-    Player[playerid][pyr::flags]         = 0x00000000;
+    Player[playerid][pyr::health]        = 0.0;
+    Player[playerid][pyr::skinid]        = -1;
+    Player[playerid][pyr::flags]         = 0;
     Player[playerid][pyr::score]         = 0;
+    Player[playerid][pyr::regionid]      = INVALID_RECORD_ID;
+    
+    if(IsValidVehicle(Player[playerid][pyr::vehicleid]))
+        Veh::Destroy(Player[playerid][pyr::vehicleid]);
+
+    if(IsValidDynamic3DTextLabel(Player[playerid][pyr::nametag]))
+        DestroyDynamic3DTextLabel(Player[playerid][pyr::nametag]);    
+
+    Player[playerid][pyr::nametag] = INVALID_3DTEXT_ID;
 }
 
 stock Player::Exists(const name[])
@@ -55,27 +59,50 @@ stock Player::LoadData(playerid)
     return 1;
 }
 
-stock Player::CreateTimer(playerid, timerid, const callback[] = "", time, bool:repeate, const specifiers[] = "", OPEN_MP_TAGS:...)
+stock Player::CreateTimer(playerid, E_PLAYER_TIMERS:pyr::timerid, const callback[] = "", time, bool:repeate, const specifiers[] = "", OPEN_MP_TAGS:...)
 {
-    if(IsValidTimer(KillTimer(pyr::Timer[playerid][timerid])))
-        return printf("[ TIMER Player ] Erro ao tentar criar Timer #%d (%s [PID : %d]) %d pois já existia", timerid, callback, playerid, time);
+    if(IsValidTimer(KillTimer(pyr::Timer[playerid][pyr::timerid])))
+        return printf("[ TIMER (Player) ] Erro ao tentar criar Timer #%d (%s [PID : %d]) %d pois já existia", _:pyr::timerid, callback, playerid, time);
     
-    pyr::Timer[playerid][timerid] = SetTimerEx(callback, time, repeate, specifiers, ___(6));
+    new timerid = SetTimerEx(callback, time, repeate, specifiers, ___(6));
+    pyr::Timer[playerid][pyr::timerid] = timerid;
     
-    //return printf("[ TIMER Player ] Timer #%d (%s [PID : %d]) %d foi criado\n", timerid, callback, playerid, time);
+    printf("[ TIMER (Player) ] ( Timer ID: %d ) [ PLAYER_TIMER #%d ] (%s [PID : %d]) %d ms (%s) foi criado\n", timerid, _:pyr::timerid, callback, playerid, time, repeate ? "repeating" : "one shoot");
 
     return 1;
 }
 
-stock Player::KillTimer(playerid, timerid)
+stock Player::KillTimer(playerid, E_PLAYER_TIMERS:pyr::timerid)
 {
-    if(!IsValidTimer(pyr::Timer[playerid][timerid])) 
-        return 0;
+    if(!IsValidTimer(pyr::Timer[playerid][pyr::timerid])) return 0;
     
-    KillTimer(pyr::Timer[playerid][timerid]);
+    switch(pyr::timerid)
+    {
+        case pyr::TIMER_PAYDAY:
+        {
+            new t_left = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_PAYDAY]);
+            DB::SetDataInt(db_entity, "players", "payday_tleft", t_left, "name = '%q'", GetPlayerNameStr(playerid));      
+        }
 
-    pyr::Timer[playerid][timerid] = INVALID_TIMER;
-    //printf("[ TIMER Player ] Timer #%d ([PID : %d]) foi morto\n", timerid, playerid);
+        case pyr::TIMER_JAIL:
+        {
+            new t_left = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_JAIL]);
+            DB::SetDataInt(db_entity, "punishments", "left_tstamp", t_left, "name = '%q' AND level = 1", GetPlayerNameStr(playerid));
+        }
+
+        case pyr::TIMER_SPEEDOMETER, pyr::TIMER_LOGIN_KICK, pyr::TIMER_INJURY:
+        {
+            
+        }
+    }
+
+    new timerid = pyr::Timer[playerid][pyr::timerid];
+
+    KillTimer(pyr::Timer[playerid][pyr::timerid]);
+
+    pyr::Timer[playerid][pyr::timerid] = INVALID_TIMER;
+    
+    printf("[ TIMER (Player) ] ( Timer ID: %d ) [ PLAYER_TIMER #%d ] [PID : %d]) foi morto\n", timerid, _:pyr::timerid, playerid);
     
     return 1;
 }
@@ -121,18 +148,18 @@ stock Player::GiveMoney(playerid, Float:price)
     return 1;   
 }
 
-stock Player::SetCPF(playerid)
+stock Player::SetNameTag(playerid)
 {
     new str[64];
     format(str, 64, "{99ff99}%s {ffffff}[ {99ff99}%d {ffffff}]", GetPlayerNameStr(playerid), playerid);
-    Player[playerid][pyr::cpf_tag]  = CreateDynamic3DTextLabel(str, -1, 0.0, 0.0, 0.0, 70.0, playerid, INVALID_VEHICLE_ID, 1);
+    Player[playerid][pyr::nametag]  = CreateDynamic3DTextLabel(str, -1, 0.0, 0.0, 0.0, 70.0, playerid, INVALID_VEHICLE_ID, 1);
 }
 
 stock Player::UpdateDamage(playerid, issuerid, Float:damage, WEAPON:weaponid, bodypart)
 {
-    if(!IsValidPlayer(playerid) && !IsValidPlayer(issuerid)) return 1;
+    if(!IsValidPlayer(issuerid)) return 1;
 
-    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_DEATH))  
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INJURED))  
     {
         GameTextForPlayer(issuerid, "~r~~h~OVERKILL", 1000, 4);
         return 1;
@@ -154,13 +181,12 @@ stock Player::UpdateDamage(playerid, issuerid, Float:damage, WEAPON:weaponid, bo
         GameTextForPlayer(issuerid, "~h~MATOU", 500, 4);
         GameTextForPlayer(playerid, "~r~~h~MORREU", 500, 4);
         SetPlayerHealth(playerid, 1.0);
-        SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_DEATH);
-        CallLocalFunction("OnPlayerDied", "iii", playerid, issuerid, WEAPON:weaponid);
+        SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
+        CallLocalFunction("OnPlayerInjury", "iii", playerid, issuerid, WEAPON:weaponid);
     }
 
     return 1;
 }
-
 
 stock Player::AplyRandomDeathAnim(playerid, &time)
 {
@@ -173,12 +199,22 @@ stock Player::AplyRandomDeathAnim(playerid, &time)
     }
 }
 
-stock Player::DestroyCpfTag(playerid)
+stock Player::AplyRandomInjuryAnim(playerid)
 {
-    if(IsValidDynamic3DTextLabel(Player[playerid][pyr::cpf_tag]))
-        DestroyDynamic3DTextLabel(Player[playerid][pyr::cpf_tag]);    
+    switch(RandomMax(100))
+    {
+        case 0..33:     ApplyAnimation(playerid, "KNIFE", "KILL_Knife_Ped_Die", 4.1, false, false, false, true, 2170, SYNC_ALL);
+        case 34..66:    ApplyAnimation(playerid, "ped", "KO_shot_stom", 4.1, false, false, false, true, 2170, SYNC_ALL);
+        case 67..100:   ApplyAnimation(playerid, "ped", "KO_shot_stom", 4.1, false, false, false, true, 2170, SYNC_ALL); 
+    }
+}
 
-    Player[playerid][pyr::cpf_tag] = INVALID_3DTEXT_ID;
+stock Player::DestroyNameTag(playerid)
+{
+    if(IsValidDynamic3DTextLabel(Player[playerid][pyr::nametag]))
+        DestroyDynamic3DTextLabel(Player[playerid][pyr::nametag]);    
+
+    Player[playerid][pyr::nametag] = INVALID_3DTEXT_ID;
 }
 
 stock Player::Spawn(playerid)

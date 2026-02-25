@@ -24,9 +24,8 @@ stock Punish::VerifyPlayer(playerid)
         if(left_time <= gettime())
         {
             SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IS_PARDON);
-
             DB::Delete(db_entity, "punishments", "name = '%q' AND level = 2", name);
-
+            printf("[ BAN ] O jogador %s foi perdoado do seu banimento", name);
             return 1;
         }
 
@@ -76,22 +75,15 @@ stock Punish::VerifyPlayer(playerid)
 
         if(left_time <= 0)
         {
-            SendClientMessage(playerid, -1, "{33ff33}[ BPS ] {ffffff}Você foi {33ff33}perdoado \
-            {ffffff}da sua prisão na ilha deserta.");
-            SendClientMessage(playerid, -1, "{33ff33}[ BPS ] {ffffff}Esperamos {33ff33}bom \
-            {ffffff}comportamento de agora em diante!");
-
             DB::Delete(db_entity, "punishments", "name = '%q' AND level = 1", name);
-
             printf("[ ILHA ] O jogador %s foi perdoado da cadeia staff", name);
 
+            SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IS_PARDON);
             ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_JAIL);
         }
 
         else
-        {
             SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_JAIL);
-        }
     }
 
     return 1;
