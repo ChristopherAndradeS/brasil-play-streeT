@@ -2,10 +2,20 @@
 
 #define PAYMENT_BASE (1000.0)
 
+enum E_PLAYER_PAYDAY
+{
+    pdy::bonus,
+    pdy::time_left, 
+}
+
+new pdy::Player[MAX_PLAYERS][E_PLAYER_PAYDAY];
+
 forward OnPayDayReach(playerid);
 
 hook OnPlayerLogin(playerid)
 {
+    DB::GetDataInt(db_entity, "players", "payday_tleft", pdy::Player[playerid][pdy::time_left], "name = '%q'", GetPlayerNameStr(playerid));
+
     new time_left = pdy::Player[playerid][pdy::time_left];
     Player::CreateTimer(playerid, pyr::TIMER_PAYDAY, "OnPayDayReach", time_left, false, "i", playerid);
 
@@ -23,11 +33,11 @@ public OnPayDayReach(playerid)
 
     total = payment + bonus;
 
-    SendClientMessage(playerid, COLOR_THEME_BPS, "|__________________ PAYDAY BPS __________________|");
+    SendClientMessage(playerid, -1, "{33ff33}|__________________ PAYDAY BPS __________________|");
     SendClientMessage(playerid, -1, "Você recebeu seu pagamento por jogar 1 hora!");
     SendClientMessage(playerid, -1, "{33ff33}Salário Fixo: {ffffff}R$ %.2f | {33ff33}Bonus Org/Admin: {ffffff}R$ %.2f", payment, bonus);
     SendClientMessage(playerid, -1, "{00FF00}TOTAL RECEBIDO: R$ %.2f  |  +1 RESPECT (Nivel)", total);
-    SendClientMessage(playerid, COLOR_THEME_BPS, "|________________________________________________|");
+    SendClientMessage(playerid, -1, "{33ff33}|________________________________________________|");
             
     Player::GiveMoney(playerid, total);
 
@@ -52,10 +62,16 @@ stock Payday::GetPlayerBonus(playerid, &Float:bonus)
 {
     bonus = 0;
 
-    // if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_ORG))
+    // if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_ORG))
     //     bonus += 1200.0;
-    if(IsFlagSet(Admin[playerid][adm::flags], FLAG_IS_ADMIN))
+    if(GetFlag(Admin[playerid][adm::flags], FLAG_IS_ADMIN))
         bonus += 250.0;
 
     return 1;
+}
+
+stock pdy::ClearData(playerid)
+{
+    pdy::Player[playerid][pdy::bonus]       = 0;
+    pdy::Player[playerid][pdy::time_left]   = 0;
 }

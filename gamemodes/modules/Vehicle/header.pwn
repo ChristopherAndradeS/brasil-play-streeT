@@ -1,9 +1,12 @@
+#define INVALID_OWNER_ID (-1)
+
 enum VEHICLE_OWNER_TYPE
 {
     VEH_OWNER_SERVER = 0,
     VEH_OWNER_PLAYER,
     VEH_OWNER_ORG
 }
+
 enum (<<= 1)
 {
     FLAG_VEH_IS_DEAD = 1,
@@ -20,6 +23,13 @@ enum (<<= 1)
     FLAG_PARAM_BOOT,
     FLAG_PARAM_OBJECTIVE,
 }
+
+enum _:OWNER_TYPES
+{
+    OWNER_TYPE_PLAYER = 1,
+    OWNER_TYPE_VEHICLE,
+}
+
 
 enum E_PLAYER_VEHICLE
 {
@@ -45,12 +55,7 @@ enum E_VEHICLES
 new veh::Player[MAX_PLAYERS][E_PLAYER_VEHICLE];
 new Vehicle[MAX_VEHICLES][E_VEHICLES];
 
+forward OnSpeedOMeterUpdate(playerid);
+forward Float:Veh::GetVehicleFuelUsed(Float:speed, Float:accel, Float:dt);
+forward OnVehicleFuelChange(playerid, Float:new_fuel, Float:old_fuel);
 forward OnVehicleCreate(vehicleid, modelid, regionid, Float:x, Float:y, Float:z);
-
-stock GetClosestVehicle(playerid, &Float:distance = 0.0)
-{
-    new Float:pX, Float:pY, Float:pZ;
-    GetPlayerPos(playerid, pX, pY, pZ);
-    
-    return Veh::GetClosest(pX, pY, pZ, distance);
-}

@@ -1,8 +1,8 @@
 {
-    "announce": false,
+    "announce": true,
     "artwork": {
         "cdn": "",
-        "enable": true,
+        "enable": false,
         "models_path": "models",
         "port": 7777,
         "web_server_bind": ""
@@ -19,15 +19,15 @@
     "enable_query": true,
     "game": {
         "allow_interior_weapons": false,
-        "chat_radius": 25.0,
+        "chat_radius": 0.0,
         "death_drop_amount": 0,
         "gravity": 0.00800000037997961,
         "group_player_objects": false,
         "lag_compensation_mode": 1,
         "map": "Brasil Play StreeT",
         "mode": "Brasil Play StreeT",
-        "nametag_draw_radius": 70.0,
-        "player_marker_draw_radius": 250.0,
+        "nametag_draw_radius": 60.0,
+        "player_marker_draw_radius": 0.0,
         "player_marker_mode": 0,
         "time": 12,
         "use_all_animations": true,
@@ -55,7 +55,7 @@
         "log_cookies": false,
         "log_deaths": true,
         "log_queries": false,
-        "log_sqlite": false,
+        "log_sqlite": true,
         "log_sqlite_queries": false,
         "timestamp_format": "[%Y-%m-%dT%H:%M:%S%z]",
         "use_prefix": true,
@@ -119,7 +119,7 @@
     "rcon": {
         "allow_teleport": true,
         "enable": true,
-        "password": "street2026"
+        "password": "password"
     },
     "sleep": 5.0,
     "use_dyn_ticks": true,

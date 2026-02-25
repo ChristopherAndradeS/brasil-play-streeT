@@ -36,7 +36,7 @@ YCMD:convidar(playerid, params[], help)
 
 YCMD:aceitar(playerid, params[], help)
 {
-    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 1;
 
     if(org::Player[playerid][pyr::orgid] != INVALID_ORG_ID) 
         return SendClientMessage(playerid, -1, "{ff3333}[ ORG ] {ffffff}Você já faz parte de uma {ff3333}organização");

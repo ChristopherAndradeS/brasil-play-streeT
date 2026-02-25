@@ -1,7 +1,6 @@
 stock Dealership::LoadMap()
 {
     new tmpobjid;
-    ////////// CONCESSIONÁRIA ///////
     tmpobjid = CreateDynamicObject(18981,-45.507,-1617.424,2.074,0.000,90.000,44.200,-1,-1,-1,300.000,300.000);
     SetDynamicObjectMaterial(tmpobjid, 0, 18757, "vcinteriors", "dts_elevator_carpet3", 0x00000000);
     tmpobjid = CreateDynamicObject(18981,-27.598,-1600.008,2.074,0.000,90.000,44.200,-1,-1,-1,300.000,300.000);

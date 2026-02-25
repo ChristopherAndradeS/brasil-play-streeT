@@ -13,6 +13,47 @@
 #define MAX_ACS_SCL         (1.5)
 #define MIN_ACS_SCL         (0.2)
 
+
+/*                  PLAYER ACESSORYS                 */
+
+enum _:AXIS_TYPE
+{
+    AXIS_TYPE_NONE = -1,
+    AXIS_TYPE_X,
+    AXIS_TYPE_Y,
+    AXIS_TYPE_Z,
+}
+
+enum _:MEASUREMENT_TYPE
+{
+    MEA_TYPE_POSITION,
+    MEA_TYPE_ANGLE,
+    MEA_TYPE_SCALE,
+}
+
+enum E_PLAYER_ACESSORY
+{
+    acs::modelid,
+    acs::slotid,
+    acs::boneid,
+    Float:acs::pX, Float:acs::pY, Float:acs::pZ,
+    Float:acs::rX, Float:acs::rY, Float:acs::rZ,
+    Float:acs::sX, Float:acs::sY, Float:acs::sZ,
+    acs::color1, acs::color2,
+
+    acs::flags,
+    acs::camid,
+    Float:acs::pOffset, Float:acs::aOffset, Float:acs::sOffset,
+    acs::pAxis, acs::aAxis, acs::sAxis
+}
+
+enum (<<= 1)
+{    
+    FLAG_EDITING_ACS = 1, 
+}
+
+new acs::Player[MAX_PLAYERS][E_PLAYER_ACESSORY];
+
 forward Response_ACC_MENU(playerid, dialogid, response, listitem, string:inputtext[]);
 forward Response_ACC_OPTIONS(playerid, dialogid, response, listitem, string:inputtext[]);
 forward Response_ACC_BONE(playerid, dialogid, response, listitem, string:inputtext[]);
@@ -79,7 +120,7 @@ hook OnPlayerDisconnect(playerid, reason)
 
 hook OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid)
 {
-    if(!IsFlagSet(acs::Player[playerid][acs::flags], MASK_EDITING_ACS)) return 1;
+    if(!GetFlag(acs::Player[playerid][acs::flags], FLAG_EDITING_ACS)) return 1;
     
     if(playertextid == Acessory::PlayerTD[playerid][PTD_ACS_POS_AXIS_BTN])
     {
@@ -134,7 +175,7 @@ hook OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid)
 
 hook OnPlayerClickTextDraw(playerid, Text:clickedid)
 {
-    if(!IsFlagSet(acs::Player[playerid][acs::flags], MASK_EDITING_ACS)) return 1;
+    if(!GetFlag(acs::Player[playerid][acs::flags], FLAG_EDITING_ACS)) return 1;
     
     new slotid = acs::Player[playerid][acs::slotid]; 
 
@@ -382,9 +423,9 @@ public Response_ACC_BONE(playerid, dialogid, response, listitem, string:inputtex
     new slotid = acs::Player[playerid][acs::slotid];
     
     if(!Acessory::ChangeBone(playerid, slotid, listitem + 1))
-        return SendClientMessage(playerid, COLOR_ERRO, "[ ACS ] {ffffff}Esse osso ja esta {ff3333}selecionado!");
+        return SendClientMessage(playerid, -1, "{ff3333}[ ACS ] {ffffff}Esse osso ja esta {ff3333}selecionado!");
     
-    SendClientMessage(playerid, COLOR_THEME_BPS, "[ ACS ] {ffffff}Osso do acessorio {33ff33}alterado {ffffff}Novo: {33ff33}%s", gBoneName[listitem + 1]);
+    SendClientMessage(playerid, -1, "{33ff33}[ ACS ] {ffffff}Osso do acessorio {33ff33}alterado {ffffff}Novo: {33ff33}%s", gBoneName[listitem + 1]);
  
     return 1;
 }
@@ -411,7 +452,7 @@ public Response_ACC_LOJA(playerid, dialogid, response, listitem, string:inputtex
 
     if(!Player::RemoveMoney(playerid, price))
     {
-        SendClientMessage(playerid, COLOR_ERRO, "[ ACS LOJA ] {ffffff}Você nao tem {ff3333}dinheiro {ffffff}suficiente!");
+        SendClientMessage(playerid, -1, "{ff3333}[ ACS LOJA ] {ffffff}Você nao tem {ff3333}dinheiro {ffffff}suficiente!");
         return 0;
     }
 
@@ -442,13 +483,13 @@ public Response_ACC_OPTIONS(playerid, dialogid, response, listitem, string:input
             {
                 RemovePlayerAttachedObject(playerid, slotid);
                 //acs::ClearData(playerid);
-                SendClientMessage(playerid, COLOR_THEME_BPS, "[ ACS ] {ffffff}Acessorio {33ff33}#%d {ffffff}desequipado!", slotid + 1);
+                SendClientMessage(playerid, -1, "{33ff33}[ ACS ] {ffffff}Acessorio {33ff33}#%d {ffffff}desequipado!", slotid + 1);
             }
 
             else
             {
                 Acessory::LoadOnPlayer(playerid, slotid);
-                SendClientMessage(playerid, COLOR_THEME_BPS, "[ ACS ] {ffffff}Acessorio {33ff33}#%d {ffffff}equipado!", slotid + 1);
+                SendClientMessage(playerid, -1, "{33ff33}[ ACS ] {ffffff}Acessorio {33ff33}#%d {ffffff}equipado!", slotid + 1);
             }
         } 
 
@@ -484,7 +525,7 @@ public Response_ACC_OPTIONS(playerid, dialogid, response, listitem, string:input
                 DB::Delete(db_entity, "acessorys", "owner = '%q' AND slotid = %d", name, slotid);
                 RemovePlayerAttachedObject(playerid, slotid);
                 acs::ClearData(playerid);
-                SendClientMessage(playerid, COLOR_THEME_BPS, "[ ACS ] {ffffff}Acessorio {33ff33}#%d {ffffff}deletado e dinheiro reembolsado!", slotid + 1);
+                SendClientMessage(playerid, -1, "{33ff33}[ ACS ] {ffffff}Acessorio {33ff33}#%d {ffffff}deletado e dinheiro reembolsado!", slotid + 1);
 
                 return 1;
             }
@@ -541,13 +582,13 @@ public Response_ACC_MENU(playerid, dialogid, response, listitem, string:inputtex
  
         if(!count)
         {
-            SendClientMessage(playerid, COLOR_ERRO, "[ ACS ] {ffffff}A loja de Acessorios esta vazia! Volte mais tarde.");
+            SendClientMessage(playerid, -1, "{ff3333}[ ACS ] {ffffff}A loja de Acessorios esta vazia! Volte mais tarde.");
             return 0;
         }
 
         if(Acessory::GetFreeSlot(playerid) == -1)
         {
-            SendClientMessage(playerid, COLOR_ERRO, "[ ACS LOJA ] {ffffff}Parece que voce ja possui o numero {ff3333}maximo {ffffff}de acessorios!");
+            SendClientMessage(playerid, -1, "{ff3333}[ ACS LOJA ] {ffffff}Parece que voce ja possui o numero {ff3333}maximo {ffffff}de acessorios!");
             return 0;
         }
 
@@ -575,7 +616,7 @@ public Response_ACC_MENU(playerid, dialogid, response, listitem, string:inputtex
         Dialog_ShowCallback(playerid, using public Response_ACC_LOJA<iiiis>, 
         DIALOG_STYLE_TABLIST_HEADERS, "{ffffff}Loja de Acessorios", msg, "Comprar", "Voltar");
 
-        SendClientMessage(playerid, COLOR_THEME_BPS, "[ ACS ] {ffffff}Abrindo {33ff33}Loja {ffffff}de Acessorios.");
+        SendClientMessage(playerid, -1, "{33ff33}[ ACS ] {ffffff}Abrindo {33ff33}Loja {ffffff}de Acessorios.");
     }
 
     return 1;
@@ -589,7 +630,7 @@ stock Acessory::SetPlayerEditor(playerid, slotid)
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
     
-    SetFlag(acs::Player[playerid][acs::flags], MASK_EDITING_ACS);
+    SetFlag(acs::Player[playerid][acs::flags], FLAG_EDITING_ACS);
     acs::Player[playerid][acs::pOffset] = 0.025;
     acs::Player[playerid][acs::aOffset] = 25.0;
     acs::Player[playerid][acs::sOffset] = 0.15;
@@ -611,7 +652,7 @@ stock Acessory::SetPlayerEditor(playerid, slotid)
     TogglePlayerControllable(playerid, false);
     Acessory::UpdateEditorCam(playerid, true);
 
-    SendClientMessage(playerid, COLOR_WARNING, "[ EDITOR ACS ] {ffffff}Editor de Acessorios {ff9933}aberto.");
+    SendClientMessage(playerid, -1, "{ff9933}[ EDITOR ACS ] {ffffff}Editor de Acessorios {ff9933}aberto.");
 }
 
 stock Acessory::UnSetPlayerEditor(playerid)
@@ -620,7 +661,7 @@ stock Acessory::UnSetPlayerEditor(playerid)
     TogglePlayerControllable(playerid, true);
     SetCameraBehindPlayer(playerid);
     acs::ClearData(playerid);
-    SendClientMessage(playerid, COLOR_WARNING, "[ EDITOR ACS ] {ffffff}Editor de Acessorios {ff9933}fechado.");
+    SendClientMessage(playerid, -1, "{ff9933}[ EDITOR ACS ] {ffffff}Editor de Acessorios {ff9933}fechado.");
 }
 
 stock Acessory::LoadOnPlayer(playerid, slotid)
@@ -697,7 +738,7 @@ stock Acessory::ChangeBone(playerid, slotid, new_boneid)
 
 stock Acessory::UpdateEditorCam(playerid, init = false)
 {
-    if(!IsFlagSet(acs::Player[playerid][acs::flags], MASK_EDITING_ACS))
+    if(!GetFlag(acs::Player[playerid][acs::flags], FLAG_EDITING_ACS))
         return 1;
     
     acs::Player[playerid][acs::camid] += init ? 0 : 1;
@@ -772,7 +813,7 @@ stock Acessory::SaveData(playerid, slotid)
     DB::SetDataFloat(db_entity, "acessorys", "sY", sY, "owner = '%q' AND slotid = %d", name, slotid);
     DB::SetDataFloat(db_entity, "acessorys", "sZ", sZ, "owner = '%q' AND slotid = %d", name, slotid);
 
-    SendClientMessage(playerid, COLOR_SUCESS, "[ ACS ] {ffffff}Acessorio {33ff33}#%d salvo {ffffff}com sucesso.", slotid + 1);
+    SendClientMessage(playerid, -1, "{33ff33}[ ACS ] {ffffff}Acessorio {33ff33}#%d salvo {ffffff}com sucesso.", slotid + 1);
         
     return 1;
 }
@@ -807,7 +848,7 @@ stock Acessory::GivePlayerStock(playerid, slotid, stockid)
     %i, %i, %f, %f, %f, %f, %f, %f, %f, %f, %f, %i, %i", name, slotid, OWNER_TYPE_PLAYER, price,
     modelid, boneid, pX, pY, pZ, rX, rY, rZ, sX, sY, sZ, color1, color2);
     
-    SendClientMessage(playerid, COLOR_THEME_BPS, "[ ACS LOJA ] {ffffff}Acessorio {33ff33}%s {ffffff}comprado com sucesso!", name);
+    SendClientMessage(playerid, -1, "{33ff33}[ ACS LOJA ] {ffffff}Acessorio {33ff33}%s {ffffff}comprado com sucesso!", name);
     
     DB::Delete(db_stock, "acessorys", "uid = %d", stockid);
 
@@ -942,4 +983,30 @@ stock Acessory::GetNameByModelid(modelid, name[], len = sizeof(name))
     }
 
     return 1;
+}
+
+stock acs::ClearData(playerid)
+{
+    acs::Player[playerid][acs::flags]   = 0x00000000;
+    acs::Player[playerid][acs::modelid] = INVALID_OBJECT_ID;
+    acs::Player[playerid][acs::slotid]  = INVALID_SLOTID;
+    acs::Player[playerid][acs::boneid]  = 0;
+    acs::Player[playerid][acs::pOffset] = 0.0;
+    acs::Player[playerid][acs::aOffset] = 0.0;
+    acs::Player[playerid][acs::sOffset] = 0.0;
+    acs::Player[playerid][acs::pAxis]   = AXIS_TYPE_NONE;
+    acs::Player[playerid][acs::aAxis]   = AXIS_TYPE_NONE;
+    acs::Player[playerid][acs::sAxis]   = AXIS_TYPE_NONE;
+    acs::Player[playerid][acs::camid]   = 0;
+    acs::Player[playerid][acs::pX]      = 0.0;
+    acs::Player[playerid][acs::pY]      = 0.0;
+    acs::Player[playerid][acs::pZ]      = 0.0;
+    acs::Player[playerid][acs::rX]      = 0.0;
+    acs::Player[playerid][acs::rY]      = 0.0;
+    acs::Player[playerid][acs::rZ]      = 0.0;
+    acs::Player[playerid][acs::sX]      = 0.0;
+    acs::Player[playerid][acs::sY]      = 0.0;
+    acs::Player[playerid][acs::sZ]      = 0.0;
+    acs::Player[playerid][acs::color1]  = -1;
+    acs::Player[playerid][acs::color2]  = -1;
 }

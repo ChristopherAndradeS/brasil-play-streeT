@@ -1,5 +1,3 @@
-#include <YSI\YSI_Coding\y_hooks>
-
 stock Login::ShowTDForPlayer(playerid, bool:in_login)
 { 
 	if(Login::IsVisibleTDForPlayer(playerid)) return;

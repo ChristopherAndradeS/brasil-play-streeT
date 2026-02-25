@@ -79,8 +79,8 @@ public UpdateWheelsTarget()
     for(new i = 0; i < NUM_FERRIS_CAGES; i++)
     {
         idx = i + Ferris[frs::step];
-        if(idx >= NUM_FERRIS_CAGES) 
-            idx = (idx % NUM_FERRIS_CAGES);
+        
+        if(idx >= NUM_FERRIS_CAGES) idx = (idx % NUM_FERRIS_CAGES);
 
         MoveDynamicObject(Ferris[frs::cage][i], 
         gFerrisOrigin[0] + gFerrisCageOffsets[idx][1], 
@@ -90,8 +90,7 @@ public UpdateWheelsTarget()
 
     Ferris[frs::step] += 1;
 
-    if(Ferris[frs::step] >= NUM_FERRIS_CAGES) 
-        Ferris[frs::step] = 0;
+    if(Ferris[frs::step] >= NUM_FERRIS_CAGES) Ferris[frs::step] = 0;
 }
 
 stock Spawn::RemoveGTAObjects(playerid)
@@ -121,7 +120,6 @@ stock Spawn::RemoveGTAObjects(playerid)
 stock Spawn::LoadMap()
 {
     new tmpobjid;
-    ////////////////////////////////// Spawn LS //////////////////////////////////
     tmpobjid = CreateDynamicObject(1946, 822.017639, -1827.203247, 11.621517, 0.000000, 0.000022, 0.000000, -1, -1, -1, 300.00, 300.00); 
     SetDynamicObjectMaterialText(tmpobjid, 0, "None", 10, "Arial", 20, 0, 0x00000000, 0xFF0DF205, 0);
     tmpobjid = CreateDynamicObject(1946, 821.617797, -1827.203247, 11.621517, 0.000000, 0.000022, 0.000000, -1, -1, -1, 300.00, 300.00); 
@@ -779,8 +777,8 @@ stock Spawn::LoadMap()
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //CreateDynamicObject(6298, 848.020751, -1849.283203, 24.735393, 0.000000, 0.000000, 90.000000, -1, -1, -1, 300.00, 300.00); 
-    //CreateDynamicObject(18877, 848.020751, -1849.283203, 26.785394, 0.000000, 0.000000, 90.000000, -1, -1, -1, 300.00, 300.00); 
+    // CreateDynamicObject(6298, 848.020751, -1849.283203, 24.735393, 0.000000, 0.000000, 90.000000, -1, -1, -1, 300.00, 300.00); 
+    // CreateDynamicObject(18877, 848.020751, -1849.283203, 26.785394, 0.000000, 0.000000, 90.000000, -1, -1, -1, 300.00, 300.00); 
     // CreateDynamicObject(18878, 848.020751, -1849.283203, 26.785394, 0.000000, 0.000000, 90.000000, -1, -1, -1, 300.00, 300.00); 
     // CreateDynamicObject(18879, 847.995605, -1849.359497, 15.381015, 0.000000, 0.000000, 90.000000, -1, -1, -1, 300.00, 300.00); 
     // CreateDynamicObject(18879, 847.995605, -1842.449096, 17.521020, 0.000000, 0.000000, 90.000000, -1, -1, -1, 300.00, 300.00); 

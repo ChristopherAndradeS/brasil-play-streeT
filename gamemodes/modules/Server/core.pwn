@@ -1,13 +1,9 @@
-#include <YSI\YSI_Coding\y_hooks>
+stock Server::IsNewDay()
+    return (!Server[srv::hour] && !Server[srv::minute]);
 
-hook OnServerUpdateSeconds()
-{
-    TextDrawSetString(Baseboard::PublicTD[TD_BASEBOARD_CLOCK], "%02d:%02d:%02d~n~~g~~h~~h~%s - %02d_de_%s_de_%04d", 
-    Server[srv::hour], Server[srv::minute], Server[srv::seconds],
-    gWeekDays[Server[srv::weekday]], Server[srv::day], gMonths[Server[srv::month]], Server[srv::year]);
+stock Server::IsNewHour()
+    return (!Server[srv::minute]);
 
-    Server::UpdatePlayerSeconds();
-}
 
 stock Server::UpdatePlayerSeconds()
 {

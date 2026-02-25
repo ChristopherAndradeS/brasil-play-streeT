@@ -1,6 +1,6 @@
 YCMD:evento(playerid, params[], help)
 {
-    if(IsFlagSet(Admin[playerid][adm::flags], FLAG_ADM_WORKING))
+    if(GetFlag(Admin[playerid][adm::flags], FLAG_ADM_WORKING))
         return SendClientMessage(playerid, -1, "{ff3333}[ EVENTO ] {ffffff}Sai do modo de trabalho: {ff3333}/aw {ffffff}para poder jogar nos eventos!");
 
     if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME) || GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_PLAYING))

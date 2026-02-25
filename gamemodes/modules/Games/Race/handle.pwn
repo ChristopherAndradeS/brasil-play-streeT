@@ -120,21 +120,3 @@ hook OnPlayerEnterCheckpoint(playerid)
 
     return 1;
 }
-
-stock Race::UpdatePlayerCheck(playerid, data[E_RACE_SEAT])
-{
-    new raceid = game::Player[playerid][pyr::gameid];
-
-    SetPlayerCheckpoint(playerid,
-    Race::gCheckpoints[data[race::checkid]][0], 
-    Race::gCheckpoints[data[race::checkid]][1], 
-    Race::gCheckpoints[data[race::checkid]][2], 25.0);
-
-    map_set_arr(Race[raceid][race::participant], playerid, data);
-
-    SendClientMessage(playerid, -1, 
-    "{3399ff}[ CORRIDA ] {ffffff}Checkpoint {3399ff}%d/%d {ffffff}| Volta: {3399ff}%d/%d {ffffff}| Posição: {3399ff}%d| Lugar",
-    data[race::checkid] + 1, sizeof(Race::gCheckpoints), data[race::laps], Race[raceid][race::lap], Race::GetPodiumPlace(raceid, playerid));
-
-    return 1;
-}

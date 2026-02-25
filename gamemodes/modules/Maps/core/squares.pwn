@@ -133,12 +133,9 @@ stock Square::RemoveGTAObjects(playerid, mapid)
 stock Square::LoadMap(mapid)
 {
     new tmpobjid;
+
     if(mapid == 1)
     {
-        // =============================================================================
-        //                                   PRAÇA HP
-        // =============================================================================
-
         tmpobjid = CreateDynamicObject(19853, 1231.440917, -1354.718750, 12.326667, 0.000000, 0.000000, 0.000000, -1, -1, -1, 300.00, 300.00); 
         SetDynamicObjectMaterial(tmpobjid, 0, 13691, "bevcunto2_lahills", "stonewall3_la", 0x00000000);
         tmpobjid = CreateDynamicObject(19853, 1231.440917, -1293.558837, 12.196667, 0.000000, 0.000000, 0.000000, -1, -1, -1, 300.00, 300.00); 

@@ -1,7 +1,3 @@
-#include <YSI\YSI_Coding\y_hooks>
-
-forward ban_input_dialog(playerid, dialogid, response, listitem, string:inputtext[]);
-
 public ban_input_dialog(playerid, dialogid, response, listitem, string:inputtext[])
 {
     if(!response) return 1;
@@ -10,8 +6,8 @@ public ban_input_dialog(playerid, dialogid, response, listitem, string:inputtext
 
     if(sscanf(inputtext, "s[24]is[64]", name, days, reason)) 
     {
-        SendClientMessage(playerid, -1, "{ff3333}[ ADMIN ] {ffffff}Escreva separando por espaço: {ff3333}NOME + DIAS + MOTIVO {ffffff}para banir");
-        SendClientMessage(playerid, -1, "{ff3333}[ ADMIN ] {ffffff}Ou escreva: {ff3333}NOME + [-1] + MOTIVO {ffffff}para banir permanentemente");
+        SendClientMessage(playerid, -1, "{ff3333}[ ADMIN ] {ffffff}Escreva separando por espaço: {ff3333}NOME + DIAS + MOTIVO {ffffff}para banir.");
+        SendClientMessage(playerid, -1, "{ff3333}[ ADMIN ] {ffffff}Ou escreva: {ff3333}NOME + [-1] + MOTIVO {ffffff}para banir permanentemente.");
         return 1;
     }
 
@@ -63,8 +59,8 @@ YCMD:mkfnd(playerid, params[], help)
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 
-    if(!Adm::Set(name, "SERVER", 9))
-        SendClientMessage(playerid, COLOR_ERRO, "[ ADM ] {ffffff}Erro Fatal ao setar voce como fundador!");
+    if(!Adm::Set(name, "SERVER", ROLE_ADM_FOUNDER))
+        SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Erro Fatal ao setar voce como fundador!");
     
     return 1;
 }
@@ -77,7 +73,7 @@ YCMD:aa(playerid, params[], help)
         return 1;
     }
 
-    if(!IsFlagSet(Admin[playerid][adm::flags], FLAG_IS_ADMIN)) 
+    if(!GetFlag(Admin[playerid][adm::flags], FLAG_IS_ADMIN)) 
     {
         SendClientMessage(playerid,  -1, "{ff3333}[ ADM ] {ffffff}Voce nao tem permissao para isso!");
         return 1;
@@ -121,7 +117,7 @@ YCMD:aw(playerid, params[], help)
         return 1;
     }
 
-    if(!IsFlagSet(Admin[playerid][adm::flags], FLAG_IS_ADMIN)) 
+    if(!GetFlag(Admin[playerid][adm::flags], FLAG_IS_ADMIN)) 
     {
         SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Voce nao tem permissao para isso!");
         return 1;
@@ -202,7 +198,7 @@ YCMD:aviso(playerid, params[], help)
     if(!Adm::ValidTargetID(playerid, targetid)) return 1;
 
     SendClientMessage(targetid, -1, "{ff9933}[ AVISO ADMIN ] {ffffff}%s", reason);
-    SendClientMessage(playerid, COLOR_SUCESS, "{ffff33}[ ADM ] {ffffff}Aviso {ffff33}enviado.");
+    SendClientMessage(playerid, -1, "{ffff33}[ ADM ] {ffffff}Aviso {ffff33}enviado.");
 
     return 1;
 }
@@ -697,20 +693,20 @@ YCMD:setadm(playerid, params[], help)
 
     if(!Adm::HasPermission(playerid, ROLE_ADM_CEO, false)) return 1;
     
-    new name[MAX_PLAYER_NAME], level;
-    if(sscanf(params, "s[24]i", name, level)) 
+    new name[MAX_PLAYER_NAME], E_ROLES_ADMIN:level;
+    if(sscanf(params, "s[24]i", name, _:level)) 
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /setadm {ff3333}[ NOME ] [ CARGO <1 - 9>]");
     
     new admin_name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, admin_name);
 
-    level = clamp(level, 1, 9);
+    level = E_ROLES_ADMIN:clamp(_:level, 1, 9);
 
     if(!Adm::Set(name, admin_name, level))
-        return SendClientMessage(playerid, COLOR_ERRO, "[ ADM ] {ffffff}Erro ao setar admin, provavelmente não existe no banco de dados!");
+        return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Erro ao setar admin, provavelmente não existe no banco de dados!");
 
     SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce promoveu {33ff33}%s {ffffff}com sucesso.", name);
-    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Cargo de promoção: %s%s", Adm::GetColorString(level), Adm::gRoleNames[level]);
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Cargo de promoção: %s%s", Adm::GetColorString(level), Adm::gRoleNames[_:level]);
     return 1;
 }
 
@@ -734,8 +730,8 @@ YCMD:remadm(playerid, params[], help)
     new admin_name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, admin_name);
 
-    if(!Adm::Set(name, admin_name, 0))
-        return SendClientMessage(playerid, COLOR_ERRO, "[ ADM ] {ffffff}Erro Fatal ao remover admin, procure um programador!");
+    if(!Adm::Set(name, admin_name, INVALID_ADM_ROLE_ID))
+        return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Erro Fatal ao remover admin, procure um programador!");
 
     SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce removeu {33ff33}%s {ffffff}com sucesso.", name);
 
@@ -1030,7 +1026,6 @@ YCMD:darlider(playerid, params[], help)
 
     return 1;
 }
-
 
 YCMD:darsub(playerid, params[], help)
 {

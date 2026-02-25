@@ -1,7 +1,5 @@
 #include <YSI\YSI_Coding\y_hooks>
 
-forward OnSpectatorListUpdate(spectatorid, reason);
-
 hook OnGameModeInit()
 {
     gAdminSpectates = list_new();
@@ -53,33 +51,4 @@ public OnSpectatorListUpdate(spectatorid, reason)
     }
 
     return 1;
-}
-
-stock Adm::AddSpectatorInList(spectatorid)   
-{
-    if(!list_valid(gAdminSpectates)) return 0;
-
-    if(list_find(gAdminSpectates, spectatorid) == -1)
-    {
-        list_add(gAdminSpectates, spectatorid);
-        return 1;
-    }
-
-    return 0;
-}
-
-stock Adm::RemSpectatorInList(spectatorid, reason)   
-{   
-    if(!list_valid(gAdminSpectates)) return 0;
-
-    new idx = list_find(gAdminSpectates, spectatorid);
-
-    if(idx != -1)
-    {
-        list_remove(gAdminSpectates, idx);
-        CallLocalFunction("OnSpectatorListUpdate", "ii", spectatorid, reason);
-        return 1;
-    }
-
-    return 0;
 }

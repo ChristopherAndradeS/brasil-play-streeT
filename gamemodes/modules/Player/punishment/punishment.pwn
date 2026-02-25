@@ -23,7 +23,7 @@ stock Punish::VerifyPlayer(playerid)
 
         if(left_time <= gettime())
         {
-            SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_IS_PARDON);
+            SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IS_PARDON);
 
             DB::Delete(db_entity, "punishments", "name = '%q' AND level = 2", name);
 
@@ -76,21 +76,21 @@ stock Punish::VerifyPlayer(playerid)
 
         if(left_time <= 0)
         {
-            SendClientMessage(playerid, COLOR_THEME_BPS, "[ BPS ] {ffffff}Você foi {33ff33}perdoado \
+            SendClientMessage(playerid, -1, "{33ff33}[ BPS ] {ffffff}Você foi {33ff33}perdoado \
             {ffffff}da sua prisão na ilha deserta.");
-            SendClientMessage(playerid, COLOR_THEME_BPS, "[ BPS ] {ffffff}Esperamos {33ff33}bom \
+            SendClientMessage(playerid, -1, "{33ff33}[ BPS ] {ffffff}Esperamos {33ff33}bom \
             {ffffff}comportamento de agora em diante!");
 
             DB::Delete(db_entity, "punishments", "name = '%q' AND level = 1", name);
 
             printf("[ ILHA ] O jogador %s foi perdoado da cadeia staff", name);
 
-            ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL);
+            ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_JAIL);
         }
 
         else
         {
-            SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL);
+            SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_JAIL);
         }
     }
 
@@ -104,7 +104,7 @@ stock Punish::SendPlayerToJail(playerid, time)
 
     DB::GetDataInt(db_entity, "players", "skinid", skinid, "name = '%q'", name);
     
-    SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL);
+    SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_JAIL);
     
     SetSpawnInfo(playerid, NO_TEAM, skinid, 
     969.973876 + RandomFloatMinMax(-2.0, 2.0), -3210.220458 + RandomFloatMinMax(-2.0, 2.0), 13.347578, RandomFloat(360.0), 
@@ -271,7 +271,7 @@ stock Punish::UnsetJail(playerid)
     
     Player::KillTimer(playerid, pyr::TIMER_JAIL);
     
-    ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL);
+    ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_JAIL);
 
     printf("[ ILHA ] O jogador %s foi perdoado da cadeia staff", GetPlayerNameStr(playerid));
 

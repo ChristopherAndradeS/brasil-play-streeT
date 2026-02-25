@@ -1,5 +1,3 @@
-#include <YSI\YSI_Coding\y_hooks>
-
 stock Baseboard::UpdateTDForPlayer(playerid, textid, const text[], GLOBAL_TAG_TYPES:...)
 {
 	if(!Baseboard::IsVisibleTDForPlayer(playerid)) return;

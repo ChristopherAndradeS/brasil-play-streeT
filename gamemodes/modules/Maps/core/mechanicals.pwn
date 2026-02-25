@@ -30,7 +30,6 @@ stock Officine::LoadMap(mapid)
 
     if(mapid == 1)
     {
-        ////////////////////////////////// MECANICA LS 2//////////////////////////////////
         tmpobjid = CreateDynamicObject(19447, 2091.667968, -1937.909057, 19.457599, 0.000038, -0.000015, 179.999771, -1, -1, -1, 300.00, 300.00); 
         SetDynamicObjectMaterial(tmpobjid, 0, 2755, "ab_dojowall", "mp_apt1_roomfloor", 0x00000000);
         tmpobjid = CreateDynamicObject(19447, 2091.667968, -1937.909057, 22.947591, 0.000045, -0.000015, 179.999740, -1, -1, -1, 300.00, 300.00); 
@@ -243,7 +242,6 @@ stock Officine::LoadMap(mapid)
     if(mapid == 2)
     {
         new TuningShop[128];
-        ///MECANICA AEROPORTO/////////
         TuningShop[0] = CreateDynamicObject(11317, 1573.328979, -2164.786376, 17.798563, 0.000080, 0.000000, 89.999717, -1, -1, -1, 300.00, 300.00);
         SetDynamicObjectMaterial(TuningShop[0], 2, 18901, "matclothes", "beretred", 0x00000000);
         SetDynamicObjectMaterial(TuningShop[0], 3, 18646, "matcolours", "grey-93-percent", 0x00000000);
@@ -400,7 +398,6 @@ stock Officine::LoadMap(mapid)
 
     if(mapid == 3)
     {
-        // MECANICA DROP //
         tmpobjid = CreateDynamicObject(18762, 1932.238891, -1818.064208, 14.889829, 0.000000, 0.000000, 0.000000, -1, -1, -1, 300.00, 300.00); 
         SetDynamicObjectMaterial(tmpobjid, 0, 18901, "matclothes", "bandanacloth1", 0x00000000);
         tmpobjid = CreateDynamicObject(18762, 1951.227905, -1818.030151, 14.889829, 0.000000, 0.000000, 0.000000, -1, -1, -1, 300.00, 300.00); 

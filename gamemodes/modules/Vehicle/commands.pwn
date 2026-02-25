@@ -1,8 +1,6 @@
-#include <YSI\YSI_Coding\y_hooks>
-
 YCMD:trancar(playerid, params[], help)
 {
-    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 1;
 
     new Float:distance;
     new vehicleid = GetClosestVehicle(playerid, distance);
@@ -17,7 +15,7 @@ YCMD:trancar(playerid, params[], help)
 
 YCMD:motor(playerid, params[], help)
 {
-    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 1;
 
     if(!IsPlayerInAnyVehicle(playerid)) 
         return SendClientMessage(playerid, -1, "{ff3333}[ VEH ] {ffffff}Você precisa estar dentro de um veiculo!");
@@ -32,7 +30,7 @@ YCMD:motor(playerid, params[], help)
 
 YCMD:gps(playerid, params[], help)
 {
-    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 1;
 
     new category[32], name[32], msg[512];
 
@@ -93,7 +91,7 @@ YCMD:gps(playerid, params[], help)
             new Float:distance = floatsqroot(floatpower(pX - tX, 2) + floatpower(pY - tY, 2) + floatpower(pZ - tZ, 2));
 
             SetPlayerCheckpoint(playerid, pX, pY, pZ, 2.5);
-            SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_CHECKPOINT);
+            SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_CHECKPOINT);
             PlayerPlaySound(playerid, 1056, 0.0, 0.0, 0.0);
             
             SendClientMessage(playerid, -1, "{33ff33}[ GPS ] {ffffff}GPS selecionou {33ff33}%s {ffffff}> {33ff33}%s", category, name);
@@ -111,7 +109,7 @@ YCMD:gps(playerid, params[], help)
 
 YCMD:cancelargps(playerid, params[], help)
 {
-    if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_CHECKPOINT)) 
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_CHECKPOINT)) 
         return SendClientMessage(playerid, -1, "{ff3333}[ GPS ] {ffffff}Você nao tem nenhum GPS ativo.");
     
     DisablePlayerCheckpoint(playerid);
@@ -121,7 +119,7 @@ YCMD:cancelargps(playerid, params[], help)
 
 YCMD:mochila(playerid, params[], help)
 {
-    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 1;
     
     return 1;
 }

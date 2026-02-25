@@ -47,39 +47,18 @@
 #define Ammu::              AMM_
 #define House::             HOS_
 
-
 /*          DEFINES          */
 #define DISCORD_LINK        "https://discord.gg/Czq6DWDvcB"
 #define LOGIN_MUSIC_URL     "https://files.catbox.moe/gqya30.mp3"
 #define LOGIN_MUSIC_MS      (203000)
-
-    /*          COLORS          */
-#define COLOR_THEME_BPS         0x0DF205FF
-#define COLOR_LIGHT_GREEN       0x88FF88FF
-#define COLOR_SUCESS            0x33FF33FF
-#define COLOR_ERRO              0xFF3333FF
-#define COLOR_WARNING           0xFFF9933FF  
-
-#define FCOLOR_THEME_BPS        "{0df205}"
-#define FCOLOR_LIGHT_GREEN      "{88FF88}"
-#define FCOLOR_SUCESS           "{33FF33}"
-#define FCOLOR_ERRO             "{FF3333}"
-#define FCOLOR_WARNING          "{FFFF33}"  
-
+ 
 /*          FOWARDS          */
 forward Float:floatclamp(Float:value, Float:min, Float:max);
-
-enum _:OWNER_TYPES
-{
-    OWNER_TYPE_PLAYER = 1,
-    OWNER_TYPE_VEHICLE,
-}
 
 new const gMonths[][16] = 
 {   
     "INVALID_MONTH", "Janeiro", "Fevereiro", "Marco", 
-    "Abril", "Maio", "Junho", 
-    "Julho", "Agosto", "Setembro", 
+    "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", 
     "Outubro", "Novembro", "Dezembro" 
 };
 

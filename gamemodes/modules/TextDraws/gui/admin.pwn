@@ -18,8 +18,8 @@ stock Adm::UpdateTextDraw(playerid, targetid)
 	Adm::UpdatePTDText(playerid, PTD_ADM_TXT_ORGNAME, "ORG: SEM ORG");
 	Adm::UpdatePTDText(playerid, PTD_ADM_TXT_STATE, "STATE: %d", GetPlayerState(targetid));
 
-	if(Admin[targetid][adm::lvl] > 0)
-		Adm::UpdatePTDText(playerid, PTD_ADM_TXT_ROLE, "CARGO: %s", Adm::gRoleNames[Admin[targetid][adm::lvl]]);
+	if(Admin[targetid][adm::lvl] > INVALID_ADM_ROLE_ID)
+		Adm::UpdatePTDText(playerid, PTD_ADM_TXT_ROLE, "CARGO: %s", Adm::gRoleNames[_:Admin[targetid][adm::lvl]]);
 	else
 		Adm::UpdatePTDText(playerid, PTD_ADM_TXT_ROLE, "CARGO: %s", "Sem cargo");
 

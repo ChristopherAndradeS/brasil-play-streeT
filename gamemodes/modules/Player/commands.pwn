@@ -1,6 +1,6 @@
 YCMD:spawn(playerid, params[], help)
 {
-    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 1;
 
     Player::Spawn(playerid);
     SendClientMessage(playerid, -1, "{99ff99}[ BPS ] {ffffff}Você foi enviado ao spawn!");
@@ -9,7 +9,7 @@ YCMD:spawn(playerid, params[], help)
 
 YCMD:dance(playerid, params[], help)
 {
-    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 1;
 
     new danceid;
 
@@ -28,7 +28,7 @@ YCMD:dance(playerid, params[], help)
 
 YCMD:skin(playerid, params[], help)
 {
-    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 1;
 
     new skinid;
 
@@ -50,14 +50,14 @@ YCMD:skin(playerid, params[], help)
 
 YCMD:ajuda(playerid, params[], help)
 {
-    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 1;
     
     return 1;
 }
 
 YCMD:acessorios(playerid, params[], help)
 {
-    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 1;
     
     if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME) && !GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_FINISHED))
         return SendClientMessage(playerid, -1, "{ff5533}[ ERRO ] {ffffff}Você não pode mexer com acessórios durante o evento!");
@@ -93,7 +93,7 @@ YCMD:acessorios(playerid, params[], help)
 
 YCMD:orgs(playerid, params[], help)
 {
-    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 1;
 
     new msg[1024], line[128], org::members[MAX_ORGS];
     
@@ -129,7 +129,7 @@ YCMD:orgs(playerid, params[], help)
 
 YCMD:veh(playerid, params[], help)
 {
-    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 1;
 
     if(IsValidVehicle(Player[playerid][pyr::vehicleid]))
         return SendClientMessage(playerid, -1, "{ff3333}[ VEH ] {ffffff}Você já possui um veículo criado. Use {ff3333}/dveh {ffffff}para destrui-lo e criar outro!");
@@ -163,7 +163,7 @@ YCMD:veh(playerid, params[], help)
 
 YCMD:dveh(playerid, params[], help)
 {
-    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return 1;
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 1;
 
     if(!IsValidVehicle(Player[playerid][pyr::vehicleid]))
         return SendClientMessage(playerid, -1, "{ff3333}[ VEH ] {ffffff}Você precisa criar um veículo antes. Use {ff3333}/veh [ MODELID ou NOME ] {ffffff}para isso!");

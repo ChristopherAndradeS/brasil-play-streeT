@@ -12,13 +12,13 @@ hook OnPlayerConnect(playerid)
 
     Player::ClearAllData(playerid);
 
-    new name[MAX_PLAYER_NAME], issue;
+    new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 
     /* VERIFICAR NOME - É ADEQUADO ?  */
-    if(!IsValidPlayerName(name, issue))
+    if(!IsValidNickName(name))
     {
-        SendClientMessage(playerid, -1 , FCOLOR_ERRO "[ KICK ] {ffffff}Seu nome de usuario e invalido: {ff3333}%s", gNameIssue[issue]);
+        SendClientMessage(playerid, -1 , "{ff3333}[ KICK ] {ffffff}Seu nome de usuario e invalido!");
         Kick(playerid);
         return -1; // ENCERRA PROXÍMAS EXECUÇÕES DE hook OnPlayerConnect
     }
@@ -26,10 +26,27 @@ hook OnPlayerConnect(playerid)
     /* VERIFICAR PUNIÇÃO - ESTÁ BANIDO ?  */
     if(!Punish::VerifyPlayer(playerid))
     {
-        SendClientMessage(playerid, -1 , FCOLOR_ERRO "[ KICK ] {ffffff}Você esta {ff3333}banido {ffffff}deste servidor!");
+        SendClientMessage(playerid, -1 , "{ff3333}[ KICK ] {ffffff}Você esta {ff3333}banido {ffffff}deste servidor!");
         Kick(playerid);
         return -1;
     }
+
+    Officine::RemoveGTAObjects(playerid, MAP_MEC_LS);
+    Officine::RemoveGTAObjects(playerid, MAP_MEC_AIRPORT);
+    Org::RemoveGTAObjects(playerid);
+    Store::RemoveGTAObjects(playerid, MAP_STORE_BINCO);
+    Spawn::RemoveGTAObjects(playerid);
+    Square::RemoveGTAObjects(playerid, MAP_SQUARE_HP);
+    Square::RemoveGTAObjects(playerid, MAP_SQUARE_LS);
+    Ammu::RemoveGTAObjects(playerid);
+    Bank::RemoveGTAObjects(playerid, MAP_BANK_LOTTERY);
+    House::RemoveGTAObjects(playerid);
+
+    Login::HideTDForPlayer(playerid);
+    Baseboard::HideTDForPlayer(playerid);
+    Acessory::HideTDForPlayer(playerid);
+    Adm::HideTDForPlayer(playerid);
+    Veh::HideTDForPlayer(playerid);
 
     return 1;
 }
@@ -43,10 +60,10 @@ hook OnPlayerDisconnect(playerid, reason)
     
     Player::KillTimer(playerid, pyr::TIMER_LOGIN_KICK);
 
-    if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) return -1;
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return -1;
 
     /* JOGADOR É VÁLIDO / LOGOU / ESTÁ EM MODO ESPECTADOR */
-    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING)) 
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_SPECTATING)) 
     {
         return -1;
     }
@@ -62,7 +79,7 @@ hook OnPlayerDisconnect(playerid, reason)
     }
 
     /* JOGADOR É VÁLIDO / LOGOU / ESTÁ PRESO */
-    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL))
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_JAIL))
     {
         if(DB::Exists(db_entity, "punishments", "name = '%q' AND level = 1", name))
         {
@@ -73,7 +90,7 @@ hook OnPlayerDisconnect(playerid, reason)
         Player::KillTimer(playerid, pyr::TIMER_JAIL); 
     }
 
-    else if(IsFlagSet(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME)) 
+    else if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME)) 
         return 1;
 
     else
@@ -96,12 +113,18 @@ hook OnPlayerDisconnect(playerid, reason)
     Adm::RemSpectatorInList(playerid, 1);
     Player::ClearAllData(playerid);
 
+    Login::HideTDForPlayer(playerid);
+    Baseboard::HideTDForPlayer(playerid);
+    Acessory::HideTDForPlayer(playerid);
+    Adm::HideTDForPlayer(playerid);
+    Veh::HideTDForPlayer(playerid);
+
     return 1;
 }
 
 hook OnPlayerLogin(playerid)
 {
-    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL))
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_JAIL))
     {
         new time;
         DB::GetDataInt(db_entity, "punishments", "left_tstamp", time, "name = '%q' AND level = 1", GetPlayerNameStr(playerid));
@@ -111,11 +134,11 @@ hook OnPlayerLogin(playerid)
         return -1;
     }
 
-    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IS_PARDON))
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IS_PARDON))
     {
-        SendClientMessage(playerid, COLOR_THEME_BPS, "[ BPS ] {ffffff}Você foi {33ff33}perdoado \
+        SendClientMessage(playerid, -1, "{33ff33}[ BPS ] {ffffff}Você foi {33ff33}perdoado \
             {ffffff}do seu banimento. Esperamos {33ff33}bom {ffffff}comportamento de agora em diante!");
-        ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_IS_PARDON);
+        ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IS_PARDON);
     }
 
     Player[playerid][pyr::health] = 100.0;
@@ -151,39 +174,6 @@ hook OnPlayerGiveDamage(playerid, damagedid, Float:amount, WEAPON:weaponid, body
     return 1;
 }
 
-stock Player::UpdateDamage(playerid, issuerid, Float:damage, WEAPON:weaponid, bodypart)
-{
-    if(!IsValidPlayer(playerid) && !IsValidPlayer(issuerid)) return 1;
-
-    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_DEATH))  
-    {
-        GameTextForPlayer(issuerid, "~r~~h~OVERKILL", 1000, 4);
-        return 1;
-    }
-
-    if(bodypart == 9)
-    {
-        GameTextForPlayer(issuerid, "~r~H~h~E~h~~h~A~g~~h~~h~D~g~~h~S~b~~h~~h~H~b~O~b~O~p~T", 1000, 4);
-        PlayerPlaySound(issuerid, 1139);
-    }
-
-    Player[playerid][pyr::health] = floatclamp(Player[playerid][pyr::health] - damage, 1.0, 200.0);
-    
-    SetPlayerHealth(playerid, floatclamp(Player[playerid][pyr::health], 1.0, 100.0));
-    SetPlayerArmour(playerid, Player[playerid][pyr::health] <= 100.0 ? 0.0 : Player[playerid][pyr::health] - 100.0);
-
-    if(Player[playerid][pyr::health] <= 1.0)
-    {   
-        GameTextForPlayer(issuerid, "~h~MATOU", 500, 4);
-        GameTextForPlayer(playerid, "~r~~h~MORREU", 500, 4);
-        SetPlayerHealth(playerid, 1.0);
-        SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_DEATH);
-        CallLocalFunction("OnPlayerDied", "iii", playerid, issuerid, WEAPON:weaponid);
-    }
-
-    return 1;
-}
-
 hook OnPlayerDeath(playerid, killerid, WEAPON:reason)
 {
     if(!IsValidPlayer(playerid)) return 1;
@@ -201,17 +191,6 @@ hook OnPlayerDeath(playerid, killerid, WEAPON:reason)
     return 1;
 }
 
-stock Player::AplyRandomDeathAnim(playerid, &time)
-{
-    switch(RandomMax(100))
-    {
-        case 0..33:     ApplyAnimation(playerid, "CRACK", "crckdeth1", 4.1, false, false, false, false, 2170, SYNC_ALL), time = 2170; 
-        case 34..66:    ApplyAnimation(playerid, "CRACK", "crckdeth3", 4.1, false, false, false, false, 2170, SYNC_ALL), time = 2170;
-        case 67..100:   ApplyAnimation(playerid, "CRACK", "crckdeth4", 4.1, false, false, false, false, 2170, SYNC_ALL), time = 1670;
-        default: time = 2000;
-    }
-}
-
 public PYR_RefreshDeath(playerid, killerid, WEAPON:reason)
 {
     Player[playerid][pyr::health] = 100.0;
@@ -226,7 +205,6 @@ public PYR_RefreshDeath(playerid, killerid, WEAPON:reason)
 
     return 1;
 }
-
 
 hook OnPlayerDied(playerid, killerid, WEAPON:reason)
 {
@@ -244,23 +222,23 @@ hook OnPlayerSpawn(playerid)
 {    
     if(IsPlayerNPC(playerid)) return -1;
 
-    if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED)) 
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) 
     {
         SendClientMessage(playerid, -1, "{ff3333}[ KICK ] {ffffff}Um erro desconhecido aconteceu! Voce spawnou sem estar logado!");
         Kick(playerid);
         return -1;
     }
     
-    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING))
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_SPECTATING))
     {
-        ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING);  
+        ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_SPECTATING);  
         Adm::AddSpectatorInList(playerid); 
         SetPlayerWeather(playerid, Server[srv::g_weatherid]);
 
         return 1;
     }
 
-    if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_IN_JAIL))
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_JAIL))
     {
         SetPlayerWeather(playerid, Server[srv::j_weatherid]);
         return -1;
@@ -271,9 +249,9 @@ hook OnPlayerSpawn(playerid)
 
 hook OnPlayerEnterCheckpoint(playerid)
 {
-    if(!GetFlag(Player[playerid][pyr::flags], MASK_PLAYER_CHECKPOINT)) return 1;
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_CHECKPOINT)) return 1;
     
-    ResetFlag(Player[playerid][pyr::flags], MASK_PLAYER_CHECKPOINT);
+    ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_CHECKPOINT);
     DisablePlayerCheckpoint(playerid);
     SendClientMessage(playerid, -1, "{33ff33}[ GPS ] {ffffff}Você chegou ao seu destino!");
     PlayerPlaySound(playerid, 1058, 0.0, 0.0, 0.0); 
@@ -281,61 +259,42 @@ hook OnPlayerEnterCheckpoint(playerid)
     return 1;
 }
 
-stock Player::DestroyCpfTag(playerid)
+hook OnPlayerEnterDynamicArea(playerid, STREAMER_TAG_AREA:areaid)
 {
-    if(IsValidDynamic3DTextLabel(Player[playerid][pyr::cpf_tag]))
-        DestroyDynamic3DTextLabel(Player[playerid][pyr::cpf_tag]);    
+    if(!IsValidPlayer(playerid)) return 1;
 
-    Player[playerid][pyr::cpf_tag] = INVALID_3DTEXT_ID;
+    new regionid = GetRegionByArea(areaid);
+    if(regionid == INVALID_REGION_ID) return 1;
+
+    Player::AddToRegion(playerid, regionid);
+    
+    if(IsPlayerInAnyVehicle(playerid))
+    {
+        new vehicleid = GetPlayerVehicleID(playerid);
+        if(vehicleid == INVALID_VEHICLE_ID) return 1;
+
+        Veh::AddToRegion(vehicleid, regionid);
+    }
+
+    return 1;
 }
 
-stock Player::Spawn(playerid)
+hook OnPlayerLeaveDynamicArea(playerid, STREAMER_TAG_AREA:areaid)
 {
-    new name[MAX_PLAYER_NAME];
-    GetPlayerName(playerid, name);
-
-    if(!DB::Exists(db_entity, "players", "name = '%q'", name))
-    {
-        SendClientMessage(playerid, -1, "{ff3333}[ ERRO FATAL ] {ffffff}Sua conta {ff3333}nao esta registrada {ffffff}houve um erro grave ao spawnar, avise um {ff3333}moderador!");
-        Kick(playerid);
-        printf("[ DB (ERRO) ] Erro ao tentar carregar posições de spawn do jogador!");
-        return 0;
-    }
-
-    if(DB::Exists(db_entity, "members", "name = '%q'", GetPlayerNameStr(playerid)))
-    {
-        new orgid, flag;
-
-        DB::GetDataInt(db_entity, "members", "orgid", orgid, "name = '%q'", GetPlayerNameStr(playerid));
-        DB::GetDataInt(db_entity, "members", "flags", flag, "name = '%q'", GetPlayerNameStr(playerid));
-
-        printf("%d", orgid);
-        
-        if(GetFlag(flag, FLAG_PLAYER_ON_WORK))
-        {
-            SetSpawnInfo(playerid, 1, org::Player[playerid][pyr::skinid], 
-            Org[orgid][org::sX] + RandomFloat(2.0), 
-            Org[orgid][org::sY] + RandomFloat(2.0), 
-            Org[orgid][org::sZ] + RandomFloat(2.0), 
-            Org[orgid][org::sA], WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0);
-
-            SendClientMessage(playerid, -1, "{99ff99}[ ORG ] {ffffff}Você estava em {99ff99}modo de trabalho {ffffff}antes de sair!");
-        }
-
-        else
-        {
-            SetSpawnInfo(playerid, 1, Player[playerid][pyr::skinid], 
-            Org[orgid][org::sX] + RandomFloat(2.0), 
-            Org[orgid][org::sY] + RandomFloat(2.0), 
-            Org[orgid][org::sZ] + RandomFloat(2.0), 
-            Org[orgid][org::sA], WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0);
-        }
-    }
-
-    else
-        SetSpawnInfo(playerid, 1, Player[playerid][pyr::skinid], 834.28 + RandomFloat(2.0), -1834.89 + RandomFloat(2.0), 12.502, 180.0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0, WEAPON:0);
+    if(!IsValidPlayer(playerid)) return 1;
     
-    SpawnPlayer(playerid);
+    new regionid = GetRegionByArea(areaid);
+    if(regionid == INVALID_REGION_ID) return 1;
+
+    Player::RemoveFromRegion(playerid);
+    
+    if(IsPlayerInAnyVehicle(playerid))
+    {
+        new vehicleid = GetPlayerVehicleID(playerid);
+        if(vehicleid == INVALID_VEHICLE_ID)  return 1;
+
+        Veh::RemoveFromRegion(vehicleid);
+    }
 
     return 1;
 }

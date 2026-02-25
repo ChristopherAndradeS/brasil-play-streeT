@@ -22,5 +22,3 @@ enum _:E_MAP_BANK
     MAP_BANK_NU = 1,
     MAP_BANK_LOTTERY,
 }
-
-

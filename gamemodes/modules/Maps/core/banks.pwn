@@ -17,7 +17,6 @@ stock Bank::LoadMap(mapid)
 
     if(mapid == MAP_BANK_NU)
     {
-        ///================= MAP NUBANK ===================
         tmpobjid = CreateDynamicObject(18765, 2531.065429, -1520.063354, 20.588998, 0.000000, -0.000030, 179.999679, -1, -1, -1, 300.00, 300.00); 
         SetDynamicObjectMaterial(tmpobjid, 0, 18996, "mattextures", "concrete12", 0x00000000);
         tmpobjid = CreateDynamicObject(18762, 2536.372558, -1516.928710, 22.507406, -0.000030, 90.000000, -92.099998, -1, -1, -1, 300.00, 300.00); 

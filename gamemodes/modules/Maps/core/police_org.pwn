@@ -1,6 +1,5 @@
 stock Org::RemoveGTAObjects(playerid)
 {
-    ////////////////////////////////// PRF //////////////////////////////////
     RemoveBuildingForPlayer(playerid, 620, 2887.830, -835.414, 9.898, 0.250);
     RemoveBuildingForPlayer(playerid, 620, 2881.820, -841.781, 9.898, 0.250);
     RemoveBuildingForPlayer(playerid, 620, 2887.580, -801.820, 9.484, 0.250);
@@ -9,7 +8,7 @@ stock Org::RemoveGTAObjects(playerid)
 stock Org::LoadMap()
 {
     new tmpobjid;
-    ////////////////////////////////// PRF //////////////////////////////////
+
     tmpobjid = CreateDynamicObject(8418, 2908.879150, -820.217895, 10.532155, 0.000000, 0.000007, 0.000000, -1, -1, -1, 300.00, 300.00); 
     SetDynamicObjectMaterial(tmpobjid, 0, 7555, "bballcpark1", "ws_carparknew2", 0x00000000);
     SetDynamicObjectMaterial(tmpobjid, 2, 10765, "airportgnd_sfse", "ws_runwaytarmac", 0x00000000);

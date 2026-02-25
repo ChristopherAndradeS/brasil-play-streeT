@@ -1,7 +1,6 @@
 Prision::LoadMap()
 {
     new object;
-
     object = CreateDynamicObject(11695, 976.4410,-3189.6360,-29.2820, 0.0000,0.0000,0.0000);
     SetDynamicObjectMaterial(object, 0, 3402, "ce_farmxref", "forestfloor256", 0x00000000);
     SetDynamicObjectMaterial(object, 2, 10166, "p69_rocks", "sfe_rock2", 0x00000000);

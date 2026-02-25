@@ -1,7 +1,6 @@
 stock Garage::LoadMap()
 {
     new tmpobjid;
-    /////==============GARAGENS===============/////
     tmpobjid = CreateDynamicObject(19940, 1554.100830, -1011.214111, 24.046247, 89.999992, 90.000007, -89.999969, -1, -1, -1, 300.00, 300.00); 
     SetDynamicObjectMaterial(tmpobjid, 0, 18996, "mattextures", "sampwhite", 0x00000000);
     tmpobjid = CreateDynamicObject(19940, 1554.540771, -1011.214111, 24.046247, 89.999992, 90.000007, -89.999969, -1, -1, -1, 300.00, 300.00); 

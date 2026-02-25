@@ -1,3 +1,16 @@
+stock Store::RemoveGTAObjects(playerid, mapid)
+{
+    if(mapid == MAP_STORE_BINCO)
+    {
+        RemoveBuildingForPlayer(playerid, 1440, 857.375, -1381.160, 13.046, 0.250);
+        RemoveBuildingForPlayer(playerid, 1365, 861.984, -1380.459, 13.625, 0.250);
+        RemoveBuildingForPlayer(playerid, 727, 1327.979, -1124.339, 21.968, 0.250);
+        RemoveBuildingForPlayer(playerid, 727, 1319.689, -1112.910, 22.257, 0.250);
+        RemoveBuildingForPlayer(playerid, 717, 1322.270, -1134.229, 23.000, 0.250);
+        RemoveBuildingForPlayer(playerid, 1223, 1332.180, -1135.660, 22.812, 0.250);
+    }
+}
+
 stock Store::LoadMap(mapid)
 {
     new tmpobjid;
@@ -162,11 +175,6 @@ stock Store::LoadMap(mapid)
 
     if(mapid == MAP_STORE_BINCO)
     {
-        //Map Exported with Texture Studio By: [uL]Pottus////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////and Crayder////////////////////////////////////////////////////////
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        //Objects////////////////////////////////////////////////////////////////////////////////////////////////////////
         tmpobjid = CreateDynamicObject(18765, 1321.260742, -1120.900024, 20.432008, 0.000000, 0.000029, 0.000000, -1, -1, -1, 300.00, 300.00); 
         SetDynamicObjectMaterial(tmpobjid, 0, 10871, "blacksky_sfse", "ws_slatetiles", 0x00000000);
         tmpobjid = CreateDynamicObject(19443, 1325.457275, -1125.792846, 24.200366, 0.000022, 0.000000, 89.999931, -1, -1, -1, 300.00, 300.00); 
@@ -936,29 +944,4 @@ stock Store::LoadMap(mapid)
         CreateDynamicObject(1223, 1332.921752, -1114.299804, 22.812500, 0.000000, 0.000000, 0.000007, -1, -1, -1, 300.00, 300.00); 
 
     }  
-}
-
-stock Store::RemoveGTAObjects(playerid, mapid)
-{
-    if(mapid == MAP_STORE_BINCO)
-    {
-        //Map Exported with Texture Studio By: [uL]Pottus////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////and Crayder////////////////////////////////////////////////////////
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        //Map Information////////////////////////////////////////////////////////////////////////////////////////////////
-        /*
-            Exported on "2026-01-11 10:38:17" by "bncolombia"
-            Created by "bncolombia"
-        */
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        //Remove Buildings///////////////////////////////////////////////////////////////////////////////////////////////
-        RemoveBuildingForPlayer(playerid, 1440, 857.375, -1381.160, 13.046, 0.250);
-        RemoveBuildingForPlayer(playerid, 1365, 861.984, -1380.459, 13.625, 0.250);
-        RemoveBuildingForPlayer(playerid, 727, 1327.979, -1124.339, 21.968, 0.250);
-        RemoveBuildingForPlayer(playerid, 727, 1319.689, -1112.910, 22.257, 0.250);
-        RemoveBuildingForPlayer(playerid, 717, 1322.270, -1134.229, 23.000, 0.250);
-        RemoveBuildingForPlayer(playerid, 1223, 1332.180, -1135.660, 22.812, 0.250);
-    }
 }

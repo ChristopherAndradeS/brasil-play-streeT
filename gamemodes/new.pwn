@@ -35,7 +35,6 @@ new MySQL:Conexao;
 #define ARQUIVO_CATS      "GPS/Categorias.txt"
 #define PASTA_ORGS        "Orgs/%d.ini"
 #define PASTA_OFICINAS    "Oficinas/Ofi_%d.ini"
-#define ARQUIVO_ORGS      "Lideres.ini"
 #define ARQUIVO_DESMANCHE "Desmanches/Desmanche_%d.ini"
 #define ARQUIVO_CONCE_STOCK "Conce/Estoque.ini"
 #define ARQUIVO_CONCE_LOC   "Conce/Local.ini"
@@ -43,7 +42,7 @@ new MySQL:Conexao;
 enum pInfo 
 {
     pSenha[129], pID, pDinheiro, pAdmin, pLevel, pVip, pSkin, pScore,
-    pCpf, pBitcoin, pOrg, pLider, pMatou, pMorreu, pTempo,
+    pCpf, pBitcoin, pMatou, pMorreu, pTempo,
     bool:pLogado
 };
 
@@ -51,7 +50,6 @@ new Player[MAX_PLAYERS][pInfo];
 
 // VARIÁVEIS DE SISTEMA
 new bool:Trabalhando[MAX_PLAYERS];
-new InviteOrg[MAX_PLAYERS];
 new TempGPS_Categoria[MAX_PLAYERS][64];
 new CheckpointAtivo[MAX_PLAYERS];
 new PixDestino[MAX_PLAYERS];
@@ -106,30 +104,6 @@ new NeonEsq[MAX_VEHICLES]; new NeonDir[MAX_VEHICLES];
 enum vInfo { vArmaId[MAX_VEHICLE_SLOTS], vMunicao[MAX_VEHICLE_SLOTS] }
 new VehicleData[MAX_VEHICLES][vInfo];
 
-// --- DEFINIÇÕES DE TIPOS DE FACC ---
-#define TIPO_ORG_LEGAL    0  // Policia, Medicos, News
-#define TIPO_FAC_LAVAGEM  1  // Lava Jato (Limpa dinheiro sujo)
-#define TIPO_FAC_DESMANCHE 2 // Desmanche de Carros
-#define TIPO_FAC_COMUM    3  // Gangue de Rua / Máfia
-
-// --- ENUM ATUALIZADO PARA MYSQL ---
-enum eOrg
-{
-    oID,            // ID real no banco de dados
-    oNome[32],
-    oCor,
-    oTipo,          // 0, 1, 2 ou 3
-    oSkin,
-    oLider[24],     // Nome do Líder
-    oSubLider[24],  // Nome do Sub-Líder
-    oCofre,
-    Float:oX, Float:oY, Float:oZ,
-    oCriada,        // Se está carregada no servidor
-    oPickup,        // O ID do pickup
-    Text3D:oLabel   // O ID do texto 3D
-}
-new OrgInfo[MAX_ORGS][eOrg];
-
 #define ORG_MECANICA_ID 1
 #define ITEM_MOTOR 5
 #define ITEM_CHASSI 6
@@ -144,7 +118,6 @@ forward AnimarLockPick(playerid);
 forward OnDebugSalvar(playerid, slot);
 forward OnAbrirLojaMySQL(playerid);
 forward ForcarSkinCorreta(playerid);
-
 
 public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {

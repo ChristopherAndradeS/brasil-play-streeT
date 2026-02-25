@@ -9,9 +9,9 @@
 
 #define CGEN_MEMORY 20000
 
-//#define ON_DEBUG_MODE
+#define ON_DEBUG_MODE
 
-#include "YSI/YSI_Data/y_iterate"
+#include <YSI/YSI_Data/y_iterate>
 #include <YSI/YSI_Coding/y_va>
 #include <YSI/YSI_Coding/y_inline>
 #include <YSI/YSI_Extra/y_inline_timers>
@@ -22,70 +22,132 @@
 /*                          GLOBAL HEADERS                 */
 #include "./gamemodes/modules/header.pwn"
 #include "./gamemodes/modules/utils.pwn"
-/*                          HEADERS                        */
+
+//     _   _                _               
+//    | | | |              | |              
+//    | |_| | ___  __ _  __| | ___ _ __ ___ 
+//    |  _  |/ _ \/ _` |/ _` |/ _ \ '__/ __|
+//    | | | |  __/ (_| | (_| |  __/ |  \__ \
+//    \_| |_/\___|\__,_|\__,_|\___|_|  |___/
+//                                          
+//                                          
+#include "./gamemodes/modules/Admin/header.pwn"                                      
 #include "./gamemodes/modules/DB/header.pwn"
+#include "./gamemodes/modules/Games/header.pwn"
 #include "./gamemodes/modules/LinkedLists/header.pwn"
-#include "./gamemodes/modules/Vehicle/header.pwn"
+#include "./gamemodes/modules/Maps/header.pwn"
+#include "./gamemodes/modules/Organization/header.pwn"
+#include "./gamemodes/modules/Player/header.pwn"
 #include "./gamemodes/modules/Server/header.pwn" 
 #include "./gamemodes/modules/TextDraws/header.pwn"
-#include "./gamemodes/modules/Player/header.pwn"
-#include "./gamemodes/modules/Admin/header.pwn"
-#include "./gamemodes/modules/Organization/header.pwn"
-#include "./gamemodes/modules/Maps/header.pwn"
-#include "./gamemodes/modules/Games/header.pwn"
-    /* GAMES */
-#include "./gamemodes/modules/Games/Race/header.pwn"
+#include "./gamemodes/modules/Vehicle/header.pwn"
+
+//  ------------------ GAMES ----------------------------
 #include "./gamemodes/modules/Games/Arena/header.pwn"
-/*                          HANDLE                          */
-#include "./gamemodes/modules/DB/handle.pwn"
-#include "./gamemodes/modules/Server/handle.pwn"
-#include "./gamemodes/modules/LinkedLists/handle.pwn"
-#include "./gamemodes/modules/Organization/handle.pwn"
-#include "./gamemodes/modules/Vehicle/handle.pwn"
-#include "./gamemodes/modules/Player/handle.pwn"
-#include "./gamemodes/modules/Admin/handle.pwn"
-#include "./gamemodes/modules/Maps/handle.pwn"
-#include "./gamemodes/modules/Games/handle.pwn"
-    /* GAMES */
-#include "./gamemodes/modules/Games/Race/handle.pwn"
-#include "./gamemodes/modules/Games/Arena/handle.pwn"
-/*                          SERVER                          */
-#include "./gamemodes/modules/Server/wheather.pwn"
-#include "./gamemodes/modules/Server/players.pwn"
-/*                          MAPAS                           */
-#include "./gamemodes/modules/Maps/banks.pwn"
-#include "./gamemodes/modules/Maps/dealership.pwn"
-#include "./gamemodes/modules/Maps/garages.pwn"
-#include "./gamemodes/modules/Maps/mechanicals.pwn"
-#include "./gamemodes/modules/Maps/police_org.pwn"
-#include "./gamemodes/modules/Maps/spawns.pwn"
-#include "./gamemodes/modules/Maps/squares.pwn"
-#include "./gamemodes/modules/Maps/store.pwn"
-#include "./gamemodes/modules/Maps/prision.pwn"
-#include "./gamemodes/modules/Maps/arena.pwn"
-#include "./gamemodes/modules/Maps/ammu.pwn"
-#include "./gamemodes/modules/Maps/house.pwn"
-/*                          TEXTDRAWS                       */
+#include "./gamemodes/modules/Games/Race/header.pwn"
+//  ------------------ GAMES ----------------------------
+
+//     _____ ___________ _____ _____ 
+//    /  __ \  _  | ___ \  ___/  ___|
+//    | /  \/ | | | |_/ / |__ \ `--. 
+//    | |   | | | |    /|  __| `--. \
+//    | \__/\ \_/ / |\ \| |___/\__/ /
+//     \____/\___/\_| \_\____/\____/ 
+//                                   
+//  
+#include "./gamemodes/modules/Admin/core.pwn"                                      
+#include "./gamemodes/modules/DB/core.pwn"
+#include "./gamemodes/modules/Games/core.pwn"
+#include "./gamemodes/modules/LinkedLists/core.pwn"
+
+//  ------------------------- [ MAPAS ] ---------------------------
+
+#include "./gamemodes/modules/Maps/core/banks.pwn"
+#include "./gamemodes/modules/Maps/core/dealership.pwn"
+#include "./gamemodes/modules/Maps/core/garages.pwn"
+#include "./gamemodes/modules/Maps/core/mechanicals.pwn"
+#include "./gamemodes/modules/Maps/core/police_org.pwn"
+#include "./gamemodes/modules/Maps/core/spawns.pwn"
+#include "./gamemodes/modules/Maps/core/squares.pwn"
+#include "./gamemodes/modules/Maps/core/store.pwn"
+#include "./gamemodes/modules/Maps/core/prision.pwn"
+#include "./gamemodes/modules/Maps/core/arena.pwn"
+#include "./gamemodes/modules/Maps/core/ammu.pwn"
+#include "./gamemodes/modules/Maps/core/house.pwn"
+
+//  ------------------------- [ MAPAS ] ---------------------------
+
+#include "./gamemodes/modules/Organization/core.pwn"
+#include "./gamemodes/modules/Player/core.pwn"
+#include "./gamemodes/modules/Server/core.pwn" 
+
+//  ----------------------- [ TEXTDRAWS ] -------------------------
+
+//                          [    GUI    ]
 #include "./gamemodes/modules/TextDraws/gui/login.pwn"
 #include "./gamemodes/modules/TextDraws/gui/acs_editor.pwn"
 #include "./gamemodes/modules/TextDraws/gui/admin.pwn"
+//                          [    HUD    ]
 #include "./gamemodes/modules/TextDraws/hud/baseboard.pwn"
 #include "./gamemodes/modules/TextDraws/hud/velocimeter.pwn"
-/*                          PLAYER                          */
-#include "./gamemodes/modules/Player/punishment.pwn"
-#include "./gamemodes/modules/Player/login.pwn"
+
+//  ----------------------- [ TEXTDRAWS ] -------------------------
+
+#include "./gamemodes/modules/Vehicle/core.pwn"
+
+//  ------------------ GAMES ----------------------------
+#include "./gamemodes/modules/Games/Arena/core.pwn"
+#include "./gamemodes/modules/Games/Race/core.pwn"
+//  ------------------ GAMES ----------------------------
+
+//     _   _                 _ _           
+//    | | | |               | | |          
+//    | |_| | __ _ _ __   __| | | ___  ___ 
+//    |  _  |/ _` | '_ \ / _` | |/ _ \/ __|
+//    | | | | (_| | | | | (_| | |  __/\__ \
+//    \_| |_/\__,_|_| |_|\__,_|_|\___||___/
+//                                         
+//                                         
+#include "./gamemodes/modules/DB/handle.pwn"
+#include "./gamemodes/modules/Server/handle.pwn"
+#include "./gamemodes/modules/LinkedLists/handle.pwn"
+#include "./gamemodes/modules/Maps/handle.pwn"
+#include "./gamemodes/modules/TextDraws/handle.pwn"
+#include "./gamemodes/modules/Player/handle.pwn"
+#include "./gamemodes/modules/Organization/handle.pwn"
+#include "./gamemodes/modules/Vehicle/handle.pwn"
+#include "./gamemodes/modules/Admin/handle.pwn"
+#include "./gamemodes/modules/Games/handle.pwn"
+
+//  -------------------------- GAMES --------------------------
+#include "./gamemodes/modules/Games/Race/handle.pwn"
+#include "./gamemodes/modules/Games/Arena/handle.pwn"
+//  -------------------------- GAMES --------------------------
+             
+//  ------------------------- PLAYERS --------------------------
+#include "./gamemodes/modules/Player/punishment/punishment.pwn"
 #include "./gamemodes/modules/Voice/handle.pwn"
-#include "./gamemodes/modules/Player/payday.pwn"
-#include "./gamemodes/modules/Player/acessory.pwn"
+#include "./gamemodes/modules/Player/login/login.pwn"
+#include "./gamemodes/modules/Player/payday/payday.pwn"
+#include "./gamemodes/modules/Acessory/acessory.pwn"
+//  ------------------------- PLAYERS --------------------------
+
+//  -------------------------- ADMS ----------------------------
+//#include "./gamemodes/modules/Admin/panel.pwn"
+//  -------------------------- ADMS ----------------------------
+
+//     _____ ________  ______  ___  ___   _   _______  _____ 
+//    /  __ \  _  |  \/  ||  \/  | / _ \ | \ | |  _  \/  ___|
+//    | /  \/ | | | .  . || .  . |/ /_\ \|  \| | | | |\ `--. 
+//    | |   | | | | |\/| || |\/| ||  _  || . ` | | | | `--. \
+//    | \__/\ \_/ / |  | || |  | || | | || |\  | |/ / /\__/ /
+//     \____/\___/\_|  |_/\_|  |_/\_| |_/\_| \_/___/  \____/ 
+//                                                           
+//                                                           
 #include "./gamemodes/modules/Player/commands.pwn"
-/*                          ORGANIZATIONS                          */
 #include "./gamemodes/modules/Organization/commands.pwn"
-/*                          ADMIN                          */
 #include "./gamemodes/modules/Admin/commands.pwn"
-#include "./gamemodes/modules/Admin/panel.pwn"
-/*                          VEHICLE                        */
 #include "./gamemodes/modules/Vehicle/commands.pwn"
-/*                          GAME                        */
 #include "./gamemodes/modules/Games/commands.pwn"
 
 main()
@@ -95,33 +157,26 @@ main()
 
 public OnGameModeExit()
 {
-	if(DB_Close(db_entity))
-    	db_entity = DB:0;
+	if(DB_Close(db_entity)) db_entity = DB:0;
 
-    printf("[ DATABASE ] Conexão com o banco de dados de ENTIDADES encerrada com sucesso!\n");
+    printf("[ DATABASE ] Conexao com o banco de dados de ENTIDADES encerrada com sucesso!\n");
 
-    if(DB_Close(db_stock))
-    	db_stock = DB:0;
+    if(DB_Close(db_stock)) db_stock = DB:0;
 
-    printf("[ DATABASE ] Conexão com o banco de dados de ESTOQUES encerrada com suceso!\n");
+    printf("[ DATABASE ] Conexao com o banco de dados de ESTOQUES encerrada com suceso!\n");
 
     new count;
 
     for(new regionid = 0; regionid < REGION_COUNT; regionid++)
     {
-        if(linked_list_valid(veh::Region[regionid]))
-            linked_list_delete(veh::Region[regionid]);
-        
-        if(linked_list_valid(pyr::Region[regionid]))
-            linked_list_delete(pyr::Region[regionid]);
-
-        if(IsValidDynamicArea(Areas[regionid]))
-            DestroyDynamicArea(Areas[regionid]);
+        if(linked_list_valid(veh::Region[regionid])) linked_list_delete(veh::Region[regionid]);
+        if(linked_list_valid(pyr::Region[regionid])) linked_list_delete(pyr::Region[regionid]);
+        if(IsValidDynamicArea(Areas[regionid]))      DestroyDynamicArea(Areas[regionid]);
         
         count++;
     }
 
-    printf("[ AREAS ] %d areas globais foram destruídas com sucesso\n", count);
+    printf("[  AREAS  ] %d areas globais foram destruídas com sucesso\n", count);
     printf("[ REGIONS ] %d regioes de jogadores foram deletadas com sucesso\n", count);
     printf("[ REGIONS ] %d regioes de veículos foram deletadas com sucesso\n", count);
 
@@ -152,7 +207,7 @@ public OnPlayerText(playerid, text[])
 {
     if(isnull(text)) return 0;
 
-    if(!IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED))
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED))
     {
         SendClientMessage(playerid, -1, "{ff3333}[ SEGURANCA ] {ffffff}Chat bloqueado durante login/registro. Use apenas o dialog para senha.");
         return 0;
@@ -164,7 +219,7 @@ public OnPlayerText(playerid, text[])
         return 0;
     }
 
-    if(IsFlagSet(Admin[playerid][adm::flags], FLAG_ADM_WORKING))
+    if(GetFlag(Admin[playerid][adm::flags], FLAG_ADM_WORKING))
     {      
         Adm::SendMsgToAllTagged(FLAG_ADM_WORKING | FLAG_IS_ADMIN, 0xFFFF33AA, 
         "[ ADM CHAT ] %s%s {ffffff}: {ffff33}%s", 
@@ -195,9 +250,9 @@ hook function TogglePlayerSpectating(playerid, bool:toggle)
 {
     if(toggle)
     {
-        SetFlag(Player[playerid][pyr::flags], MASK_PLAYER_SPECTATING);
+        SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_SPECTATING);
         
-        if(IsFlagSet(Player[playerid][pyr::flags], MASK_PLAYER_LOGGED))
+        if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED))
             Adm::RemSpectatorInList(playerid, 2);
     }
 

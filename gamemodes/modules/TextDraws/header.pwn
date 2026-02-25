@@ -1,5 +1,3 @@
-#include <YSI\YSI_Coding\y_hooks>
-
 new Text:Login::PublicTD[7] = {INVALID_TEXT_DRAW, ...};
 new PlayerText:Login::PlayerTD[MAX_PLAYERS][3] = {INVALID_PLAYER_TEXT_DRAW, ...};
 
@@ -116,57 +114,4 @@ enum _:E_PTD_VEH
     PlayerText:PTD_VEH_FIRST_DOT = 4,
     PlayerText:PTD_VEH_LAST_DOT  = 16,
     PlayerText:PTD_VEH_TXT_NAME = 17,
-}
-
-hook OnGameModeInit()
-{
-    Login::CreatePublicTD();
-    printf("[ TEXTDRAW ] TextDraw: Login carregada\n");
-
-    Baseboard::CreatePublicTD();
-    printf("[ TEXTDRAW ] TextDraw: Rodapé carregada\n");
-
-    Acessory::CreatePublicTD();
-    printf("[ TEXTDRAW ] TextDraw: Editor de acessórios carregada\n");
-
-    Adm::CreatePublicTD();
-    printf("[ TEXTDRAW ] TextDraw: Administração\n");
-
-    Veh::CreatePublicTD();
-    printf("[ TEXTDRAW ] TextDraw: Velocimetro\n");
-
-    return 1;
-}
-
-hook OnGameModeExit()
-{
-    // Login::DestroyPublicTD();
-    // Baseboard::DestroyPublicTD();
-    // Acessory::DestroyPublicTD();
-    // Adm::DestroyPublicTD();
-    // Veh::DestroyPublicTD();
-
-    return 1;
-}
-
-hook OnPlayerConnect(playerid)
-{
-    Login::HideTDForPlayer(playerid);
-    Baseboard::HideTDForPlayer(playerid);
-    Acessory::HideTDForPlayer(playerid);
-    Adm::HideTDForPlayer(playerid);
-    Veh::HideTDForPlayer(playerid);
-    
-    return 1;
-}
-
-hook OnPlayerDisconnect(playerid, reason)
-{
-    Login::HideTDForPlayer(playerid);
-    Baseboard::HideTDForPlayer(playerid);
-    Acessory::HideTDForPlayer(playerid);
-    Adm::HideTDForPlayer(playerid);
-    Veh::HideTDForPlayer(playerid);
-    
-    return 1;
 }
