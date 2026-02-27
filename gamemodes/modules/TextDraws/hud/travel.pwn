@@ -7,9 +7,7 @@ stock Travel::UpdateTextDrawColor(playerid, Float:pX, Float:pY, Float:pZ, Float:
         if(tick <= GetTickCount())
         {
             Travel::HideTDForPlayer(playerid);
-            Timer_KillCallback(pyr::Timer[playerid][pyr::TIMER_TRAVEL]);
-            print("timer morto!!!!");
-            pyr::Timer[playerid][pyr::TIMER_TRAVEL] = 0;
+            Player::KillTimer(playerid, pyr::TIMER_TRAVEL);
             TogglePlayerSpectating(playerid, false);
 
             SetPlayerPos(playerid, pX, pY, pZ);

@@ -21,10 +21,6 @@
 #include <YSI/YSI_Visual/y_dialog> 
 #include <YSI/YSI_Coding/y_hooks>
 
-/*                          GLOBAL HEADERS                 */
-#include "./gamemodes/modules/header.pwn"
-#include "./gamemodes/modules/utils.pwn"
-
 //     _   _                _               
 //    | | | |              | |              
 //    | |_| | ___  __ _  __| | ___ _ __ ___ 
@@ -32,7 +28,13 @@
 //    | | | |  __/ (_| | (_| |  __/ |  \__ \
 //    \_| |_/\___|\__,_|\__,_|\___|_|  |___/
 //                                          
-//                                          
+//                                    
+
+//  --------------------  GLOBAL HEADERS -----------------------
+#include "./gamemodes/modules/header.pwn"
+#include "./gamemodes/modules/utils.pwn"
+//  --------------------  GLOBAL HEADERS -----------------------
+
 #include "./gamemodes/modules/Admin/header.pwn"                                      
 #include "./gamemodes/modules/DB/header.pwn"
 #include "./gamemodes/modules/Games/header.pwn"
@@ -41,14 +43,19 @@
 #include "./gamemodes/modules/NPC/header.pwn"
 #include "./gamemodes/modules/Organization/header.pwn"
 #include "./gamemodes/modules/Player/header.pwn"
+
+//  ------------------------- PLAYERS --------------------------
+#include "./gamemodes/modules/Player/acessory/header.pwn"
+//  ------------------------- PLAYERS --------------------------
+
 #include "./gamemodes/modules/Server/header.pwn" 
 #include "./gamemodes/modules/TextDraws/header.pwn"
 #include "./gamemodes/modules/Vehicle/header.pwn"
 
-//  ------------------ GAMES ----------------------------
+//  -------------------------  GAMES ---------------------------
 #include "./gamemodes/modules/Games/Arena/header.pwn"
 #include "./gamemodes/modules/Games/Race/header.pwn"
-//  ------------------ GAMES ----------------------------
+//  -------------------------  GAMES ---------------------------
 
 //     _____ ___________ _____ _____ 
 //    /  __ \  _  | ___ \  ___/  ___|
@@ -63,8 +70,7 @@
 #include "./gamemodes/modules/Games/core.pwn"
 #include "./gamemodes/modules/LinkedLists/core.pwn"
 
-//  ------------------------- [ MAPAS ] ---------------------------
-
+//  --------------------------- MAPAS -----------------------------
 #include "./gamemodes/modules/Maps/core/banks.pwn"
 #include "./gamemodes/modules/Maps/core/dealership.pwn"
 #include "./gamemodes/modules/Maps/core/garages.pwn"
@@ -77,15 +83,14 @@
 #include "./gamemodes/modules/Maps/core/arena.pwn"
 #include "./gamemodes/modules/Maps/core/ammu.pwn"
 #include "./gamemodes/modules/Maps/core/house.pwn"
-
-//  ------------------------- [ MAPAS ] ---------------------------
+//  --------------------------- MAPAS -----------------------------
 
 #include "./gamemodes/modules/Organization/core.pwn"
 #include "./gamemodes/modules/Player/core.pwn"
+#include "./gamemodes/modules/Player/injury/handle.pwn"
 #include "./gamemodes/modules/Server/core.pwn" 
 
-//  ----------------------- [ TEXTDRAWS ] -------------------------
-
+//  ------------------------- TEXTDRAWS ---------------------------
 //                          [    GUI    ]
 #include "./gamemodes/modules/TextDraws/gui/login.pwn"
 #include "./gamemodes/modules/TextDraws/gui/acs_editor.pwn"
@@ -94,15 +99,22 @@
 #include "./gamemodes/modules/TextDraws/hud/baseboard.pwn"
 #include "./gamemodes/modules/TextDraws/hud/velocimeter.pwn"
 #include "./gamemodes/modules/TextDraws/hud/travel.pwn"
-
-//  ----------------------- [ TEXTDRAWS ] -------------------------
+//  ------------------------- TEXTDRAWS ---------------------------
 
 #include "./gamemodes/modules/Vehicle/core.pwn"
 
-//  ------------------ GAMES ----------------------------
+//  -------------------------  GAMES ---------------------------
 #include "./gamemodes/modules/Games/Arena/core.pwn"
 #include "./gamemodes/modules/Games/Race/core.pwn"
-//  ------------------ GAMES ----------------------------
+//  -------------------------  GAMES ---------------------------
+
+//  ------------------------- PLAYERS --------------------------
+#include "./gamemodes/modules/Player/acessory/core.pwn"
+#include "./gamemodes/modules/Player/injury/core.pwn"
+#include "./gamemodes/modules/Player/login/core.pwn"
+#include "./gamemodes/modules/Player/payday/core.pwn"
+#include "./gamemodes/modules/Player/punishment/core.pwn"
+//  ------------------------- PLAYERS --------------------------
 
 //     _   _                 _ _           
 //    | | | |               | | |          
@@ -118,8 +130,16 @@
 #include "./gamemodes/modules/Maps/handle.pwn"
 #include "./gamemodes/modules/TextDraws/handle.pwn"
 #include "./gamemodes/modules/NPC/handle.pwn"
-
 #include "./gamemodes/modules/Player/handle.pwn"
+
+//  ------------------------- PLAYERS --------------------------
+#include "./gamemodes/modules/Player/injury/handle.pwn"
+#include "./gamemodes/modules/Player/login/handle.pwn"
+#include "./gamemodes/modules/Player/payday/handle.pwn"
+#include "./gamemodes/modules/Player/acessory/handle.pwn"
+#include "./gamemodes/modules/Player/voice/handle.pwn"
+//  ------------------------- PLAYERS --------------------------
+
 #include "./gamemodes/modules/Organization/handle.pwn"
 #include "./gamemodes/modules/Vehicle/handle.pwn"
 #include "./gamemodes/modules/Admin/handle.pwn"
@@ -130,14 +150,6 @@
 #include "./gamemodes/modules/Games/Arena/handle.pwn"
 //  -------------------------- GAMES --------------------------
              
-//  ------------------------- PLAYERS --------------------------
-#include "./gamemodes/modules/Player/punishment/punishment.pwn"
-#include "./gamemodes/modules/Voice/handle.pwn"
-#include "./gamemodes/modules/Player/login/login.pwn"
-#include "./gamemodes/modules/Player/payday/payday.pwn"
-#include "./gamemodes/modules/Acessory/acessory.pwn"
-//  ------------------------- PLAYERS --------------------------
-
 //  -------------------------- ADMS ----------------------------
 //#include "./gamemodes/modules/Admin/panel.pwn"
 //  -------------------------- ADMS ----------------------------
@@ -307,11 +319,3 @@ YCMD:wep(playerid, params[], help)
     GivePlayerWeapon(playerid, WEAPON:strval(params), 1000);
     return 1;
 }
-
-YCMD:teste(playerid, params[], help)
-{
-    new Float:pX, Float:pY, Float:pZ;
-    NPC_GetPos(med_npcid, pX, pY, pZ);
-    SetPlayerPos(playerid, pX, pY, pZ);
-    return 1;
-}   

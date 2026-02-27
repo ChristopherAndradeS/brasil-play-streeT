@@ -55,5 +55,3 @@ enum E_PLAYER_TIMERS
 new pyr::Timer[MAX_PLAYERS][E_PLAYER_TIMERS];
 
 forward Player::Kick(playerid, E_PLAYER_TIMERS:timerid, const msg[]);
-
-new med_npcid;

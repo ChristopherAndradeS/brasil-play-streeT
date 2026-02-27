@@ -1,17 +1,5 @@
 #include <YSI\YSI_Coding\y_hooks>
 
-#define PAYMENT_BASE (1000.0)
-
-enum E_PLAYER_PAYDAY
-{
-    pdy::bonus,
-    pdy::time_left, 
-}
-
-new pdy::Player[MAX_PLAYERS][E_PLAYER_PAYDAY];
-
-forward OnPayDayReach(playerid);
-
 hook OnPlayerLogin(playerid)
 {
     DB::GetDataInt(db_entity, "players", "payday_tleft", pdy::Player[playerid][pdy::time_left], "name = '%q'", GetPlayerNameStr(playerid));
@@ -25,8 +13,7 @@ hook OnPlayerLogin(playerid)
 
 public OnPayDayReach(playerid)
 {
-    if(!IsValidPlayer(playerid))
-        return 1;
+    if(!IsValidPlayer(playerid)) return 1;
     
     new Float:payment = PAYMENT_BASE, Float:bonus, Float:total;
 
@@ -57,22 +44,4 @@ public OnPayDayReach(playerid)
     Player::CreateTimer(playerid, pyr::TIMER_PAYDAY, "OnPayDayReach", 3600000, true, "i", playerid);
     
     return 1; 
-}
-
-stock Payday::GetPlayerBonus(playerid, &Float:bonus)
-{
-    bonus = 0;
-
-    // if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_ORG))
-    //     bonus += 1200.0;
-    if(GetFlag(Admin[playerid][adm::flags], FLAG_IS_ADMIN))
-        bonus += 250.0;
-
-    return 1;
-}
-
-stock pdy::ClearData(playerid)
-{
-    pdy::Player[playerid][pdy::bonus]       = 0;
-    pdy::Player[playerid][pdy::time_left]   = 0;
 }

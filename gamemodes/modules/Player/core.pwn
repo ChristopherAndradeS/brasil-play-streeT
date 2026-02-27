@@ -1,20 +1,3 @@
-
-/*                  PLAYER PUBLICS                 */
-public Player::Kick(playerid, E_PLAYER_TIMERS:timerid, const msg[]) 
-{    
-    Player::KillTimer(playerid, timerid);
-    
-    if(IsPlayerConnected(playerid))
-    {
-        StopAudioStreamForPlayer(playerid);
-        SendClientMessage(playerid, -1, "{ff3333}[ KICK ] {ffffff}%s", msg);
-        Kick(playerid);
-    }
-    
-    return 1; 
-}
-
-/*                  PLAYER FUNCS                 */
 stock IsValidPlayer(playerid)
 {
     if(playerid == INVALID_PLAYER_ID)return 0;
@@ -90,9 +73,9 @@ stock Player::KillTimer(playerid, E_PLAYER_TIMERS:pyr::timerid)
             DB::SetDataInt(db_entity, "punishments", "left_tstamp", t_left, "name = '%q' AND level = 1", GetPlayerNameStr(playerid));
         }
 
-        case pyr::TIMER_SPEEDOMETER, pyr::TIMER_LOGIN_KICK, pyr::TIMER_INJURY, pyr::TIMER_TRAVEL:
+        default:
         {
-            
+
         }
     }
 
@@ -153,54 +136,6 @@ stock Player::SetNameTag(playerid)
     new str[64];
     format(str, 64, "{99ff99}%s {ffffff}[ {99ff99}%d {ffffff}]", GetPlayerNameStr(playerid), playerid);
     Player[playerid][pyr::nametag]  = CreateDynamic3DTextLabel(str, -1, 0.0, 0.0, 0.0, 70.0, playerid, INVALID_VEHICLE_ID, 1);
-}
-
-stock Player::UpdateDamage(playerid, issuerid, Float:damage, WEAPON:weaponid, bodypart)
-{
-    if(!IsValidPlayer(issuerid)) return 1;
-
-    if(bodypart == 9)
-    {
-        GameTextForPlayer(issuerid, "~r~H~h~E~h~~h~A~g~~h~~h~D~g~~h~S~b~~h~~h~H~b~O~b~O~p~T", 1000, 4);
-        PlayerPlaySound(issuerid, 1139);
-    }
-
-    Player[playerid][pyr::health] = floatclamp(Player[playerid][pyr::health] - damage, 1.0, 200.0);
-    
-    SetPlayerHealth(playerid, floatclamp(Player[playerid][pyr::health], 1.0, 100.0));
-    SetPlayerArmour(playerid, Player[playerid][pyr::health] <= 100.0 ? 0.0 : Player[playerid][pyr::health] - 100.0);
-
-    if(Player[playerid][pyr::health] <= 1.0)
-    {   
-        GameTextForPlayer(issuerid, "~h~MATOU", 500, 4);
-        GameTextForPlayer(playerid, "~r~~h~MORREU", 500, 4);
-        SetPlayerHealth(playerid, 1.0);
-        SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
-        CallLocalFunction("OnPlayerInjury", "iii", playerid, issuerid, WEAPON:weaponid);
-    }
-
-    return 1;
-}
-
-stock Player::AplyRandomDeathAnim(playerid, &time)
-{
-    switch(RandomMax(100))
-    {
-        case 0..33:     ApplyAnimation(playerid, "CRACK", "crckdeth1", 4.1, false, false, false, false, 2170, SYNC_ALL), time = 2170; 
-        case 34..66:    ApplyAnimation(playerid, "CRACK", "crckdeth3", 4.1, false, false, false, false, 2170, SYNC_ALL), time = 2170;
-        case 67..100:   ApplyAnimation(playerid, "CRACK", "crckdeth4", 4.1, false, false, false, false, 2170, SYNC_ALL), time = 1670;
-        default: time = 2000;
-    }
-}
-
-stock Player::AplyRandomInjuryAnim(playerid, &time)
-{
-    switch(RandomMax(100))
-    {
-        case 0..33:     ApplyAnimation(playerid, "ped", "KO_skid_front", 4.1, false, false, false, false, 1930, SYNC_ALL), time = 1930;
-        case 34..66:    ApplyAnimation(playerid, "ped", "KO_shot_face", 4.1, false, false, false, false, 2100, SYNC_ALL), time = 2100;
-        case 67..100:   ApplyAnimation(playerid, "ped", "KO_shot_stom", 4.1, false, false, false, false, 3170, SYNC_ALL), time = 3170;
-    }
 }
 
 stock Player::DestroyNameTag(playerid)
