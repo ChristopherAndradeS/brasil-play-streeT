@@ -110,7 +110,6 @@ stock Punish::SendPlayerToJail(playerid, time)
     {
         new t_left = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_PAYDAY]);
         DB::SetDataInt(db_entity, "players", "payday_tleft", t_left, "name = '%q'", name);
-        printf("payday salvo %d", t_left);
         Player::KillTimer(playerid, pyr::TIMER_PAYDAY);
     }
 

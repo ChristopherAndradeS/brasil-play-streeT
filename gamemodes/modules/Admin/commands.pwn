@@ -1007,7 +1007,7 @@ YCMD:darlider(playerid, params[], help)
     new targetid, orgid;
 
     if(sscanf(params, "ui", targetid, orgid)) 
-        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /darlider {ff3333}[ NOME ] <orgid 1 - %d >", MAX_ORGS);
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /darlider {ff3333}[ ID ] <orgid 1 - %d >", MAX_ORGS);
 
     if(orgid < 0 || orgid >= MAX_ORGS || !GetFlag(Org[orgid][org::flags], FLAG_ORG_CREATED))
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Parâmetro {ff3333}[ ORGID ] {ffffff}Inválido! Use {ff3333}/allorgs.");
@@ -1039,8 +1039,8 @@ YCMD:darsub(playerid, params[], help)
 
     new targetid, orgid;
 
-    if(sscanf(params, "Ui", targetid, orgid)) 
-        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /darsub {ff3333}[ NOME ] <orgid 1 - %d >", MAX_ORGS);
+    if(sscanf(params, "ui", targetid, orgid)) 
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /darsub {ff3333}[ ID ] <orgid 1 - %d >", MAX_ORGS);
 
     if(orgid < 0 || orgid >= MAX_ORGS || !GetFlag(Org[orgid][org::flags], FLAG_ORG_CREATED))
         return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Parâmetro {ff3333}[ ORGID ] {ffffff}Inválido! Use {ff3333}/allorgs.");

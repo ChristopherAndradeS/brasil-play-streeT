@@ -51,7 +51,7 @@ stock Player::CreateTimer(playerid, E_PLAYER_TIMERS:pyr::timerid, const callback
     new timerid = SetTimerEx(callback, time, repeate, specifiers, ___(6));
     pyr::Timer[playerid][pyr::timerid] = timerid;
     
-    printf("[ TIMER (Player) ] ( Timer ID: %d ) [ PLAYER_TIMER #%d ] (%s [PID : %d]) %d ms (%s) foi criado\n", timerid, _:pyr::timerid, callback, playerid, time, repeate ? "repeating" : "one shoot");
+    //printf("[ TIMER (Player) ] ( Timer ID: %d ) [ PLAYER_TIMER #%d ] (%s [PID : %d]) %d ms (%s) foi criado\n", timerid, _:pyr::timerid, callback, playerid, time, repeate ? "repeating" : "one shoot");
 
     return 1;
 }
@@ -67,7 +67,6 @@ stock Player::KillTimer(playerid, E_PLAYER_TIMERS:pyr::timerid)
             new t_left = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_PAYDAY]);
 
             t_left = t_left <= 0 ? 3600000 : t_left;
-            printf("payday salvo %d", t_left);
             
             DB::SetDataInt(db_entity, "players", "payday_tleft", t_left, "name = '%q'", GetPlayerNameStr(playerid));      
         }
@@ -83,13 +82,13 @@ stock Player::KillTimer(playerid, E_PLAYER_TIMERS:pyr::timerid)
         }
     }
 
-    new timerid = pyr::Timer[playerid][pyr::timerid];
+    //new timerid = pyr::Timer[playerid][pyr::timerid];
 
     KillTimer(pyr::Timer[playerid][pyr::timerid]);
 
     pyr::Timer[playerid][pyr::timerid] = INVALID_TIMER;
     
-    printf("[ TIMER (Player) ] ( Timer ID: %d ) [ PLAYER_TIMER #%d ] [PID : %d]) foi morto\n", timerid, _:pyr::timerid, playerid);
+    //printf("[ TIMER (Player) ] ( Timer ID: %d ) [ PLAYER_TIMER #%d ] [PID : %d]) foi morto\n", timerid, _:pyr::timerid, playerid);
     
     return 1;
 }

@@ -73,6 +73,7 @@ enum E_PLAYER_ORG
 {
     pyr::inviterid, pyr::invite_orgid,
     pyr::orgid,
+    pyr::tick_kit,
     pyr::debts,
     pyr::flags,
     pyr::skinid,

@@ -25,7 +25,7 @@ hook OnGameModeInit()
 
     printf("[ AREAS ]   %d areas globais de %.1fx%.1f (m) foram criadas com sucesso\n", count, REGION_SIZE, REGION_SIZE);
     printf("[ REGIONS ] %d regioes de jogadores foram criadas com sucesso\n", count);
-    printf("[ REGIONS ] %d regioes de veículos foram criadas com sucesso\n", count);
+    printf("[ REGIONS ] %d regioes de veiculos foram criadas com sucesso\n", count);
 
     return 1;
 }

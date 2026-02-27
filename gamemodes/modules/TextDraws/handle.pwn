@@ -6,13 +6,13 @@ hook OnGameModeInit()
     printf("[ TEXTDRAW ] TextDraw: Login carregada\n");
 
     Baseboard::CreatePublicTD();
-    printf("[ TEXTDRAW ] TextDraw: Rodapé carregada\n");
+    printf("[ TEXTDRAW ] TextDraw: Rodape carregada\n");
 
     Acessory::CreatePublicTD();
-    printf("[ TEXTDRAW ] TextDraw: Editor de acessórios carregada\n");
+    printf("[ TEXTDRAW ] TextDraw: Editor de acessorios carregada\n");
 
     Adm::CreatePublicTD();
-    printf("[ TEXTDRAW ] TextDraw: Administração\n");
+    printf("[ TEXTDRAW ] TextDraw: Administracao\n");
 
     Veh::CreatePublicTD();
     printf("[ TEXTDRAW ] TextDraw: Velocimetro\n");

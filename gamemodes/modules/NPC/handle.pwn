@@ -36,7 +36,6 @@ hook OnPlayerDisconnect(playerid, reason)
 {
     if(IsPlayerNPC(playerid))
     {
-        printf("Name tag de leticia destruida com sucesso\n");
         NPC[playerid][npc::id] = INVALID_PLAYER_ID;
         NPC[playerid][npc::flags] = 0;
 

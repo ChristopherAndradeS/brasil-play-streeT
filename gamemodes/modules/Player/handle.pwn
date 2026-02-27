@@ -33,7 +33,6 @@ hook OnPlayerConnect(playerid)
 
     DB::GetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", name);
 
-    printf("flags, %08x", Player[playerid][pyr::flags]);
     /* VERIFICAR NOME - É ADEQUADO ?  */
     if(!IsValidNickName(name))
     {
@@ -132,8 +131,6 @@ hook OnPlayerDisconnect(playerid, reason)
     ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED);
     ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_CHECKPOINT);
     
-    printf("flags, %08x", Player[playerid][pyr::flags]);
-    
     DB::SetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", GetPlayerNameStr(playerid));
 
     Player::ClearData(playerid);
@@ -150,6 +147,7 @@ hook OnPlayerLogin(playerid)
     ApplyAnimation(playerid, "CRACK", "null", 0.0, false, false, false, false, 0); 
     ApplyAnimation(playerid, "SWAT", "null", 0.0, false, false, false, false, 0); 
     ApplyAnimation(playerid, "KNIFE", "null", 0.0, false, false, false, false, 0); 
+    ApplyAnimation(playerid, "MEDIC", "null", 0.0, false, false, false, false, 0);
 
     Player[playerid][pyr::health] = 100.0;
 

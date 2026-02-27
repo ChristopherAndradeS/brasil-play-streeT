@@ -27,10 +27,10 @@ stock Org::Load(orgid)
     
     new str[144];
     
-    format(str, 144, "[ {%06x}%s {ffffff}]\nTipo: %s\n{ffffff}Lider: {%06x}%s",
-    
+    format(str, 144, "[ {%06x}%s {ffffff}]\nTipo: %s\n{ffffff}Lider: {%06x}%s | {ffffff}Colider: {%06x}%s",
     Org[orgid][org::color] >>> 8, Org[orgid][org::name], Org::gTypeNames[_:Org[orgid][org::type]],
-    Org[orgid][org::color] >>> 8, Org[orgid][org::leader]);
+    Org[orgid][org::color] >>> 8, Org[orgid][org::leader],
+    Org[orgid][org::color] >>> 8, Org[orgid][org::coleader]);
     
     Org[orgid][org::labelid] = CreateDynamic3DTextLabel(str, -1, Org[orgid][org::sX], Org[orgid][org::sY], Org[orgid][org::sZ], 60.0, .testlos = 1);
 
@@ -75,13 +75,13 @@ stock Org::Create(const name[], ORG_TYPE:type, const creator[], const tag[], con
 
     if(orgid == INVALID_ORG_ID)
     {
-        printf("[ ORGS (DB) ] Não foi possível criar a organização %s! Aumente o valor de MAX_ORGS\n", name);
+        printf("[ ORGS (DB) ] Nao foi possivel criar a organizacao %s! Aumente o valor de MAX_ORGS\n", name);
         return 0;
     }
 
     if(DB::Exists(db_stock, "organizations", "name = '%q'", name))
     {
-        printf("[ ORGS (DB) ] Não foi possível criar a organização %s, pois já existia!\n", name);
+        printf("[ ORGS (DB) ] Nao foi possivel criar a organizacao %s, pois ja existia!\n", name);
         return 0;
     }
 
@@ -148,37 +148,39 @@ stock Org::SetMember(playerid, targetid, orgid, ORG_ROLES:role)
             return 0;
         }
 
-        switch(role)
+        SendClientMessage(targetid, -1, 
+        "{33ff33}[ ORGS ] {ffffff}Parabéns, você agora é {33ff33}membro {ffffff}da organização {%06x}%s", 
+        Org[orgid][org::color] >>> 8, Org[orgid][org::name]); 
+    }
+
+    switch(role)
+    {
+        case ORG_ROLE_LEADER:
         {
-            case ORG_ROLE_LEADER:
-            {
-                format(Org[orgid][org::leader], MAX_PLAYER_NAME, "%s", name);
-                DB::SetDataString(db_stock, "organizations", "leader", Org[orgid][org::leader], "orgid = %d", orgid);
-                SendClientMessage(targetid, -1, 
-                "{33ff33}[ ORGS ] {ffffff}Parabéns, você agora é {33ff33}Líder {ffffff}da organização {%06x}%s", 
-                Org[orgid][org::color] >>> 8, Org[orgid][org::name]);
+            format(Org[orgid][org::leader], MAX_PLAYER_NAME, "%s", name);
+            DB::SetDataString(db_stock, "organizations", "leader", Org[orgid][org::leader], "orgid = %d", orgid);
+            
+            SendClientMessage(targetid, -1, 
+            "{33ff33}[ ORGS ] {ffffff}Parabéns, você agora é {33ff33}Líder {ffffff}da organização {%06x}%s", 
+            Org[orgid][org::color] >>> 8, Org[orgid][org::name]);
 
-                Org::UpdateLabel(orgid);
+            Org::UpdateLabel(orgid);
 
-                printf("[ ORG (DB) ] O admin %s, setou %s como lider da organizacao %s\n", GetPlayerNameStr(playerid), name, Org[orgid][org::name]);
-            }
+            printf("[ ORG (DB) ] O admin %s, setou %s como lider da organizacao %s\n", GetPlayerNameStr(playerid), name, Org[orgid][org::name]);
+        }
 
-            case ORG_ROLE_COLEADER:
-            {
-                format(Org[orgid][org::coleader], MAX_PLAYER_NAME, "%s", name);
-                DB::SetDataString(db_stock, "organizations", "coleader", Org[orgid][org::coleader], "orgid = %d", orgid);
-                SendClientMessage(targetid, -1, 
-                "{33ff33}[ ORGS ] {ffffff}Parabéns, você agora é {33ff33}Colíder {ffffff}da organização {%06x}%s", 
-                Org[orgid][org::color] >>> 8, Org[orgid][org::name]);
-                printf("[ ORG (DB) ] O admin/líder %s, setou %s como colider da organizacao %s\n", GetPlayerNameStr(playerid), name, Org[orgid][org::name]);
-            }
+        case ORG_ROLE_COLEADER:
+        {
+            format(Org[orgid][org::coleader], MAX_PLAYER_NAME, "%s", name);
+            DB::SetDataString(db_stock, "organizations", "coleader", Org[orgid][org::coleader], "orgid = %d", orgid);
+            
+            SendClientMessage(targetid, -1, 
+            "{33ff33}[ ORGS ] {ffffff}Parabéns, você agora é {33ff33}Colíder {ffffff}da organização {%06x}%s", 
+            Org[orgid][org::color] >>> 8, Org[orgid][org::name]);
 
-            default: 
-            {
-                SendClientMessage(targetid, -1, 
-                "{33ff33}[ ORGS ] {ffffff}Parabéns, você agora é {33ff33}membro {ffffff}da organização {%06x}%s", 
-                Org[orgid][org::color] >>> 8, Org[orgid][org::name]); 
-            }
+            Org::UpdateLabel(orgid);
+
+            printf("[ ORG (DB) ] O admin/líder %s, setou %s como colider da organizacao %s\n", GetPlayerNameStr(playerid), name, Org[orgid][org::name]);
         }
     }
 
@@ -209,10 +211,9 @@ stock Org::UnSetMember(targetid)
         {
             format(Org[orgid][org::coleader], MAX_PLAYER_NAME, "%s", NO_COLEADER_NAME);
             DB::SetDataString(db_stock, "organizations", "coleader", NO_COLEADER_NAME, "orgid = %d", orgid);
+            Org::UpdateLabel(orgid);
         }
     }
-
-    SendClientMessage(targetid, -1, "{ff3333}[ ORG ] {ffffff}Você foi {ff3333}expulso {ffffff}da sua organização!");
 
     DB::Delete(db_entity, "members", "name = '%q'", GetPlayerNameStr(targetid));
 
@@ -281,13 +282,13 @@ stock Org::HasPermission(playerid, ORG_ROLES:role)
 {
     if(org::Player[playerid][pyr::orgid] == INVALID_ORG_ID)
     {   
-        SendClientMessage(playerid, -1, "{ff3333}[ ORGS ] {ffffff}Você não faz parte de uma {ff3333}organização!");
+        SendClientMessage(playerid, -1, "{ff3333}[ ORG ] {ffffff}Você não faz parte de uma {ff3333}organização!");
         return 0;
     }
 
     if(org::Player[playerid][pyr::role] < role)
     {
-        SendClientMessage(playerid, -1, "{ff3333}[ ORGS ] {ffffff}Você não tem {ff3333}permissão {ffffff}para usar esse comando!");
+        SendClientMessage(playerid, -1, "{ff3333}[ ORG ] {ffffff}Você não tem {ff3333}permissão {ffffff}para usar esse comando!");
         return 0;
     }
 
@@ -351,9 +352,10 @@ stock Org::UpdateLabel(orgid)
 {
     new str[144];
     
-    format(str, 144, "[ {%06x}%s {ffffff}]\nTipo: %s\n{ffffff}Lider: {%06x}%s",
+    format(str, 144, "[ {%06x}%s {ffffff}]\nTipo: %s\n{ffffff}Lider: {%06x}%s | {ffffff}Colider: {%06x}%s",
     Org[orgid][org::color] >>> 8, Org[orgid][org::name], Org::gTypeNames[_:Org[orgid][org::type]],
-    Org[orgid][org::color] >>> 8, Org[orgid][org::leader]);
+    Org[orgid][org::color] >>> 8, Org[orgid][org::leader],
+    Org[orgid][org::color] >>> 8, Org[orgid][org::coleader]);
     
     UpdateDynamic3DTextLabelText(Org[orgid][org::labelid] , -1, str);
 }
@@ -373,5 +375,8 @@ stock Org::SetMemberTag(playerid)
     else 
         format(str, 32, "{%06x}[ %s ]", Org[orgid][org::color] >>> 8, Org[orgid][org::tag]);
     
-    org::Player[playerid][pyr::labelid]  = CreateDynamic3DTextLabel(str, -1, 0.0, 0.0, 0.1, 25.0, playerid, .testlos = 1);
+    if(IsValidDynamic3DTextLabel(org::Player[playerid][pyr::labelid]))
+        UpdateDynamic3DTextLabelText(org::Player[playerid][pyr::labelid], -1, str);
+    else
+        org::Player[playerid][pyr::labelid]  = CreateDynamic3DTextLabel(str, -1, 0.0, 0.0, 0.1, 25.0, playerid, .testlos = 1);
 }

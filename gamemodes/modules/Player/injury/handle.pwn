@@ -53,7 +53,6 @@ public OnPlayerInjury(playerid)
 
     if(!IsValidPlayer(playerid))
     {
-        printf("JOGADOR INJURIADO SAIU");
         Player::KillTimer(playerid, pyr::TIMER_INJURY);
         DestroyDynamic3DTextLabel(Player[playerid][pyr::deathtag]);
         Player[playerid][pyr::deathtag] = INVALID_3DTEXT_ID;
@@ -122,7 +121,6 @@ public OnPlayerReviveFinished(playerid, targetid)
     {
         if(IsValidPlayer(playerid))
         {
-            printf("JOGADOR REAVIVADOR SAIU durante reavivament");
             ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
             ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
             Player[playerid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
@@ -130,7 +128,6 @@ public OnPlayerReviveFinished(playerid, targetid)
 
         if(IsValidPlayer(targetid))
         {
-            printf("JOGADOR INJURIADO SAIU durante reavivament");
             ResetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
             Player[targetid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
         }
@@ -176,8 +173,8 @@ public OnPlayerReviveFinished(playerid, targetid)
     ClearAnimations(targetid, SYNC_ALL);
     ClearAnimations(playerid, SYNC_ALL);
 
-    SendClientMessage(playerid, -1, "{33ff99}[ SOCORRO ] {ffffff}Reavivamento concluído com sucesso.");
-    SendClientMessage(targetid, -1, "{33ff99}[ SOCORRO ] {ffffff}Você foi reanimado e está estável.");
+    SendClientMessage(playerid, -1, "{33ff99}[ SOS ] {ffffff}Reavivamento concluído com sucesso.");
+    SendClientMessage(targetid, -1, "{33ff99}[ SOS ] {ffffff}Você foi reanimado e está estável.");
 
     return 1;
 }

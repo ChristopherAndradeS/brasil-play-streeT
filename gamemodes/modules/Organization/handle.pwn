@@ -2,8 +2,8 @@
 
 hook OnGameModeInit()
 {
-    Org::Create("Groove StreeT",   ORG_TYPE_GANG,   "SERVER", "GRV", NO_LEADER_NAME, NO_COLEADER_NAME,  {65, 105, 106, 195}, 0x66FF66FF, 2512.6948, -1672.7095, 13.5, 93.2823);
-    Org::Create("Policia Militar", ORR_TYPE_POLICE, "SERVER", "PF", NO_LEADER_NAME, NO_COLEADER_NAME,  {300, 301, 306, 309}, 0x66FFFFFF, 1540.6760, -1675.6892, 13.5493, 90.0);
+    // Org::Create("Groove StreeT",   ORG_TYPE_GANG,   "SERVER", "GRV", NO_LEADER_NAME, NO_COLEADER_NAME,  {65, 105, 106, 195}, 0x66FF66FF, 2512.6948, -1672.7095, 13.5, 93.2823);
+    // Org::Create("Policia Militar", ORR_TYPE_POLICE, "SERVER", "PF", NO_LEADER_NAME, NO_COLEADER_NAME,  {300, 301, 306, 309}, 0x66FFFFFF, 1540.6760, -1675.6892, 13.5493, 90.0);
 
     for(new i = 0; i < MAX_ORGS; i++)
     {
@@ -12,7 +12,7 @@ hook OnGameModeInit()
         if(result == -1) continue;
         
         else if(result == 0)
-            printf("[ DB (ORG) ] Erro ao carregar organização orgid: %d!\n", i);
+            printf("[ DB (ORG) ] Erro ao carregar organizacao orgid: %d!\n", i);
         else
             printf("[ DB (ORG) ] Organizacao %s carregada com sucesso!\n", Org[i][org::name]);
     }

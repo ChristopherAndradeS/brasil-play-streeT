@@ -314,9 +314,3 @@ stock SendMessageToNearPlayer(Float:pX, Float:pY, Float:pZ, const msg[], GLOBAL_
 
     return 1;
 }
-
-YCMD:wep(playerid, params[], help)
-{
-    GivePlayerWeapon(playerid, WEAPON:strval(params), 1000);
-    return 1;
-}

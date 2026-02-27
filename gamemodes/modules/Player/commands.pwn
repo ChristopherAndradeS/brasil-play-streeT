@@ -108,6 +108,12 @@ YCMD:acessorios(playerid, params[], help)
 
 YCMD:orgs(playerid, params[], help)
 {
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ORG ] {ffffff}Veja as organizações atuais e o número de membros online.");
+        return 1;
+    }
+
     if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 1;
 
     new msg[1024], line[128], org::members[MAX_ORGS];
