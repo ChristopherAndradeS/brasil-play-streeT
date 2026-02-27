@@ -28,11 +28,6 @@ stock Org::Load(orgid)
         Org[orgid][org::zoneid] = GangZoneCreate(Float:Org::ZonesLimits[orgid][0], Float:Org::ZonesLimits[orgid][1], 
             Float:Org::ZonesLimits[orgid][2], Float:Org::ZonesLimits[orgid][3]);
     }
-    else
-    {
-        Org[orgid][org::zoneid] = GangZoneCreate(Org[orgid][org::sX] - 75.0, Org[orgid][org::sY] - 75.0,
-            Org[orgid][org::sX] + 75.0, Org[orgid][org::sY] + 75.0);
-    }
     
     new str[144];
     
