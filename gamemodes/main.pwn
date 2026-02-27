@@ -87,7 +87,15 @@
 
 #include "./gamemodes/modules/Organization/core.pwn"
 #include "./gamemodes/modules/Player/core.pwn"
-#include "./gamemodes/modules/Player/injury/handle.pwn"
+
+//  ------------------------- PLAYERS --------------------------
+#include "./gamemodes/modules/Player/acessory/core.pwn"
+#include "./gamemodes/modules/Player/injury/core.pwn"
+#include "./gamemodes/modules/Player/login/core.pwn"
+#include "./gamemodes/modules/Player/payday/core.pwn"
+#include "./gamemodes/modules/Player/punishment/core.pwn"
+//  ------------------------- PLAYERS --------------------------
+
 #include "./gamemodes/modules/Server/core.pwn" 
 
 //  ------------------------- TEXTDRAWS ---------------------------
@@ -107,14 +115,6 @@
 #include "./gamemodes/modules/Games/Arena/core.pwn"
 #include "./gamemodes/modules/Games/Race/core.pwn"
 //  -------------------------  GAMES ---------------------------
-
-//  ------------------------- PLAYERS --------------------------
-#include "./gamemodes/modules/Player/acessory/core.pwn"
-#include "./gamemodes/modules/Player/injury/core.pwn"
-#include "./gamemodes/modules/Player/login/core.pwn"
-#include "./gamemodes/modules/Player/payday/core.pwn"
-#include "./gamemodes/modules/Player/punishment/core.pwn"
-//  ------------------------- PLAYERS --------------------------
 
 //     _   _                 _ _           
 //    | | | |               | | |          
