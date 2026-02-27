@@ -12,7 +12,8 @@ stock Org::Load(orgid)
     new skins[MAX_ORGS_SKINS];
     Org::GetSkins(orgid, skins);
 
-    Org[orgid][org::skins] = skins;
+    for(new i = 0; i < MAX_ORGS_SKINS; i++)
+        Org[orgid][org::skins][i] = skins[i];
     
     DB::GetDataFloat(db_stock, "organizations", "funds", Org[orgid][org::funds], "orgid = %d", orgid);
     DB::GetDataInt(db_stock, "organizations", "flags", Org[orgid][org::flags], "orgid = %d", orgid);
@@ -22,8 +23,16 @@ stock Org::Load(orgid)
     DB::GetDataFloat(db_stock, "organizations", "sZ", Org[orgid][org::sZ], "orgid = %d", orgid);
     DB::GetDataFloat(db_stock, "organizations", "sA", Org[orgid][org::sA], "orgid = %d", orgid);
 
-    Org[orgid][org::zoneid] = GangZoneCreate(Float:Org::ZonesLimits[orgid][0], Float:Org::ZonesLimits[orgid][1], 
-        Float:Org::ZonesLimits[orgid][2], Float:Org::ZonesLimits[orgid][3]);
+    if(orgid < sizeof(Org::ZonesLimits))
+    {
+        Org[orgid][org::zoneid] = GangZoneCreate(Float:Org::ZonesLimits[orgid][0], Float:Org::ZonesLimits[orgid][1], 
+            Float:Org::ZonesLimits[orgid][2], Float:Org::ZonesLimits[orgid][3]);
+    }
+    else
+    {
+        Org[orgid][org::zoneid] = GangZoneCreate(Org[orgid][org::sX] - 75.0, Org[orgid][org::sY] - 75.0,
+            Org[orgid][org::sX] + 75.0, Org[orgid][org::sY] + 75.0);
+    }
     
     new str[144];
     

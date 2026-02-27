@@ -25,10 +25,8 @@ hook OnPlayerStateChange(playerid, PLAYER_STATE:newstate, PLAYER_STATE:oldstate)
     return 1;
 }
 
-hook OnVehicleHealthChance(vehicleid, Float:new_health, Float:old_health)
+hook OnVehicleHealthChange(vehicleid, Float:new_health, Float:old_health)
 {
-    #pragma unused old_health
-
     new raceid, playerid = GetVehicleDriver(vehicleid);
     if(Race::IsRaceVehicle(vehicleid, raceid, playerid) && Game[raceid][game_state] == GAME_STATE_STARTED)
         return 1;
@@ -151,6 +149,8 @@ public OnSpeedOMeterUpdate(playerid)
 
 hook OnVehicleFuelChange(vehicleid, Float:new_fuel, Float:old_fuel)
 {
+    #pragma unused old_fuel
+
     new playerid = GetVehicleDriver(vehicleid);
 
     if(new_fuel <= 0.0)
@@ -165,6 +165,8 @@ hook OnVehicleFuelChange(vehicleid, Float:new_fuel, Float:old_fuel)
 
     if(new_fuel < 15.0)
     {
+        if(!IsValidPlayer(playerid)) return 1;
+
         if(veh::Player[playerid][pyr::tick_gas_notify] > GetTickCount()) return 1;
         
         if(IsValidPlayer(playerid))
@@ -178,7 +180,7 @@ hook OnVehicleFuelChange(vehicleid, Float:new_fuel, Float:old_fuel)
 
 hook OnPlayerKeyStateChange(playerid, KEY:newkeys, KEY:oldkeys)
 {
-    if(newkeys == KEY_YES)
+    if((newkeys & KEY_YES) && !(oldkeys & KEY_YES))
     {
         if(!IsPlayerInAnyVehicle(playerid)) return 1;
         
