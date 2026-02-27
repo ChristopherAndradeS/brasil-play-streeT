@@ -57,5 +57,5 @@ new Vehicle[MAX_VEHICLES][E_VEHICLES];
 
 forward OnSpeedOMeterUpdate(playerid);
 forward Float:Veh::GetVehicleFuelUsed(Float:speed, Float:accel, Float:dt);
-forward OnVehicleFuelChange(playerid, Float:new_fuel, Float:old_fuel);
+forward OnVehicleFuelChange(vehicleid, Float:new_fuel, Float:old_fuel);
 forward OnVehicleCreate(vehicleid, modelid, regionid, Float:x, Float:y, Float:z);
