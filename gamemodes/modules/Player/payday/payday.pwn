@@ -17,6 +17,7 @@ hook OnPlayerLogin(playerid)
     DB::GetDataInt(db_entity, "players", "payday_tleft", pdy::Player[playerid][pdy::time_left], "name = '%q'", GetPlayerNameStr(playerid));
 
     new time_left = pdy::Player[playerid][pdy::time_left];
+    
     Player::CreateTimer(playerid, pyr::TIMER_PAYDAY, "OnPayDayReach", time_left, false, "i", playerid);
 
     return 1;

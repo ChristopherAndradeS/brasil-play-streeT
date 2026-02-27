@@ -1,17 +1,19 @@
 new Text:Login::PublicTD[7] = {INVALID_TEXT_DRAW, ...};
-new PlayerText:Login::PlayerTD[MAX_PLAYERS][3] = {INVALID_PLAYER_TEXT_DRAW, ...};
+new PlayerText:Login::PlayerTD[MAX_PLAYERS][3] = {{INVALID_PLAYER_TEXT_DRAW, ...}, ...};
 
 new Text:Baseboard::PublicTD[13] = {INVALID_TEXT_DRAW, ...};
-new PlayerText:Baseboard::PlayerTD[MAX_PLAYERS][5] = {INVALID_PLAYER_TEXT_DRAW, ...};
+new PlayerText:Baseboard::PlayerTD[MAX_PLAYERS][5] = {{INVALID_PLAYER_TEXT_DRAW, ...}, ...};
 
 new Text:Acessory::PublicTD[21] = {INVALID_TEXT_DRAW, ...};
-new PlayerText:Acessory::PlayerTD[MAX_PLAYERS][14] = {INVALID_PLAYER_TEXT_DRAW, ...};
+new PlayerText:Acessory::PlayerTD[MAX_PLAYERS][14] = {{INVALID_PLAYER_TEXT_DRAW, ...}, ...};
 
 new Text:Adm::PublicTD[14] = {INVALID_TEXT_DRAW, ...};
-new PlayerText:Adm::PlayerTD[MAX_PLAYERS][9] = {INVALID_PLAYER_TEXT_DRAW, ...};
+new PlayerText:Adm::PlayerTD[MAX_PLAYERS][9] = {{INVALID_PLAYER_TEXT_DRAW, ...}, ...};
 
 new Text:Veh::PublicTD[11] = {INVALID_TEXT_DRAW, ...};
-new PlayerText:Veh::PlayerTD[MAX_PLAYERS][18] = {INVALID_PLAYER_TEXT_DRAW, ...};
+new PlayerText:Veh::PlayerTD[MAX_PLAYERS][18] = {{INVALID_PLAYER_TEXT_DRAW, ...}, ...};
+
+new PlayerText:Travel::PlayerTD[MAX_PLAYERS][2] = {{INVALID_PLAYER_TEXT_DRAW, ...}, ...};
 
 
 /*  LOGIN  */

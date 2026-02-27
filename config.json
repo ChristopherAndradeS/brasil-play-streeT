@@ -110,7 +110,7 @@
     },
     "password": "",
     "pawn": {
-        "legacy_plugins": ["streamer", "PawnPlus", "samp_bcrypt", "ColAndreas_static"],
+        "legacy_plugins": ["streamer", "PawnPlus", "samp_bcrypt"],
         "main_scripts": [
             "main 1"
         ],

@@ -49,6 +49,7 @@ enum E_PLAYER_TIMERS
     pyr::TIMER_JAIL,
     pyr::TIMER_SPEEDOMETER,
     pyr::TIMER_INJURY,
+    pyr::TIMER_TRAVEL,
 }
 
 new pyr::Timer[MAX_PLAYERS][E_PLAYER_TIMERS];

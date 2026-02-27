@@ -1,4 +1,5 @@
-#define MAX_PLAYERS 50
+#define MAX_PLAYERS (50)
+#define MAX_NPCS    (1)
 
 #include <open.mp>
 #include <sscanf2>
@@ -6,7 +7,7 @@
 #include <samp_bcrypt>
 #include <PawnPlus>
 #include <sampvoice>
-#include <colandreas>
+//#include <colandreas>
 
 #define CGEN_MEMORY 20000
 
@@ -37,6 +38,7 @@
 #include "./gamemodes/modules/Games/header.pwn"
 #include "./gamemodes/modules/LinkedLists/header.pwn"
 #include "./gamemodes/modules/Maps/header.pwn"
+#include "./gamemodes/modules/NPC/header.pwn"
 #include "./gamemodes/modules/Organization/header.pwn"
 #include "./gamemodes/modules/Player/header.pwn"
 #include "./gamemodes/modules/Server/header.pwn" 
@@ -91,6 +93,7 @@
 //                          [    HUD    ]
 #include "./gamemodes/modules/TextDraws/hud/baseboard.pwn"
 #include "./gamemodes/modules/TextDraws/hud/velocimeter.pwn"
+#include "./gamemodes/modules/TextDraws/hud/travel.pwn"
 
 //  ----------------------- [ TEXTDRAWS ] -------------------------
 
@@ -114,6 +117,7 @@
 #include "./gamemodes/modules/LinkedLists/handle.pwn"
 #include "./gamemodes/modules/Maps/handle.pwn"
 #include "./gamemodes/modules/TextDraws/handle.pwn"
+#include "./gamemodes/modules/NPC/handle.pwn"
 
 #include "./gamemodes/modules/Player/handle.pwn"
 #include "./gamemodes/modules/Organization/handle.pwn"

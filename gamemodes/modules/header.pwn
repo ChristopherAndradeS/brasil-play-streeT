@@ -46,6 +46,9 @@
 #define arena::             arn_
 #define Ammu::              AMM_
 #define House::             HOS_
+#define NPC::               NPC_
+#define npc::               npc_
+#define Travel::            TRV_
 
 /*          DEFINES          */
 #define DISCORD_LINK        "https://discord.gg/Czq6DWDvcB"

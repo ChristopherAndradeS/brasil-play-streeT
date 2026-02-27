@@ -90,7 +90,7 @@ stock Player::KillTimer(playerid, E_PLAYER_TIMERS:pyr::timerid)
             DB::SetDataInt(db_entity, "punishments", "left_tstamp", t_left, "name = '%q' AND level = 1", GetPlayerNameStr(playerid));
         }
 
-        case pyr::TIMER_SPEEDOMETER, pyr::TIMER_LOGIN_KICK, pyr::TIMER_INJURY:
+        case pyr::TIMER_SPEEDOMETER, pyr::TIMER_LOGIN_KICK, pyr::TIMER_INJURY, pyr::TIMER_TRAVEL:
         {
             
         }
@@ -159,12 +159,6 @@ stock Player::UpdateDamage(playerid, issuerid, Float:damage, WEAPON:weaponid, bo
 {
     if(!IsValidPlayer(issuerid)) return 1;
 
-    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INJURED))  
-    {
-        GameTextForPlayer(issuerid, "~r~~h~OVERKILL", 1000, 4);
-        return 1;
-    }
-
     if(bodypart == 9)
     {
         GameTextForPlayer(issuerid, "~r~H~h~E~h~~h~A~g~~h~~h~D~g~~h~S~b~~h~~h~H~b~O~b~O~p~T", 1000, 4);
@@ -199,13 +193,13 @@ stock Player::AplyRandomDeathAnim(playerid, &time)
     }
 }
 
-stock Player::AplyRandomInjuryAnim(playerid)
+stock Player::AplyRandomInjuryAnim(playerid, &time)
 {
     switch(RandomMax(100))
     {
-        case 0..33:     ApplyAnimation(playerid, "KNIFE", "KILL_Knife_Ped_Die", 4.1, false, false, false, true, 2170, SYNC_ALL);
-        case 34..66:    ApplyAnimation(playerid, "ped", "KO_shot_stom", 4.1, false, false, false, true, 2170, SYNC_ALL);
-        case 67..100:   ApplyAnimation(playerid, "ped", "KO_shot_stom", 4.1, false, false, false, true, 2170, SYNC_ALL); 
+        case 0..33:     ApplyAnimation(playerid, "ped", "KO_skid_front", 4.1, false, false, false, false, 1930, SYNC_ALL), time = 1930;
+        case 34..66:    ApplyAnimation(playerid, "ped", "KO_shot_face", 4.1, false, false, false, false, 2100, SYNC_ALL), time = 2100;
+        case 67..100:   ApplyAnimation(playerid, "ped", "KO_shot_stom", 4.1, false, false, false, false, 3170, SYNC_ALL), time = 3170;
     }
 }
 
@@ -236,8 +230,7 @@ stock Player::Spawn(playerid)
 
         DB::GetDataInt(db_entity, "members", "orgid", orgid, "name = '%q'", GetPlayerNameStr(playerid));
         DB::GetDataInt(db_entity, "members", "flags", flag, "name = '%q'", GetPlayerNameStr(playerid));
-
-        printf("%d", orgid);
+        DB::GetDataInt(db_entity, "members", "skinid", org::Player[playerid][pyr::skinid], "name = '%q'", GetPlayerNameStr(playerid));
         
         if(GetFlag(flag, FLAG_PLAYER_ON_WORK))
         {

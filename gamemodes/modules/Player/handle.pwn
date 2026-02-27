@@ -12,7 +12,6 @@ hook OnPlayerConnect(playerid, classid)
 {
     if(IsPlayerNPC(playerid))
     {
-        printf("NPC");
         return -1;
     } 
 
@@ -23,7 +22,6 @@ hook OnPlayerRequestClass(playerid, classid)
 {
     if(IsPlayerNPC(playerid))
     {
-        printf("NPC");
         return -1;
     } 
 
@@ -45,7 +43,7 @@ hook OnPlayerConnect(playerid)
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 
-    DB::GetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", name);
+    //DB::GetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", name);
 
     /* VERIFICAR NOME - É ADEQUADO ?  */
     if(!IsValidNickName(name))
@@ -132,8 +130,8 @@ hook OnPlayerLogin(playerid)
     ApplyAnimation(playerid, "ped", "null", 0.0, false, false, false, false, 0); 
     ApplyAnimation(playerid, "DANCING", "null", 0.0, false, false, false, false, 0); 
     ApplyAnimation(playerid, "CRACK", "null", 0.0, false, false, false, false, 0); 
-    ApplyAnimation(playerid, "SWAT", "null", 4.1, false, false, false, false, 0); 
-    ApplyAnimation(playerid, "KNIFE", "null", 4.1, false, false, false, false, 0); 
+    ApplyAnimation(playerid, "SWAT", "null", 0.0, false, false, false, false, 0); 
+    ApplyAnimation(playerid, "KNIFE", "null", 0.0, false, false, false, false, 0); 
 
     Player[playerid][pyr::health] = 100.0;
 
@@ -170,6 +168,12 @@ hook OnPlayerLogin(playerid)
 hook OnPlayerGiveDamage(playerid, damagedid, Float:amount, WEAPON:weaponid, bodypart)
 {
     if(!IsValidPlayer(damagedid)) return 1;
+
+    if(GetFlag(Player[damagedid][pyr::flags], FLAG_PLAYER_INJURED))  
+    {
+        GameTextForPlayer(playerid, "~r~~h~OVERKILL", 1000, 4);
+        return -1;
+    }
 
     if(GetFlag(Player[damagedid][pyr::flags], FLAG_PLAYER_INVUNERABLE)) return -1;
 
@@ -214,89 +218,81 @@ hook OnPlayerInjury(playerid, killerid, WEAPON:reason)
 
     if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME))return 1;
     
-    Player[playerid][pyr::death_tick] = GetTickCount();
-
-    Player::CreateTimer(playerid, pyr::TIMER_INJURY, "OnPlayerInjuryUpate", 100, true, "iii", playerid);
-
-    return 1;
-}
-
-public OnPlayerInjuryUpate(playerid)
-{
-    if(!IsValidPlayer(playerid))
+    inline update()
     {
-        printf("tornou-se inválido");
-        Player::KillTimer(playerid, pyr::TIMER_INJURY);
-        return 1;
-    }
+        new tick = Player[playerid][pyr::death_tick] - GetTickCount();
 
-    new tick = GetTickCount() - Player[playerid][pyr::death_tick];
-
-    switch(tick)
-    {
-        case 0..2100:
+        if(!IsValidPlayer(playerid))
         {
-            new animidx = GetPlayerAnimationIndex(playerid);
+            Timer_KillCallback(pyr::Timer[playerid][pyr::TIMER_INJURY]);
+            DestroyDynamic3DTextLabel(Player[playerid][pyr::deathtag]);
+            print("invalido");
+            Player[playerid][pyr::deathtag] = INVALID_3DTEXT_ID;
+            return 1;
+        }
 
-            if(animidx == 746 || animidx == 1205 || animidx == 1207)
-                return 1;
+        new str[256];
 
-            Player[playerid][pyr::death_tick] = GetTickCount();
+        if(tick <= 0)
+        {
 
+            Player[playerid][pyr::health] = 50.0;
+            SetPlayerHealth(playerid, 50.0);
+
+            ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INJURED);
+            ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
+            
+            Travel::ShowTDForPlayer(playerid, 
+            "A emergencia chegou e~n~Voce foi para o hospital...",
+            1182.2079 + RandomFloatMinMax(-2.0, 2.0), 
+            -1323.2695 + RandomFloatMinMax(-2.0, 2.0), 13.5798, 270.0);
+            
+            Timer_KillCallback(pyr::Timer[playerid][pyr::TIMER_INJURY]);
+            DestroyDynamic3DTextLabel(Player[playerid][pyr::deathtag]);
+            Player[playerid][pyr::deathtag] = INVALID_3DTEXT_ID;
+
+            print("TIMERMORT");
+
+            //CallLoca
+
+            return 1;
+        }
+
+        format(str, 256, "[ {ff4444}FERIDO {ffffff}]\nUse {ff4444}'F' {ffffff}ou {ff4444}/rev {ffffff}para socorrer\n{ff4444}Emergencia {ffffff}chegara em: {ff4444}%02d{ffffff}:{ff4444}%02d", 
+        floatround((tick / 60000)), floatround((tick % 60000) / 1000));
+
+        if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INJURED))
+        {
+            Player[playerid][pyr::deathtag] = CreateDynamic3DTextLabel(str, -1, 0.0, 0.0, -0.3, 60.0, .attachedplayer = playerid, .testlos = 1);
             SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INJURED);
-            Player::AplyRandomInjuryAnim(playerid);
         }
 
-        default:
+        else
         {
-            new str[144];
+            UpdateDynamic3DTextLabelText(Player[playerid][pyr::deathtag], -1, str);
+            GameTextForPlayer(playerid, "~r~~h~Emergencia chegara em:~n~~w~%02d~r~~h~:~w~%02d", 900, 3, floatround((tick / 60000)), floatround((tick % 60000) / 1000));
+        }
 
-            if(tick >= MAX_PLAYER_TICK_INJURY)
-            {
-                new Float:pX, Float:pY, Float:pZ, Float:nX, Float:nY, Float:nZ;
-                GetPlayerPos(playerid, pX, pY, pZ);
-
-                if(GetRandomPositionAround(pX, pY, pZ, 10.0, 20.0, nX, nY, nZ))
-                {
-                    NPC_SetPos(med_npcid, nX, nY, nZ);
-                    NPC_MoveToPlayer(med_npcid, playerid, .stopRange = 0.1);
-                    
-                    format(str, 144, "[ {ff4444}FERIDO {ffffff}]\nServico de {ff4444}emergencia\nSOS CHEGOU");
-            
-                    UpdateDynamic3DTextLabelText(Player[playerid][pyr::deathtag], -1, str);
-                }
-
-                else
-                {
-                    printf("HOSPITAL");
-                }
-
-                Player::KillTimer(playerid, pyr::TIMER_INJURY);
-                return 1;
-            }
-
-            new time_to_death = MAX_PLAYER_TICK_INJURY - tick, animidx = GetPlayerAnimationIndex(playerid);
-            
-            format(str, 144, "[ {ff4444}FERIDO {ffffff}]\nServico de {ff4444}emergencia {ffffff}chegara em\n{ff4444}%02d{ffffff}:{ff4444}%02d", 
-            floatround((time_to_death / 60000)), floatround((time_to_death % 60000) / 1000));
-
-            if(animidx != 1508)
-            {
-                TogglePlayerControllable(playerid, false);
-                ApplyAnimation(playerid, "SWAT", "gnstwall_injurd", 4.1, true, false, false, true, MAX_PLAYER_TICK_INJURY, SYNC_OTHER);
-                ApplyAnimation(playerid, "SWAT", "gnstwall_injurd", 4.1, true, false, false, true, MAX_PLAYER_TICK_INJURY, SYNC_ALL);
-                Player[playerid][pyr::deathtag] = CreateDynamic3DTextLabel(str, -1, 0.0, 0.0, -0.4, 60.0, .attachedplayer = playerid, .testlos = 1);
-            }
-
-            else
-                UpdateDynamic3DTextLabelText(Player[playerid][pyr::deathtag], -1, str);
-            
-            foreach (new i : StreamedPlayer[playerid])
-            {
-                Streamer_Update(i, STREAMER_TYPE_3D_TEXT_LABEL);
-            }
+        foreach (new i : StreamedPlayer[playerid])
+        {
+            Streamer_Update(i, STREAMER_TYPE_3D_TEXT_LABEL);
         }
     }
+    
+    TogglePlayerControllable(playerid, false);
+
+    ClearAnimations(playerid, SYNC_ALL);
+    ApplyAnimation(playerid, "SWAT", "gnstwall_injurd", 4.1, true, false, false, true, 0, SYNC_OTHER);
+    ApplyAnimation(playerid, "SWAT", "gnstwall_injurd", 4.1, true, false, false, true, 0, SYNC_ALL);
+
+    new time_sos = floatround(GetPlayerDistanceFromPoint(playerid, 1182.2079, -1323.2695, 13.5798) / 0.012);
+    Player[playerid][pyr::death_tick] = GetTickCount() + time_sos;
+    
+    new count = floatround(time_sos / 1000.0, floatround_ceil);
+    
+    printf("%d %d", time_sos, count);
+
+    pyr::Timer[playerid][pyr::TIMER_INJURY] = Timer_CreateCallback(using inline update, 1000, count);
 
     return 1;
 }
@@ -317,7 +313,7 @@ hook OnPlayerSpawn(playerid)
         ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_SPECTATING);  
         Adm::AddSpectatorInList(playerid); 
         SetPlayerWeather(playerid, Server[srv::g_weatherid]);
-
+        SetPlayerHealth(playerid, Player[playerid][pyr::health]);
         return 1;
     }
 
