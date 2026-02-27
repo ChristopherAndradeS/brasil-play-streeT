@@ -2,8 +2,23 @@ YCMD:spawn(playerid, params[], help)
 {
     if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 1;
 
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INJURED) || GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION))
+        return SendClientMessage(playerid, -1, "{ff5533}[ BPS ] {ffffff}Você não pode usar /spawn enquanto estiver ferido ou reavivando.");
+
     Player::Spawn(playerid);
     SendClientMessage(playerid, -1, "{99ff99}[ BPS ] {ffffff}Você foi enviado ao spawn!");
+    return 1;
+}
+
+YCMD:rev(playerid, params[], help)
+{
+    #pragma unused params, help
+
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 1;
+
+    if(!Player::HandleResuscitationAction(playerid))
+        SendClientMessage(playerid, -1, "{ff5533}[ SOCORRO ] {ffffff}Não há jogadores feridos próximos para reavivar.");
+
     return 1;
 }
 

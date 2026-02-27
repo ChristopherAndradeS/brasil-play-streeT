@@ -100,6 +100,27 @@ hook OnPlayerDisconnect(playerid, reason)
     if(IsPlayerInAnyVehicle(playerid))
         Player::KillTimer(playerid, pyr::TIMER_SPEEDOMETER);
 
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION))
+    {
+        Player::KillTimer(playerid, pyr::TIMER_RESUSCITATION);
+        ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
+        ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
+
+        new targetid = Player[playerid][pyr::resuscitation_targetid];
+        if(IsValidPlayer(targetid))
+        {
+            ResetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
+            Player[targetid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
+            TogglePlayerControllable(targetid, GetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_INJURED) ? false : true);
+            ClearAnimations(targetid, SYNC_ALL);
+
+            if(GetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_INJURED))
+                ApplyAnimation(targetid, "SWAT", "gnstwall_injurd", 4.1, true, false, false, true, 0, SYNC_ALL);
+        }
+    }
+
+    Player[playerid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
+
     Login::HideTDForPlayer(playerid);
     Baseboard::HideTDForPlayer(playerid);
     Acessory::HideTDForPlayer(playerid);
@@ -229,6 +250,60 @@ hook OnPlayerLeaveDynamicArea(playerid, STREAMER_TAG_AREA:areaid)
 
         Veh::RemoveFromRegion(vehicleid);
     }
+
+    return 1;
+}
+
+
+stock Player::HandleResuscitationAction(playerid)
+{
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 0;
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INJURED)) return 0;
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION)) return 0;
+
+    new Float:pX, Float:pY, Float:pZ;
+    GetPlayerPos(playerid, pX, pY, pZ);
+
+    new near_players[MAX_PLAYERS];
+    for(new i = 0; i < MAX_PLAYERS; i++)
+        near_players[i] = INVALID_PLAYER_ID;
+
+    Player::GetPlayersFlaggedInRange(pX, pY, pZ, FLAG_PLAYER_INJURED, 2.25, near_players);
+
+    new targetid = near_players[0];
+
+    if(targetid == INVALID_PLAYER_ID) return 0;
+
+    if(targetid == playerid)
+    {
+        for(new i = 1; i < MAX_PLAYERS; i++)
+        {
+            if(near_players[i] != INVALID_PLAYER_ID)
+            {
+                targetid = near_players[i];
+                break;
+            }
+        }
+    }
+
+    if(targetid == INVALID_PLAYER_ID || targetid == playerid) return 0;
+
+    return Player::StartResuscitation(playerid, targetid);
+}
+
+stock Player::HandleKeySelector(playerid, KEY:newkeys, KEY:oldkeys)
+{
+    if((newkeys & KEY_SECONDARY_ATTACK) && !(oldkeys & KEY_SECONDARY_ATTACK))
+        Player::HandleResuscitationAction(playerid);
+
+    return 1;
+}
+
+hook OnPlayerKeyStateChange(playerid, KEY:newkeys, KEY:oldkeys)
+{
+    if(IsPlayerNPC(playerid)) return -1;
+
+    Player::HandleKeySelector(playerid, newkeys, oldkeys);
 
     return 1;
 }

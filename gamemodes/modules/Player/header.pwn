@@ -17,6 +17,7 @@ enum (<<= 1)
     FLAG_PLAYER_CHECKPOINT,
     FLAG_PLAYER_INJURED,
     FLAG_PLAYER_INVUNERABLE,
+    FLAG_PLAYER_RESUSCITATION,
     FLAG_PLAYER_GENDER
 }
 
@@ -33,6 +34,7 @@ enum E_PLAYER
     pyr::flags,
     pyr::regionid,
     pyr::vehicleid,
+    pyr::resuscitation_targetid,
     Text3D:pyr::nametag,
     Text3D:pyr::deathtag
 }
@@ -49,6 +51,7 @@ enum E_PLAYER_TIMERS
     pyr::TIMER_JAIL,
     pyr::TIMER_SPEEDOMETER,
     pyr::TIMER_INJURY,
+    pyr::TIMER_RESUSCITATION,
     pyr::TIMER_TRAVEL,
 }
 

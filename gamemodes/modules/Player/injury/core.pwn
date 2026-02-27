@@ -26,6 +26,164 @@ stock Player::UpdateDamage(playerid, issuerid, Float:damage, WEAPON:weaponid, bo
     return 1;
 }
 
+stock Player::CanStartResuscitation(playerid, targetid, bool:notify = true)
+{
+    if(!IsValidPlayer(playerid) || !IsValidPlayer(targetid)) return 0;
+
+    if(playerid == targetid)
+    {
+        if(notify)
+            SendClientMessage(playerid, -1, "{ff5533}[ SOCORRO ] {ffffff}Você não pode se reviver.");
+        return 0;
+    }
+
+    if(!GetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_INJURED))
+    {
+        if(notify)
+            SendClientMessage(playerid, -1, "{ff5533}[ SOCORRO ] {ffffff}Esse jogador não está ferido.");
+        return 0;
+    }
+
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INJURED))
+    {
+        if(notify)
+            SendClientMessage(playerid, -1, "{ff5533}[ SOCORRO ] {ffffff}Você está ferido e não pode reavivar alguém.");
+        return 0;
+    }
+
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION))
+    {
+        if(notify)
+            SendClientMessage(playerid, -1, "{ff5533}[ SOCORRO ] {ffffff}Você já está em um reavivamento.");
+        return 0;
+    }
+
+    if(GetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_RESUSCITATION))
+    {
+        if(notify)
+            SendClientMessage(playerid, -1, "{ff5533}[ SOCORRO ] {ffffff}Esse jogador já está sendo reanimado.");
+        return 0;
+    }
+
+    new tick = Player[targetid][pyr::death_tick] - GetTickCount();
+    if(tick <= 9000)
+    {
+        if(notify)
+            SendClientMessage(playerid, -1, "{ff5533}[ SOCORRO ] {ffffff}O serviço de emergencia já está chegando, não é possível revive-lo");
+        return 0;
+    }
+
+    return 1;
+}
+
+stock Player::StartResuscitation(playerid, targetid)
+{
+    if(!Player::CanStartResuscitation(playerid, targetid)) return 0;
+
+    new Float:tX, Float:tY, Float:tZ, Float:tA;
+    GetPlayerPos(targetid, tX, tY, tZ);
+    GetPlayerFacingAngle(targetid, tA);
+
+    new Float:revive_x = tX - 0.28894;
+    new Float:revive_y = tY - 0.017823;
+    new Float:revive_z = 13.332237;
+    new Float:revive_a = tA - (-160.970307);
+
+    SetPlayerPos(targetid, tX, tY, revive_z);
+    SetPlayerPos(playerid, revive_x, revive_y, revive_z);
+
+    SetPlayerFacingAngle(playerid, revive_a);
+
+    SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
+    SetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
+    SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
+
+    Player[playerid][pyr::resuscitation_targetid] = targetid;
+    Player[targetid][pyr::resuscitation_targetid] = playerid;
+
+    TogglePlayerControllable(playerid, false);
+    TogglePlayerControllable(targetid, false);
+
+    ClearAnimations(playerid, SYNC_ALL);
+    ClearAnimations(targetid, SYNC_ALL);
+
+    ApplyAnimation(targetid, "CRACK", "crckidle4", 4.1, true, false, false, false, 0, SYNC_ALL);
+    ApplyAnimation(playerid, "MEDIC", "CPR", 4.1, true, false, false, false, 8330, SYNC_ALL);
+
+    SendClientMessage(playerid, -1, "{33ff99}[ SOCORRO ] {ffffff}Você iniciou o reavivamento.");
+    SendClientMessage(targetid, -1, "{33ff99}[ SOCORRO ] {ffffff}Você está sendo reanimado.");
+
+    inline update()
+    {
+        Player::KillTimer(playerid, pyr::TIMER_RESUSCITATION);
+
+        if(!IsValidPlayer(playerid) || !IsValidPlayer(targetid))
+        {
+            if(IsValidPlayer(playerid))
+            {
+                ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
+                ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
+                Player[playerid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
+            }
+
+            if(IsValidPlayer(targetid))
+            {
+                ResetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
+                Player[targetid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
+            }
+
+            return 1;
+        }
+
+        if(!GetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_INJURED))
+        {
+            TogglePlayerControllable(playerid, true);
+            ClearAnimations(playerid, SYNC_ALL);
+
+            ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
+            ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
+
+            Player[playerid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
+            Player[targetid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
+            return 1;
+        }
+
+        Player::KillTimer(targetid, pyr::TIMER_INJURY);
+
+        if(IsValidDynamic3DTextLabel(Player[targetid][pyr::deathtag]))
+            DestroyDynamic3DTextLabel(Player[targetid][pyr::deathtag]);
+        Player[targetid][pyr::deathtag] = INVALID_3DTEXT_ID;
+
+        Player[targetid][pyr::health] = 50.0;
+        SetPlayerHealth(targetid, 50.0);
+
+        ResetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_INJURED);
+        ResetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
+
+        ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
+        ResetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
+        ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
+
+        Player[playerid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
+        Player[targetid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
+
+        TogglePlayerControllable(targetid, true);
+        TogglePlayerControllable(playerid, true);
+
+        ClearAnimations(targetid, SYNC_ALL);
+        ClearAnimations(playerid, SYNC_ALL);
+
+        SendClientMessage(playerid, -1, "{33ff99}[ SOCORRO ] {ffffff}Reavivamento concluído com sucesso.");
+        SendClientMessage(targetid, -1, "{33ff99}[ SOCORRO ] {ffffff}Você foi reanimado e está estável.");
+
+        return 1;
+    }
+
+    pyr::Timer[playerid][pyr::TIMER_RESUSCITATION] = Timer_CreateCallback(using inline update, 8330, 1);
+
+    return 1;
+}
+
 stock Player::AplyRandomDeathAnim(playerid, &time)
 {
     switch(RandomMax(100))
