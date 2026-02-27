@@ -32,7 +32,7 @@ stock Org::Load(orgid)
     Org[orgid][org::color] >>> 8, Org[orgid][org::name], Org::gTypeNames[_:Org[orgid][org::type]],
     Org[orgid][org::color] >>> 8, Org[orgid][org::leader]);
     
-    Org[orgid][org::labelid] = CreateDynamic3DTextLabel(str, -1, Org[orgid][org::sX], Org[orgid][org::sY], Org[orgid][org::sZ], 50.0);
+    Org[orgid][org::labelid] = CreateDynamic3DTextLabel(str, -1, Org[orgid][org::sX], Org[orgid][org::sY], Org[orgid][org::sZ], 60.0, .testlos = 1);
 
     Org[orgid][org::pickupid] = CreateDynamicPickup(1314, 0, Org[orgid][org::sX], Org[orgid][org::sY], Org[orgid][org::sZ]);
     
@@ -373,5 +373,5 @@ stock Org::SetMemberTag(playerid)
     else 
         format(str, 32, "{%06x}[ %s ]", Org[orgid][org::color] >>> 8, Org[orgid][org::tag]);
     
-    org::Player[playerid][pyr::labelid]  = CreateDynamic3DTextLabel(str, -1, 0.0, 0.0, 0.1, 25.0, playerid);
+    org::Player[playerid][pyr::labelid]  = CreateDynamic3DTextLabel(str, -1, 0.0, 0.0, 0.1, 25.0, playerid, .testlos = 1);
 }

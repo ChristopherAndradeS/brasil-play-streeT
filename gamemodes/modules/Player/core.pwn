@@ -63,8 +63,12 @@ stock Player::KillTimer(playerid, E_PLAYER_TIMERS:pyr::timerid)
     switch(pyr::timerid)
     {
         case pyr::TIMER_PAYDAY:
-        {
+        {   
             new t_left = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_PAYDAY]);
+
+            t_left = t_left <= 0 ? 3600000 : t_left;
+            printf("payday salvo %d", t_left);
+            
             DB::SetDataInt(db_entity, "players", "payday_tleft", t_left, "name = '%q'", GetPlayerNameStr(playerid));      
         }
 
@@ -76,7 +80,6 @@ stock Player::KillTimer(playerid, E_PLAYER_TIMERS:pyr::timerid)
 
         default:
         {
-
         }
     }
 

@@ -15,7 +15,8 @@ hook OnGameModeInit()
     pX FLOAT, pY FLOAT, pZ FLOAT,\
     pA           FLOAT,\
     score        INTEGER,\
-    skinid       INTEGER");
+    skinid       INTEGER\
+    flags INTEGER");
 
     DB::CreateTable(db_entity, "punishments", 
     "name       VARCHAR(24) NOT NULL UNIQUE,\

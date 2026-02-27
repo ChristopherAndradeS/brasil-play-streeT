@@ -18,7 +18,7 @@ hook OnGameModeInit()
                 NPC_SetSkin(npcid, 308);
                 NPC_SetInvulnerable(npcid, true);
                 NPC_ApplyAnimation(npcid, "COP_AMBIENT", "Coplook_loop", 4.1, true, false, false, false, 0);
-                NPC[npcid][npc::nametag] = CreateDynamic3DTextLabel("{ff5522}[ SOS ][ SOCORRISTA ]", -1, 0.0, 0.0, 0.1, 60.0, npcid);
+                NPC[npcid][npc::nametag] = CreateDynamic3DTextLabel("{ff5522}[ SOS ]\n[ NPC ] {ffffff}Leticia", -1, 0.0, 0.0, 0.1, 60.0, npcid, .testlos = 1);
                 SetFlag(NPC[npcid][npc::flags], FLAG_NPC_EXIST);
 
                 printf("[ NPC ] NPC_Leticia criada com sucesso!\n");

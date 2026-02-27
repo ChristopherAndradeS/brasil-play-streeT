@@ -1,3 +1,4 @@
+forward OnPlayerReviveFinished(playerid, targetid);
 
 stock Player::UpdateDamage(playerid, issuerid, Float:damage, WEAPON:weaponid, bodypart)
 {
@@ -20,7 +21,7 @@ stock Player::UpdateDamage(playerid, issuerid, Float:damage, WEAPON:weaponid, bo
         GameTextForPlayer(playerid, "~r~~h~MORREU", 500, 4);
         SetPlayerHealth(playerid, 1.0);
         SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
-        CallLocalFunction("OnPlayerInjury", "iii", playerid, issuerid, WEAPON:weaponid);
+        SetPlayerInjury(playerid, issuerid, WEAPON:weaponid);
     }
 
     return 1;
@@ -76,6 +77,50 @@ stock Player::CanStartResuscitation(playerid, targetid, bool:notify = true)
     return 1;
 }
 
+stock Player::AplyRandomDeathAnim(playerid, &time)
+{
+    switch(RandomMax(100))
+    {
+        case 0..33:     ApplyAnimation(playerid, "CRACK", "crckdeth1", 4.1, false, false, false, false, 2170, SYNC_ALL), time = 2170; 
+        case 34..66:    ApplyAnimation(playerid, "CRACK", "crckdeth3", 4.1, false, false, false, false, 2170, SYNC_ALL), time = 2170;
+        case 67..100:   ApplyAnimation(playerid, "CRACK", "crckdeth4", 4.1, false, false, false, false, 2170, SYNC_ALL), time = 1670;
+        default: time = 2000;
+    }
+}
+
+stock Player::AplyRandomInjuryAnim(playerid, &time)
+{
+    switch(RandomMax(100))
+    {
+        case 0..33:     ApplyAnimation(playerid, "ped", "KO_skid_front", 4.1, false, false, false, false, 1930, SYNC_ALL), time = 1930;
+        case 34..66:    ApplyAnimation(playerid, "ped", "KO_shot_face", 4.1, false, false, false, false, 2100, SYNC_ALL), time = 2100;
+        case 67..100:   ApplyAnimation(playerid, "ped", "KO_shot_stom", 4.1, false, false, false, false, 3170, SYNC_ALL), time = 3170;
+    }
+}
+
+stock SetPlayerInjury(playerid, killerid, WEAPON:reason)
+{
+    #pragma unused reason
+    
+    if(!IsValidPlayer(playerid) && !IsValidPlayer(killerid)) return 1;
+
+    if(GetFlag(game::Player[playerid][pyr::flags], FLAG_PLAYER_INGAME))return 1;
+
+    TogglePlayerControllable(playerid, false);
+
+    ClearAnimations(playerid, SYNC_ALL);
+    ApplyAnimation(playerid, "SWAT", "gnstwall_injurd", 4.1, true, false, false, true, 0, SYNC_OTHER);
+    ApplyAnimation(playerid, "SWAT", "gnstwall_injurd", 4.1, true, false, false, true, 0, SYNC_ALL);
+
+    new time_sos = floatround(GetPlayerDistanceFromPoint(playerid, 1182.2079, -1323.2695, 13.5798) / 0.012);
+    
+    Player[playerid][pyr::death_tick] = GetTickCount() + time_sos;
+
+    Player::CreateTimer(playerid, pyr::TIMER_INJURY, "OnPlayerInjury", 1000, true, "i", playerid);
+
+    return 1;
+}
+
 stock Player::StartResuscitation(playerid, targetid)
 {
     if(!Player::CanStartResuscitation(playerid, targetid)) return 0;
@@ -113,94 +158,43 @@ stock Player::StartResuscitation(playerid, targetid)
     SendClientMessage(playerid, -1, "{33ff99}[ SOCORRO ] {ffffff}Você iniciou o reavivamento.");
     SendClientMessage(targetid, -1, "{33ff99}[ SOCORRO ] {ffffff}Você está sendo reanimado.");
 
-    inline update()
-    {
-        Player::KillTimer(playerid, pyr::TIMER_RESUSCITATION);
-
-        if(!IsValidPlayer(playerid) || !IsValidPlayer(targetid))
-        {
-            if(IsValidPlayer(playerid))
-            {
-                ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
-                ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
-                Player[playerid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
-            }
-
-            if(IsValidPlayer(targetid))
-            {
-                ResetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
-                Player[targetid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
-            }
-
-            return 1;
-        }
-
-        if(!GetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_INJURED))
-        {
-            TogglePlayerControllable(playerid, true);
-            ClearAnimations(playerid, SYNC_ALL);
-
-            ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
-            ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
-
-            Player[playerid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
-            Player[targetid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
-            return 1;
-        }
-
-        Player::KillTimer(targetid, pyr::TIMER_INJURY);
-
-        if(IsValidDynamic3DTextLabel(Player[targetid][pyr::deathtag]))
-            DestroyDynamic3DTextLabel(Player[targetid][pyr::deathtag]);
-        Player[targetid][pyr::deathtag] = INVALID_3DTEXT_ID;
-
-        Player[targetid][pyr::health] = 50.0;
-        SetPlayerHealth(targetid, 50.0);
-
-        ResetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_INJURED);
-        ResetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
-
-        ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
-        ResetFlag(Player[targetid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
-        ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
-
-        Player[playerid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
-        Player[targetid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
-
-        TogglePlayerControllable(targetid, true);
-        TogglePlayerControllable(playerid, true);
-
-        ClearAnimations(targetid, SYNC_ALL);
-        ClearAnimations(playerid, SYNC_ALL);
-
-        SendClientMessage(playerid, -1, "{33ff99}[ SOCORRO ] {ffffff}Reavivamento concluído com sucesso.");
-        SendClientMessage(targetid, -1, "{33ff99}[ SOCORRO ] {ffffff}Você foi reanimado e está estável.");
-
-        return 1;
-    }
-
-    pyr::Timer[playerid][pyr::TIMER_RESUSCITATION] = Timer_CreateCallback(using inline update, 8330, 1);
+    Player::CreateTimer(playerid, pyr::TIMER_RESUSCITATION, "OnPlayerReviveFinished", 8330, false, "ii", playerid, targetid);
 
     return 1;
 }
 
-stock Player::AplyRandomDeathAnim(playerid, &time)
+stock Player::HandleResuscitationAction(playerid)
 {
-    switch(RandomMax(100))
-    {
-        case 0..33:     ApplyAnimation(playerid, "CRACK", "crckdeth1", 4.1, false, false, false, false, 2170, SYNC_ALL), time = 2170; 
-        case 34..66:    ApplyAnimation(playerid, "CRACK", "crckdeth3", 4.1, false, false, false, false, 2170, SYNC_ALL), time = 2170;
-        case 67..100:   ApplyAnimation(playerid, "CRACK", "crckdeth4", 4.1, false, false, false, false, 2170, SYNC_ALL), time = 1670;
-        default: time = 2000;
-    }
-}
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 0;
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INJURED)) return 0;
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION)) return 0;
 
-stock Player::AplyRandomInjuryAnim(playerid, &time)
-{
-    switch(RandomMax(100))
+    new Float:pX, Float:pY, Float:pZ;
+    GetPlayerPos(playerid, pX, pY, pZ);
+
+    new near_players[MAX_PLAYERS];
+    for(new i = 0; i < MAX_PLAYERS; i++)
+        near_players[i] = INVALID_PLAYER_ID;
+
+    Player::GetPlayersFlaggedInRange(pX, pY, pZ, FLAG_PLAYER_INJURED, 2.25, near_players);
+
+    new targetid = near_players[0];
+
+    if(targetid == INVALID_PLAYER_ID) return 0;
+
+    if(targetid == playerid)
     {
-        case 0..33:     ApplyAnimation(playerid, "ped", "KO_skid_front", 4.1, false, false, false, false, 1930, SYNC_ALL), time = 1930;
-        case 34..66:    ApplyAnimation(playerid, "ped", "KO_shot_face", 4.1, false, false, false, false, 2100, SYNC_ALL), time = 2100;
-        case 67..100:   ApplyAnimation(playerid, "ped", "KO_shot_stom", 4.1, false, false, false, false, 3170, SYNC_ALL), time = 3170;
+        for(new i = 1; i < MAX_PLAYERS; i++)
+        {
+            if(near_players[i] != INVALID_PLAYER_ID)
+            {
+                targetid = near_players[i];
+                break;
+            }
+        }
     }
+
+    if(targetid == INVALID_PLAYER_ID || targetid == playerid) return 0;
+
+    return Player::StartResuscitation(playerid, targetid);
 }

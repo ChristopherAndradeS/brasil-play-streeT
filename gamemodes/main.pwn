@@ -11,7 +11,7 @@
 
 #define CGEN_MEMORY 20000
 
-#define ON_DEBUG_MODE
+//#define ON_DEBUG_MODE
 
 #include <YSI/YSI_Data/y_iterate>
 #include <YSI/YSI_Coding/y_va>
@@ -250,7 +250,8 @@ public OnPlayerText(playerid, text[])
 
     SendMessageToNearPlayer(pX, pY, pZ, "{FFFF99}[ L ] {ffffff}%s {FFFF99}[ %d ] diz: {ffffff}%s", GetPlayerNameStr(playerid), playerid, text);
     
-    ApplyAnimation(playerid, "GANGS", "prtial_gngtlkA", 4.1, false, false, false, false, 1500);
+    if(IsPlayerControllable(playerid))
+        ApplyAnimation(playerid, "GANGS", "prtial_gngtlkA", 4.1, false, false, false, false, 1500);
 
     return 0;
 }

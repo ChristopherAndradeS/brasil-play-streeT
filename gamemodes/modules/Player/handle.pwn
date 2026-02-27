@@ -31,8 +31,9 @@ hook OnPlayerConnect(playerid)
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 
-    //DB::GetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", name);
+    DB::GetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", name);
 
+    printf("flags, %08x", Player[playerid][pyr::flags]);
     /* VERIFICAR NOME - É ADEQUADO ?  */
     if(!IsValidNickName(name))
     {
@@ -65,6 +66,8 @@ hook OnPlayerConnect(playerid)
     Acessory::HideTDForPlayer(playerid);
     Adm::HideTDForPlayer(playerid);
     Veh::HideTDForPlayer(playerid);
+
+    Login::SetPlayer(playerid);
 
     return 1;
 }
@@ -119,13 +122,19 @@ hook OnPlayerDisconnect(playerid, reason)
         }
     }
 
-    Player[playerid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
-
     Login::HideTDForPlayer(playerid);
     Baseboard::HideTDForPlayer(playerid);
     Acessory::HideTDForPlayer(playerid);
     Adm::HideTDForPlayer(playerid);
     Veh::HideTDForPlayer(playerid);
+
+    ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
+    ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED);
+    ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_CHECKPOINT);
+    
+    printf("flags, %08x", Player[playerid][pyr::flags]);
+    
+    DB::SetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", GetPlayerNameStr(playerid));
 
     Player::ClearData(playerid);
 
@@ -183,22 +192,32 @@ hook OnPlayerSpawn(playerid)
         Kick(playerid);
         return -1;
     }
-    
+
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_JAIL)) return -1;
+
     if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_SPECTATING))
     {
         ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_SPECTATING);  
         Adm::AddSpectatorInList(playerid); 
         SetPlayerWeather(playerid, Server[srv::g_weatherid]);
         SetPlayerHealth(playerid, Player[playerid][pyr::health]);
-        return 1;
     }
 
-    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_IN_JAIL))
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INJURED))
     {
-        SetPlayerWeather(playerid, Server[srv::j_weatherid]);
-        return -1;
+        Player[playerid][pyr::health] = 50.0;
+        SetPlayerHealth(playerid, 50.0);
+        ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INJURED);
+        ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
+        ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
+        Player[playerid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
+        
+        Travel::ShowTDForPlayer(playerid, 
+        "A emergencia chegou e~n~Voce foi para o hospital...",
+        1182.2079 + RandomFloatMinMax(-2.0, 2.0), 
+        -1323.2695 + RandomFloatMinMax(-2.0, 2.0), 13.5798, 270.0);      
     }
-   
+
     return 1;
 }
 
@@ -254,56 +273,19 @@ hook OnPlayerLeaveDynamicArea(playerid, STREAMER_TAG_AREA:areaid)
     return 1;
 }
 
-
-stock Player::HandleResuscitationAction(playerid)
+hook OnPlayerKeyStateChange(playerid, KEY:newkeys, KEY:oldkeys)
 {
-    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 0;
-    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INJURED)) return 0;
-    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION)) return 0;
+    if(IsPlayerNPC(playerid)) return -1;
 
-    new Float:pX, Float:pY, Float:pZ;
-    GetPlayerPos(playerid, pX, pY, pZ);
+    Player::HandleKeySelector(playerid, newkeys, oldkeys);
 
-    new near_players[MAX_PLAYERS];
-    for(new i = 0; i < MAX_PLAYERS; i++)
-        near_players[i] = INVALID_PLAYER_ID;
-
-    Player::GetPlayersFlaggedInRange(pX, pY, pZ, FLAG_PLAYER_INJURED, 2.25, near_players);
-
-    new targetid = near_players[0];
-
-    if(targetid == INVALID_PLAYER_ID) return 0;
-
-    if(targetid == playerid)
-    {
-        for(new i = 1; i < MAX_PLAYERS; i++)
-        {
-            if(near_players[i] != INVALID_PLAYER_ID)
-            {
-                targetid = near_players[i];
-                break;
-            }
-        }
-    }
-
-    if(targetid == INVALID_PLAYER_ID || targetid == playerid) return 0;
-
-    return Player::StartResuscitation(playerid, targetid);
+    return 1;
 }
 
 stock Player::HandleKeySelector(playerid, KEY:newkeys, KEY:oldkeys)
 {
     if((newkeys & KEY_SECONDARY_ATTACK) && !(oldkeys & KEY_SECONDARY_ATTACK))
         Player::HandleResuscitationAction(playerid);
-
-    return 1;
-}
-
-hook OnPlayerKeyStateChange(playerid, KEY:newkeys, KEY:oldkeys)
-{
-    if(IsPlayerNPC(playerid)) return -1;
-
-    Player::HandleKeySelector(playerid, newkeys, oldkeys);
 
     return 1;
 }

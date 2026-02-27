@@ -110,6 +110,7 @@ stock Punish::SendPlayerToJail(playerid, time)
     {
         new t_left = GetTimerRemaining(pyr::Timer[playerid][pyr::TIMER_PAYDAY]);
         DB::SetDataInt(db_entity, "players", "payday_tleft", t_left, "name = '%q'", name);
+        printf("payday salvo %d", t_left);
         Player::KillTimer(playerid, pyr::TIMER_PAYDAY);
     }
 
@@ -118,6 +119,7 @@ stock Punish::SendPlayerToJail(playerid, time)
     
     Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_PAYDAY, "~r~~h~PAYDAY~w~ ...");
 
+    SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
     SetPlayerWeather(playerid, Server[srv::j_weatherid]);
 
     return 1;
