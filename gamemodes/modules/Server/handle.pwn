@@ -58,7 +58,7 @@ hook OnServerUpdateMilis()
         GetVehicleHealth(i, health);
         if(Vehicle[i][veh::health] != health)
         {
-            CallLocalFunction("OnVehicleHealthChance", "iff", i, health, Vehicle[i][veh::health]);
+            CallLocalFunction("OnVehicleHealthChange", "iff", i, health, Vehicle[i][veh::health]);
             Vehicle[i][veh::health] = health;
         }
     }

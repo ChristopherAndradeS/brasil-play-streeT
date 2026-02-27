@@ -1,6 +1,6 @@
 #include <YSI\YSI_Coding\y_hooks>
 
-hook OnVehicleHealthChance(vehicleid, Float:new_health, Float:old_health)
+hook OnVehicleHealthChange(vehicleid, Float:new_health, Float:old_health)
 {
     #pragma unused old_health
 

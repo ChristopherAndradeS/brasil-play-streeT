@@ -56,4 +56,4 @@ new Server::gRandMgs[][144] =
     {"Está perdido? Use {99ff99}/gps"}
 };
 
-forward OnVehicleHealthChance(vehicleid, Float:new_health, Float:old_health);
+forward OnVehicleHealthChange(vehicleid, Float:new_health, Float:old_health);
