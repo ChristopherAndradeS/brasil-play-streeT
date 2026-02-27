@@ -74,6 +74,8 @@ hook OnPlayerInjury(playerid, killerid, WEAPON:reason)
             Player[playerid][pyr::health] = 50.0;
             SetPlayerHealth(playerid, 50.0);
             ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INJURED);
+            ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
+            Player[playerid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
             //ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
             
             Travel::ShowTDForPlayer(playerid, 

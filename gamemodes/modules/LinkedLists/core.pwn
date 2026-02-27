@@ -142,6 +142,33 @@ stock Player::GetPlayersIntoRange(Float:x, Float:y, Float:z, Float:radius, playe
     return count;
 }
 
+
+stock Player::GetPlayersFlaggedInRange(Float:x, Float:y, Float:z, flags, Float:radius, playerid_list[])
+{
+    new regionid = GetRegionFromXY(x, y), count = 0;
+
+    if(regionid == INVALID_REGION_ID) return count;
+
+    new len = linked_list_size(pyr::Region[regionid]);
+
+    for(new i = 0; i < len; i++)
+    {
+        new playerid = linked_list_get(pyr::Region[regionid], i);
+
+        if(!IsValidPlayer(playerid)) continue;
+        if(!GetFlag(Player[playerid][pyr::flags], flags)) continue;
+
+        new Float:dist = GetPlayerDistanceFromPoint(playerid, x, y, z);
+        if(dist <= radius)
+        {
+            playerid_list[count] = playerid;
+            count++;
+        }
+    }
+
+    return count;
+}
+
 stock Veh::GetClosest(Float:x, Float:y, Float:z, &Float:min_dist_sq)
 {
     new regionid = GetRegionFromXY(x, y);
