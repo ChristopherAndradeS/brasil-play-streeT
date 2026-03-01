@@ -255,14 +255,16 @@ YCMD:abastecer(playerid, params[], help)
 
     new Float:fuel = Vehicle[vehicleid][veh::fuel];
 
-    new idx = floatround(fuel / 15);
-
     new str[256];
 
-    for(new i = 4; i > idx; i--)
+    for(new i = 1; i <= 4; i++)
     {
+        new Float:targetFuel = 15.0 * i;
+
+        if(fuel >= targetFuel) continue;
+
         format(str, 256, "%s%d. Encher {ff9933}%d%% {ffffff}do tanque\t{55ff55}R$ %.2f\n", 
-        str, 5 - i, 25 * i, ((15.0 * i) - fuel) * FUEL_PRICE_PER_LITER);
+        str, i, 25 * i, (targetFuel - fuel) * FUEL_PRICE_PER_LITER);
     }
 
     if(isnull(str))
@@ -377,15 +379,20 @@ YCMD:oficina(playerid, params[], help)
                     return 1;
                 }
 
-                new idx = floatround(armour / 250);
-
                 new str[512];
 
-                for(new i = 4; i > idx; i--)
+                for(new i = 1; i <= 4; i++)
                 {
+                    new Float:targetArmour = 250.0 * i;
+
+                    if(armour >= targetArmour) continue;
+
                     format(str, 512, "%s%d. Blindar {ff9933}%d%% {ffffff}da lataria\t{55ff55}R$ %.2f\t{ffffff}+ Reparo: {55ff55} R$ %.2f\n", 
-                    str, 5 - i, 25 * i, ((250.0 * i) - armour) * ARMOUR_PRICE_PER_HP, price);
+                    str, i, 25 * i, (targetArmour - armour) * ARMOUR_PRICE_PER_HP, price);
                 }
+
+                if(isnull(str))
+                    return SendClientMessage(playerid, -1, "{ff3333}[ MEC ] {ffffff}Seu veículo já está {ff3333}quase totalmente blindado.");
 
                 Dialog_ShowCallback(playerid, using inline armour_dialog, DIALOG_STYLE_TABLIST, 
                 "Blindagem", 
