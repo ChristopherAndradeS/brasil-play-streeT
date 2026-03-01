@@ -61,7 +61,7 @@
         "use_prefix": true,
         "use_timestamp": true
     },
-    "max_bots": 1,
+    "max_bots": 2,
     "max_players": 50,
     "name": "Brasil Play StreeT",
     "network": {

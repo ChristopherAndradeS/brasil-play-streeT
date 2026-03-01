@@ -12,7 +12,8 @@ enum E_NPC
 
 enum E_NPC_NAME
 {
-    NPC_LETICIA = 1,
+    NPC_LETICIA,
+    NPC_ROGERIO
 }
 
 #define NPC_INVALID (E_NPC_NAME:0)

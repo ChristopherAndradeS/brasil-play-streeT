@@ -1,5 +1,5 @@
 #define MAX_PLAYERS (50)
-#define MAX_NPCS    (1)
+#define MAX_NPCS    (2)
 
 #include <open.mp>
 #include <sscanf2>
@@ -185,7 +185,7 @@ public OnGameModeInit()
     Gas[1][gas::pickup] = CreateDynamicPickup(19621, 0, 1938.5725, -1772.6949, 13.55);
     
     new str[144];
-    format(str, 144, "[ {ff9933}POSTO DE GASOLINA {ffffff}]\nDigite {ff9933}'/abastecer'");
+    format(str, 144, "[ {ff9933}POSTO DE GASOLINA {ffffff}]\nDigite {ff9933}/abastecer");
 
     Gas[0][gas::label] = CreateDynamic3DTextLabel(str, -1, 1944.5725, -1772.6949, 13.55, 60.0);
     Gas[1][gas::label] = CreateDynamic3DTextLabel(str, -1, 1938.5725, -1772.6949, 13.55, 60.0);
@@ -196,7 +196,7 @@ public OnGameModeInit()
 
     Mec[ofc::pickup] = CreateDynamicPickup(19627, 0, 1943.4880, -1810.5806, 13.5663);
 
-    format(str, 144, "[ {ff5599}OFICINA MECANICA{ffffff}]\nDigite {ff5599}'/oficina'");
+    format(str, 144, "[ {ff5599}OFICINA MECANICA{ffffff}]\nDigite {ff5599}/oficina");
 
     Mec[ofc::label] = CreateDynamic3DTextLabel(str, -1, 1943.4880, -1810.5806, 13.5663, 60.0);
 

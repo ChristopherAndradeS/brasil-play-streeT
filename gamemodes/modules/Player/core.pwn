@@ -98,7 +98,11 @@ stock Player::RemoveMoney(playerid, Float:price, bool:verify = false)
     if(verify)
     {
         if(floatcmp(Player[playerid][pyr::money], price) >= 0) return 1;
-        else return 0;
+        else
+        {
+            SendClientMessage(playerid, -1, "{ff5555} [ R$ ] {ffffff}Não foi possível pagar. Faltam {ff5555}%.2f {ffffff}R$!\n", price - Player[playerid][pyr::money]);
+            return 0;
+        }
     }
 
     else
