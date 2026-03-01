@@ -27,13 +27,23 @@ hook OnGameModeInit()
     date        VARCHAR(64),\
     left_tstamp INTEGER");
 
-    // DB::CreateTable(db_entity, "vehicles", 
-    // "owner      VARCHAR(24),\
-    // owner_type  INTEGER, \
-    // slotid      INTEGER,\
-    // modelid     INTEGER,\
-    // pX FLOAT pY FLOAT, pZ FLOAT,\
-    // pA FLOAT, color1 INTEGER, color2 INTEGER");
+    DB::CreateTable(db_entity, "vehicles", 
+    "ownerid      INTEGER,\
+    owner_type    INTEGER,\
+    modelid       INTEGER,\
+    flags         INTEGER,\
+    params        INTEGER,\
+    fuel          FLOAT,\
+    health        FLOAT,\
+    pX            FLOAT,\
+    pY            FLOAT,\
+    pZ            FLOAT,\
+    pA            FLOAT,\
+    color1        INTEGER,\
+    color2        INTEGER,\
+    paintjobid    INTEGER,\
+    interiorid    INTEGER,\
+    worldid       INTEGER");
 
     DB::CreateTable(db_entity, "acessorys", 
     "owner       VARCHAR(24),\

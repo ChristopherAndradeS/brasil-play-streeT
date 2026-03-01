@@ -131,6 +131,11 @@ hook OnPlayerDisconnect(playerid, reason)
     
     DB::SetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", GetPlayerNameStr(playerid));
 
+    Veh::Save(playerid);
+
+    if(IsValidVehicle(Player[playerid][pyr::vehicleid]))
+        Veh::Destroy(Player[playerid][pyr::vehicleid]);
+
     Player::ClearData(playerid);
 
     Adm::RemSpectatorInList(playerid, 1);
