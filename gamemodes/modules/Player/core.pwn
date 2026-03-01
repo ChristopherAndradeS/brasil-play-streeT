@@ -16,10 +16,8 @@ stock Player::ClearData(playerid)
     Player[playerid][pyr::flags]         = 0;
     Player[playerid][pyr::score]         = 0;
     Player[playerid][pyr::regionid]      = INVALID_RECORD_ID;
+    Player[playerid][pyr::vehicleid]      = INVALID_VEHICLE_ID;
     Player[playerid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
-    
-    if(IsValidVehicle(Player[playerid][pyr::vehicleid]))
-        Veh::Destroy(Player[playerid][pyr::vehicleid]);
 
     if(IsValidDynamic3DTextLabel(Player[playerid][pyr::nametag]))
         DestroyDynamic3DTextLabel(Player[playerid][pyr::nametag]);    

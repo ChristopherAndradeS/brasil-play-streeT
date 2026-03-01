@@ -1,11 +1,5 @@
 #define INVALID_OWNER_ID (-1)
-
-enum VEHICLE_OWNER_TYPE
-{
-    VEH_OWNER_SERVER = 0,
-    VEH_OWNER_PLAYER,
-    VEH_OWNER_ORG
-}
+#define INVALID_PAINTJOB_ID (-1)
 
 enum (<<= 1)
 {
@@ -27,7 +21,10 @@ enum (<<= 1)
 enum _:OWNER_TYPES
 {
     OWNER_TYPE_PLAYER = 1,
-    OWNER_TYPE_VEHICLE,
+    OWNER_TYPE_SERVER,
+    OWNER_TYPE_COMPANY,
+    OWNER_TYPE_ORG,
+    INVALID_OWNER_TYPE
 }
 
 enum E_PLAYER_VEHICLE
@@ -37,12 +34,16 @@ enum E_PLAYER_VEHICLE
 
 enum E_VEHICLES
 {
+    veh::dbid,
     veh::regionid,
     veh::ownerid, veh::owner_type,
+    veh::modelid,
     veh::flags, veh::params,
     Float:veh::fuel, Float:veh::health,
     Float:veh::pX, Float:veh::pY, Float:veh::pZ, Float:veh::pA,
-    veh::color1, veh::color2, veh::interiorid, veh::worldid,
+    veh::color1, veh::color2,
+    veh::paintjobid,
+    veh::interiorid, veh::worldid,
 
     veh::o_speed, Float:veh::o_accel, Float:veh::oX, Float:veh::oY, Float:veh::oZ,
     

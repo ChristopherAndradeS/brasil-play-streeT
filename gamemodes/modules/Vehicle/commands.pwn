@@ -8,6 +8,8 @@ YCMD:trancar(playerid, params[], help)
     if(vehicleid == INVALID_VEHICLE_ID || distance > 2.0) 
         return SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Chegue perto de um veiculo!");
 
+    if(!Veh::HasPermission(playerid, vehicleid)) return 1;
+
     Veh::ToggleParams(playerid, vehicleid, FLAG_PARAM_DOORS);
 
     return 1;
@@ -35,6 +37,8 @@ YCMD:motor(playerid, params[], help)
             return 1;
         }
 
+        if(!Veh::HasPermission(playerid, vehicleid)) return 1;
+
         Veh::ToggleParams(playerid, vehicleid, FLAG_PARAM_ENGINE);
     }  
 
@@ -51,7 +55,10 @@ YCMD:farol(playerid, params[], help)
     new vehicleid = GetPlayerVehicleID(playerid);
 
     if(IsValidVehicle(vehicleid))
+    {
+        if(!Veh::HasPermission(playerid, vehicleid)) return 1;
         Veh::ToggleParams(playerid, vehicleid, FLAG_PARAM_LIGHTS);
+    }
 
     return 1;
 }
@@ -66,7 +73,10 @@ YCMD:capo(playerid, params[], help)
     new vehicleid = GetPlayerVehicleID(playerid);
 
     if(IsValidVehicle(vehicleid))
+    {
+        if(!Veh::HasPermission(playerid, vehicleid)) return 1;
         Veh::ToggleParams(playerid, vehicleid, FLAG_PARAM_BONNET);
+    }
 
     return 1;
 }
@@ -81,7 +91,10 @@ YCMD:portamalas(playerid, params[], help)
     new vehicleid = GetPlayerVehicleID(playerid);
 
     if(IsValidVehicle(vehicleid))
+    {
+        if(!Veh::HasPermission(playerid, vehicleid)) return 1;
         Veh::ToggleParams(playerid, vehicleid, FLAG_PARAM_BOOT);
+    }
 
     return 1;
 }
@@ -96,7 +109,10 @@ YCMD:alarme(playerid, params[], help)
     new vehicleid = GetPlayerVehicleID(playerid);
 
     if(IsValidVehicle(vehicleid))
+    {
+        if(!Veh::HasPermission(playerid, vehicleid)) return 1;
         Veh::ToggleParams(playerid, vehicleid, FLAG_PARAM_ALARM);
+    }
 
     return 1;
 }
@@ -217,6 +233,8 @@ YCMD:abastecer(playerid, params[], help)
     if(!vehicleid)
         return SendClientMessage(playerid, -1, "{ff3333}[ GAS ] {ffffff}Entre num veículo para abastecer.");
     
+    if(!Veh::HasPermission(playerid, vehicleid)) return 1;
+
     if(Model_IsManual(GetVehicleModel(vehicleid)))
         return SendClientMessage(playerid, -1, "{ff3333}[ GAS ] {ffffff}Esse veículo não é movido a combustão");
     
@@ -290,6 +308,8 @@ YCMD:oficina(playerid, params[], help)
     if(!vehicleid)
         return SendClientMessage(playerid, -1, "{ff3333}[ MEC ] {ffffff}Entre num veículo para isso.");
     
+    if(!Veh::HasPermission(playerid, vehicleid)) return 1;
+
     if(Model_IsManual(GetVehicleModel(vehicleid)))
         return SendClientMessage(playerid, -1, "{ff3333}[ MEC ] {ffffff}Não consertamos esse veículo.");
     

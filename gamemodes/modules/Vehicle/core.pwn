@@ -1,3 +1,118 @@
+stock Veh::Insert(ownerid, OWNER_TYPES:ownertype, modelid, color1, color2, paintjobid = INVALID_PAINTJOB_ID)
+{
+    if(ownerid == INVALID_OWNER_ID || ownertype == INVALID_OWNER_TYPE)
+        return 0;
+
+    return DB::Insert(db_entity, "vehicles",
+    "ownerid, owner_type, modelid, flags, params, fuel, health, pX, pY, pZ, pA, color1, color2, paintjobid, interiorid, worldid",
+    "%d, %d, %d, %d, %d, %f, %f, %f, %f, %f, %f, %d, %d, %d, %d, %d",
+    ownerid, _:ownertype, modelid, 0, 0, 60.0, 1000.0, 0.0, 0.0, 0.0, 0.0, color1, color2, paintjobid, 0, 0);
+}
+
+stock Veh::Load(playerid)
+{
+    new vehicle_data[E_VEHICLES];
+
+    if(!DB::Exists(db_entity, "vehicles", "ownerid = %d AND owner_type = %d", playerid, _:OWNER_TYPE_PLAYER))
+        return 0;
+
+    DB::GetDataInt(db_entity, "vehicles", "rowid", vehicle_data[veh::dbid], "ownerid = %d AND owner_type = %d", playerid, _:OWNER_TYPE_PLAYER);
+    DB::GetDataInt(db_entity, "vehicles", "ownerid", vehicle_data[veh::ownerid], "rowid = %d", vehicle_data[veh::dbid]);
+    DB::GetDataInt(db_entity, "vehicles", "owner_type", vehicle_data[veh::owner_type], "rowid = %d", vehicle_data[veh::dbid]);
+    DB::GetDataInt(db_entity, "vehicles", "modelid", vehicle_data[veh::modelid], "rowid = %d", vehicle_data[veh::dbid]);
+    DB::GetDataInt(db_entity, "vehicles", "flags", vehicle_data[veh::flags], "rowid = %d", vehicle_data[veh::dbid]);
+    DB::GetDataInt(db_entity, "vehicles", "params", vehicle_data[veh::params], "rowid = %d", vehicle_data[veh::dbid]);
+    DB::GetDataFloat(db_entity, "vehicles", "fuel", vehicle_data[veh::fuel], "rowid = %d", vehicle_data[veh::dbid]);
+    DB::GetDataFloat(db_entity, "vehicles", "health", vehicle_data[veh::health], "rowid = %d", vehicle_data[veh::dbid]);
+    DB::GetDataFloat(db_entity, "vehicles", "pX", vehicle_data[veh::pX], "rowid = %d", vehicle_data[veh::dbid]);
+    DB::GetDataFloat(db_entity, "vehicles", "pY", vehicle_data[veh::pY], "rowid = %d", vehicle_data[veh::dbid]);
+    DB::GetDataFloat(db_entity, "vehicles", "pZ", vehicle_data[veh::pZ], "rowid = %d", vehicle_data[veh::dbid]);
+    DB::GetDataFloat(db_entity, "vehicles", "pA", vehicle_data[veh::pA], "rowid = %d", vehicle_data[veh::dbid]);
+    DB::GetDataInt(db_entity, "vehicles", "color1", vehicle_data[veh::color1], "rowid = %d", vehicle_data[veh::dbid]);
+    DB::GetDataInt(db_entity, "vehicles", "color2", vehicle_data[veh::color2], "rowid = %d", vehicle_data[veh::dbid]);
+    DB::GetDataInt(db_entity, "vehicles", "paintjobid", vehicle_data[veh::paintjobid], "rowid = %d", vehicle_data[veh::dbid]);
+    DB::GetDataInt(db_entity, "vehicles", "interiorid", vehicle_data[veh::interiorid], "rowid = %d", vehicle_data[veh::dbid]);
+    DB::GetDataInt(db_entity, "vehicles", "worldid", vehicle_data[veh::worldid], "rowid = %d", vehicle_data[veh::dbid]);
+
+    Player[playerid][pyr::vehicleid] = Veh::Create(vehicle_data[veh::modelid], vehicle_data);
+
+    if(vehicle_data[veh::paintjobid] != INVALID_PAINTJOB_ID)
+        ChangeVehiclePaintjob(Player[playerid][pyr::vehicleid], vehicle_data[veh::paintjobid]);
+
+    return 1;
+}
+
+stock Veh::Save(playerid)
+{
+    new vehicleid = Player[playerid][pyr::vehicleid];
+
+    if(!IsValidVehicle(vehicleid)) return 0;
+    if(Vehicle[vehicleid][veh::owner_type] != OWNER_TYPE_PLAYER) return 0;
+
+    GetVehiclePos(vehicleid, Vehicle[vehicleid][veh::pX], Vehicle[vehicleid][veh::pY], Vehicle[vehicleid][veh::pZ]);
+    GetVehicleZAngle(vehicleid, Vehicle[vehicleid][veh::pA]);
+    GetVehicleHealth(vehicleid, Vehicle[vehicleid][veh::health]);
+
+    return DB::Update(db_entity, "vehicles",
+    "ownerid = %d, owner_type = %d, modelid = %d, flags = %d, params = %d, fuel = %f, health = %f, pX = %f, pY = %f, pZ = %f, pA = %f, color1 = %d, color2 = %d, paintjobid = %d, interiorid = %d, worldid = %d WHERE rowid = %d",
+    Vehicle[vehicleid][veh::ownerid], Vehicle[vehicleid][veh::owner_type], GetVehicleModel(vehicleid), Vehicle[vehicleid][veh::flags], Vehicle[vehicleid][veh::params],
+    Vehicle[vehicleid][veh::fuel], Vehicle[vehicleid][veh::health], Vehicle[vehicleid][veh::pX], Vehicle[vehicleid][veh::pY], Vehicle[vehicleid][veh::pZ], Vehicle[vehicleid][veh::pA],
+    Vehicle[vehicleid][veh::color1], Vehicle[vehicleid][veh::color2], Vehicle[vehicleid][veh::paintjobid], Vehicle[vehicleid][veh::interiorid], Vehicle[vehicleid][veh::worldid],
+    Vehicle[vehicleid][veh::dbid]);
+}
+
+stock Veh::Delete(playerid)
+{
+    new vehicleid = Player[playerid][pyr::vehicleid];
+
+    if(!IsValidVehicle(vehicleid)) return 0;
+
+    new deleted = DB::Delete(db_entity, "vehicles", "rowid = %d", Vehicle[vehicleid][veh::dbid]);
+
+    Veh::Destroy(Player[playerid][pyr::vehicleid]);
+
+    return deleted;
+}
+
+stock Veh::TransferOwnership(vehicleid, ownerid, OWNER_TYPES:ownertype)
+{
+    if(!IsValidVehicle(vehicleid)) return 0;
+    if(ownerid == INVALID_OWNER_ID || ownertype == INVALID_OWNER_TYPE) return 0;
+
+    Vehicle[vehicleid][veh::ownerid] = ownerid;
+    Vehicle[vehicleid][veh::owner_type] = _:ownertype;
+
+    return DB::Update(db_entity, "vehicles", "ownerid = %d, owner_type = %d WHERE rowid = %d", ownerid, _:ownertype, Vehicle[vehicleid][veh::dbid]);
+}
+
+stock Veh::HasPermission(playerid, vehicleid, bool:allow_other = false)
+{
+    if(!IsValidVehicle(vehicleid)) return 0;
+
+    if(allow_other) return 1;
+
+    if(Vehicle[vehicleid][veh::owner_type] == OWNER_TYPE_PLAYER)
+    {
+        if(Vehicle[vehicleid][veh::ownerid] == playerid)
+            return 1;
+
+        SendClientMessage(playerid, -1, "{ff3333}[ VEH ] {ffffff}Você só pode usar isso no seu veículo.");
+        return 0;
+    }
+
+    if(Vehicle[vehicleid][veh::owner_type] == OWNER_TYPE_ORG)
+    {
+        if(org::Player[playerid][pyr::orgid] != INVALID_ORG_ID && Vehicle[vehicleid][veh::ownerid] == org::Player[playerid][pyr::orgid])
+            return 1;
+
+        SendClientMessage(playerid, -1, "{ff3333}[ VEH ] {ffffff}Esse veículo pertence a outra organização.");
+        return 0;
+    }
+
+    SendClientMessage(playerid, -1, "{ff3333}[ VEH ] {ffffff}Você não tem permissão para este veículo.");
+    return 0;
+}
+
 stock Veh::Create(modelid, data[E_VEHICLES])
 {
     new vehicleid = CreateVehicle(modelid, 
@@ -7,8 +122,10 @@ stock Veh::Create(modelid, data[E_VEHICLES])
     data[veh::params] = Model_IsManual(GetVehicleModel(vehicleid)) ? 1 : data[veh::params];
     Vehicle[vehicleid][veh::fuel] = Model_IsManual(GetVehicleModel(vehicleid)) ? 0.0 : data[veh::fuel];
    
+    Vehicle[vehicleid][veh::dbid]           = data[veh::dbid];
     Vehicle[vehicleid][veh::ownerid]        = data[veh::ownerid];
     Vehicle[vehicleid][veh::owner_type]     = data[veh::owner_type];
+    Vehicle[vehicleid][veh::modelid]        = modelid;
     Vehicle[vehicleid][veh::flags]          = data[veh::flags];
     Vehicle[vehicleid][veh::params]         = data[veh::params];
     Vehicle[vehicleid][veh::fuel]           = data[veh::fuel];
@@ -19,6 +136,7 @@ stock Veh::Create(modelid, data[E_VEHICLES])
     Vehicle[vehicleid][veh::pA]             = data[veh::pA];
     Vehicle[vehicleid][veh::color1]         = data[veh::color1];
     Vehicle[vehicleid][veh::color2]         = data[veh::color2];
+    Vehicle[vehicleid][veh::paintjobid]     = data[veh::paintjobid];
     Vehicle[vehicleid][veh::interiorid]     = data[veh::interiorid];
     Vehicle[vehicleid][veh::worldid]        = data[veh::worldid];
 
@@ -48,6 +166,9 @@ stock Veh::Create(modelid, data[E_VEHICLES])
    
     ResetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_BROKED);
     ResetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_EMPTY);
+
+    if(data[veh::paintjobid] != INVALID_PAINTJOB_ID)
+        ChangeVehiclePaintjob(vehicleid, data[veh::paintjobid]);
 
     LinkVehicleToInterior(vehicleid, data[veh::interiorid]);
     SetVehicleVirtualWorld(vehicleid, data[veh::worldid]);
@@ -162,8 +283,11 @@ stock Veh::Clear(vehicleid)
 {
     new data[E_VEHICLES];
     Vehicle[vehicleid] = data;
-    Vehicle[vehicleid][veh::regionid]       = INVALID_REGION_ID;
-    Vehicle[vehicleid][veh::ownerid]        = INVALID_OWNER_ID;
+    Vehicle[vehicleid][veh::dbid]            = INVALID_RECORD_ID;
+    Vehicle[vehicleid][veh::regionid]        = INVALID_REGION_ID;
+    Vehicle[vehicleid][veh::ownerid]         = INVALID_OWNER_ID;
+    Vehicle[vehicleid][veh::owner_type]      = INVALID_OWNER_TYPE;
+    Vehicle[vehicleid][veh::paintjobid]      = INVALID_PAINTJOB_ID;
 }
 
 stock Float:Veh::GetVehicleFuelUsed(Float:speed, Float:accel, Float:dt)
