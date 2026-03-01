@@ -17,7 +17,6 @@ hook OnGameModeInit()
                 NPC_SetFacingAngle(npcid, 270.0);
                 NPC_SetSkin(npcid, 308);
                 NPC_SetInvulnerable(npcid, true);
-                NPC_ApplyAnimation(npcid, "COP_AMBIENT", "null", 0.0, false, false, false, false, 0);
                 NPC_ApplyAnimation(npcid, "COP_AMBIENT", "Coplook_loop", 4.1, true, false, false, false, 0);
                 NPC[i][npc::nametag] = CreateDynamic3DTextLabel("{ff5522}[ SOS ]\n[ NPC ] {ffffff}Leticia", -1, 0.0, 0.0, 0.1, 60.0, npcid, .testlos = 1);
                 SetFlag(NPC[i][npc::flags], FLAG_NPC_EXIST);
@@ -37,7 +36,6 @@ hook OnGameModeInit()
                 NPC_SetFacingAngle(npcid, 177.836853);
                 NPC_SetSkin(npcid, 50);
                 NPC_SetInvulnerable(npcid, true);
-                NPC_ApplyAnimation(npcid, "SHOP","SHP_Serve_Loop", 0.0, false, false, false, false, 0);
                 NPC_ApplyAnimation(npcid, "SHOP","SHP_Serve_Loop", 4.1, true, false, false, false, 0);
                 NPC[i][npc::nametag] = CreateDynamic3DTextLabel("{ff5599}[ MEC ]\n[ NPC ] {ffffff}Rogerio", -1, 0.0, 0.0, 0.1, 60.0, npcid, .testlos = 1);
                 SetFlag(NPC[i][npc::flags], FLAG_NPC_EXIST);
@@ -53,15 +51,18 @@ hook OnGameModeInit()
     return 1;
 }
 
-hook OnPlayerDisconnect(playerid, reason)
+hook OnGameModeExit()
 {
-    if(IsPlayerNPC(playerid))
+    for(new i = 0; i < MAX_NPCS; i++)
     {
-        NPC[playerid][npc::id] = INVALID_PLAYER_ID;
-        NPC[playerid][npc::flags] = 0;
+        new npcid = NPC[i][npc::id];
+        NPC[i][npc::id] = INVALID_PLAYER_ID;
+        NPC[i][npc::flags] = 0;
 
-        DestroyDynamic3DTextLabel(NPC[playerid][npc::nametag]);
-        NPC[playerid][npc::nametag] = INVALID_3DTEXT_ID;
+        DestroyDynamic3DTextLabel(NPC[i][npc::nametag]);
+        NPC[i][npc::nametag] = INVALID_3DTEXT_ID;
+
+        NPC_Destroy(npcid);
     }
 
     return 1;

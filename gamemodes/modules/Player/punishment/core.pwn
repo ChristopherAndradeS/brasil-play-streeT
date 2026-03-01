@@ -20,6 +20,7 @@ stock Punish::VerifyPlayer(playerid)
         new left_time;
 
         DB::GetDataInt(db_entity, "punishments", "left_tstamp", left_time, "name = '%q' AND level = 2", name);
+        DB::GetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", name);
 
         if(left_time <= gettime())
         {
@@ -72,6 +73,7 @@ stock Punish::VerifyPlayer(playerid)
         new left_time;
 
         DB::GetDataInt(db_entity, "punishments", "left_tstamp", left_time, "name = '%q' AND level = 1", name);
+        DB::GetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", name);
 
         if(left_time <= 0)
         {

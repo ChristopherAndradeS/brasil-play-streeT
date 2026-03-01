@@ -31,8 +31,6 @@ hook OnPlayerConnect(playerid)
     new name[MAX_PLAYER_NAME];
     GetPlayerName(playerid, name);
 
-    DB::GetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", name);
-
     /* VERIFICAR NOME - É ADEQUADO ?  */
     if(!IsValidNickName(name))
     {
@@ -148,6 +146,8 @@ hook OnPlayerLogin(playerid)
     ApplyAnimation(playerid, "SWAT", "null", 0.0, false, false, false, false, 0); 
     ApplyAnimation(playerid, "KNIFE", "null", 0.0, false, false, false, false, 0); 
     ApplyAnimation(playerid, "MEDIC", "null", 0.0, false, false, false, false, 0);
+    ApplyAnimation(playerid, "SHOP", "null", 0.0, false, false, false, false, 0);
+    ApplyAnimation(playerid, "COP_AMBIENT", "null", 0.0, false, false, false, false, 0);
 
     Player[playerid][pyr::health] = 100.0;
 
@@ -283,7 +283,12 @@ hook OnPlayerKeyStateChange(playerid, KEY:newkeys, KEY:oldkeys)
 stock Player::HandleKeySelector(playerid, KEY:newkeys, KEY:oldkeys)
 {
     if((newkeys & KEY_SECONDARY_ATTACK) && !(oldkeys & KEY_SECONDARY_ATTACK))
+    {
         Player::HandleResuscitationAction(playerid);
+
+        if(IsPlayerInRangeOfPoint(playerid, 1.5, -18.1846, -1619.5968, 3.6084))
+            return SendClientMessage(playerid, -1, "TESTANDO, ABRINDO CONCE");
+    }
 
     return 1;
 }

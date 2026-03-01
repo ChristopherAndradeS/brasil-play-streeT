@@ -103,6 +103,8 @@
 #include "./gamemodes/modules/TextDraws/gui/login.pwn"
 #include "./gamemodes/modules/TextDraws/gui/acs_editor.pwn"
 #include "./gamemodes/modules/TextDraws/gui/admin.pwn"
+#include "./gamemodes/modules/TextDraws/gui/dealership.pwn"
+#include "./gamemodes/modules/TextDraws/gui/garage.pwn"
 //                          [    HUD    ]
 #include "./gamemodes/modules/TextDraws/hud/baseboard.pwn"
 #include "./gamemodes/modules/TextDraws/hud/velocimeter.pwn"
@@ -345,13 +347,5 @@ stock SendMessageToNearPlayer(Float:pX, Float:pY, Float:pZ, const msg[], GLOBAL_
         SendClientMessage(playerid, -1, formated_msg); 
     }
 
-    return 1;
-}
-
-YCMD:teste(playerid, params[], help)
-{
-    new id = strval(params);
-
-    SetPlayerPos(playerid, Gas[id][gas::pX], Gas[id][gas::pY], Gas[id][gas::pZ]);
     return 1;
 }

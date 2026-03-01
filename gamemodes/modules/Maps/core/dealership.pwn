@@ -1,5 +1,22 @@
 stock Dealership::LoadMap()
 {
+    new actorvar;
+
+    actorvar = CreateDynamicActor(150, -14.163480, -1622.838256, 3.459959, -135.052383, 0, 100.0, -1, -1, -1, 100.0);
+    ApplyDynamicActorAnimation(actorvar,"SHOP","SHP_Serve_Loop",4.000000,1,0,0,0,0);
+    actorvar = CreateDynamicActor(59, -17.219507, -1614.765625, 3.589956, -137.372329, 0, 100.0, -1, -1, -1, 100.0);
+    ApplyDynamicActorAnimation(actorvar,"ped","SEAT_idle",4.000000,1,0,0,0,0);
+    actorvar = CreateDynamicActor(309, -25.004665, -1626.105712, 3.589925, 135.292434, 0, 100.0, -1, -1, -1, 100.0);
+    ApplyDynamicActorAnimation(actorvar,"COP_AMBIENT","Copbrowse_loop",4.000000,1,0,0,0,0);
+
+    CreateDynamicPickup(19134, 0, -18.1846, -1619.5968, 3.6084);
+
+    new str[144];
+
+    format(str, 144, "[ {ff1199}CONCESSIONARIA {ffffff}]\nAperte {ff1199}'F' {ffffff}para abrir o menu de compra");
+
+    CreateDynamic3DTextLabel(str, -1, -18.1846, -1619.5968, 3.6084, 60, .testlos = 1);
+
     new tmpobjid;
     tmpobjid = CreateDynamicObject(18981,-45.507,-1617.424,2.074,0.000,90.000,44.200,-1,-1,-1,300.000,300.000);
     SetDynamicObjectMaterial(tmpobjid, 0, 18757, "vcinteriors", "dts_elevator_carpet3", 0x00000000);

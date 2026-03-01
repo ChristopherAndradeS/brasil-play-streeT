@@ -171,17 +171,13 @@ stock Veh::GetClosest(Float:x, Float:y, Float:z, &Float:min_dist_sq)
 {
     new regionid = GetRegionFromXY(x, y);
 
-    printf("%d", regionid);
     min_dist_sq = FLOAT_INFINITY;
 
     if(regionid == INVALID_REGION_ID) return INVALID_VEHICLE_ID;
 
-    printf("passou 1");
-
     new closest_vehicleid   = INVALID_VEHICLE_ID;
     new count = linked_list_size(veh::Region[regionid]);
 
-    printf("%d", count);
     for(new i = 0; i < count; i++)
     {
         new vehicleid = linked_list_get(veh::Region[regionid], i);
@@ -192,7 +188,6 @@ stock Veh::GetClosest(Float:x, Float:y, Float:z, &Float:min_dist_sq)
 
         if(dist < min_dist_sq)
         {
-            printf("%f", dist);
             min_dist_sq = dist;
             closest_vehicleid = vehicleid;
         }
