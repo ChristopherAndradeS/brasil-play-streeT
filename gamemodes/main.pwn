@@ -11,7 +11,7 @@
 
 #define CGEN_MEMORY 20000
 
-//#define ON_DEBUG_MODE
+#define ON_DEBUG_MODE
 
 #include <YSI/YSI_Data/y_iterate>
 #include <YSI/YSI_Coding/y_va>
@@ -173,6 +173,36 @@ main()
     pp_use_funcidx(true);
 }
 
+public OnGameModeInit()
+{
+    /* GAS STATION */
+    Gas[0][gas::pX] = 1944.5725;
+    Gas[1][gas::pX] = 1938.5725;
+    Gas[0][gas::pY] = Gas[1][gas::pY] = -1772.6949;
+    Gas[0][gas::pZ] = Gas[1][gas::pZ] = 13.55;
+
+    Gas[0][gas::pickup] = CreateDynamicPickup(19621, 0, 1944.5725, -1772.6949, 13.55);
+    Gas[1][gas::pickup] = CreateDynamicPickup(19621, 0, 1938.5725, -1772.6949, 13.55);
+    
+    new str[144];
+    format(str, 144, "[ {ff9933}POSTO DE GASOLINA {ffffff}]\nDigite {ff9933}'/abastecer'");
+
+    Gas[0][gas::label] = CreateDynamic3DTextLabel(str, -1, 1944.5725, -1772.6949, 13.55, 60.0);
+    Gas[1][gas::label] = CreateDynamic3DTextLabel(str, -1, 1938.5725, -1772.6949, 13.55, 60.0);
+
+    Mec[ofc::pX] = 1943.4880;
+    Mec[ofc::pY] = -1810.5806;
+    Mec[ofc::pZ] = 13.5663;
+
+    Mec[ofc::pickup] = CreateDynamicPickup(19627, 0, 1943.4880, -1810.5806, 13.5663);
+
+    format(str, 144, "[ {ff5599}OFICINA MECANICA{ffffff}]\nDigite {ff5599}'/oficina'");
+
+    Mec[ofc::label] = CreateDynamic3DTextLabel(str, -1, 1943.4880, -1810.5806, 13.5663, 60.0);
+
+    return 1;
+}
+
 public OnGameModeExit()
 {
 	if(DB_Close(db_entity)) db_entity = DB:0;
@@ -197,6 +227,9 @@ public OnGameModeExit()
     printf("[  AREAS  ] %d areas globais foram destruídas com sucesso\n", count);
     printf("[ REGIONS ] %d regioes de jogadores foram deletadas com sucesso\n", count);
     printf("[ REGIONS ] %d regioes de veículos foram deletadas com sucesso\n", count);
+
+    DestroyAllDynamic3DTextLabels();
+    DestroyAllDynamicPickups();
 
     return 1;
 }
@@ -312,5 +345,13 @@ stock SendMessageToNearPlayer(Float:pX, Float:pY, Float:pZ, const msg[], GLOBAL_
         SendClientMessage(playerid, -1, formated_msg); 
     }
 
+    return 1;
+}
+
+YCMD:teste(playerid, params[], help)
+{
+    new id = strval(params);
+
+    SetPlayerPos(playerid, Gas[id][gas::pX], Gas[id][gas::pY], Gas[id][gas::pZ]);
     return 1;
 }

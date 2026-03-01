@@ -4,11 +4,7 @@ hook OnVehicleHealthChange(vehicleid, Float:new_health, Float:old_health)
 {
     #pragma unused old_health
 
-    new raceid, playerid;
-    if(!Race::IsRaceVehicle(vehicleid, raceid, playerid)) return 1;
-
-    if(Game[raceid][game_state] != GAME_STATE_STARTED)
-        return 1;
+    if(!Race::IsRaceVehicle(vehicleid)) return 1;
 
     if(new_health < 2000.0)
         Race::ProtectVehicle(vehicleid);

@@ -49,18 +49,17 @@ hook OnGameModeExit()
 
 hook OnServerUpdateMilis()
 {
-    new Float:health;
-
     foreach(new i : Vehicle)
     {
-        if(GetFlag(Vehicle[i][veh::flags], FLAG_VEH_IS_DEAD)) continue;
+        if(Model_IsManual(GetVehicleModel(i))) continue;
         
-        GetVehicleHealth(i, health);
-        if(Vehicle[i][veh::health] != health)
-        {
-            CallLocalFunction("OnVehicleHealthChange", "iff", i, health, Vehicle[i][veh::health]);
-            Vehicle[i][veh::health] = health;
-        }
+        if(!IsVehicleOccupied(i) || GetFlag(Vehicle[i][veh::flags], FLAG_VEH_BROKED) || GetFlag(Vehicle[i][veh::flags], FLAG_VEH_EMPTY)) continue;
+        
+        new driverid = GetVehicleDriver(i);
+
+        if(IsValidPlayer(driverid))
+            CallLocalFunction("OnVehicleUpdate", "ii", driverid, i);
+    
     }
 
     return 1;

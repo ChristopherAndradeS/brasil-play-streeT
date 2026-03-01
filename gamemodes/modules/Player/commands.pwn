@@ -174,7 +174,25 @@ YCMD:veh(playerid, params[], help)
     GetPlayerPos(playerid, pX, pY, pZ);
     GetPlayerFacingAngle(playerid, pA);
 
-    Player[playerid][pyr::vehicleid] = Veh::Create(modelid, pX, pY, pZ, pA, RandomMinMax(0, 10), RandomMinMax(0, 10), 0, 0, 0);
+    new veh_data[E_VEHICLES];
+
+    veh_data[veh::pX]           = pX;
+    veh_data[veh::pY]           = pY;
+    veh_data[veh::pZ]           = pZ;
+    veh_data[veh::pA]           = pA;
+    veh_data[veh::fuel]         = 25.0;
+    veh_data[veh::health]       = 1250.0;
+    veh_data[veh::interiorid]   = 0;
+    veh_data[veh::worldid]      = 0;
+    veh_data[veh::params]       = 1;
+    veh_data[veh::color1]       = RandomMinMax(0, 255);
+    veh_data[veh::color2]       = RandomMinMax(0, 255);
+
+    Player[playerid][pyr::vehicleid] = Veh::Create(modelid, veh_data);
+
+    new Float:health;
+    GetVehicleHealth(Player[playerid][pyr::vehicleid], health);
+
     PutPlayerInVehicle(playerid, Player[playerid][pyr::vehicleid], 0);
 
     SendClientMessage(playerid, -1, "{33ff33}[ VEH ] {ffffff}Veículo criado com sucesso!");

@@ -49,6 +49,7 @@
 #define NPC::               NPC_
 #define npc::               npc_
 #define Travel::            TRV_
+#define gas::               gas_
 
 /*          DEFINES          */
 #define DISCORD_LINK        "https://discord.gg/Czq6DWDvcB"

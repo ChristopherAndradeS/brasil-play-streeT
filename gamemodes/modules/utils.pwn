@@ -218,3 +218,18 @@ stock bool:GetRandomPositionAround(
 
     return false;
 }
+
+stock RemoverChar(string[], element)
+{
+    new i = 0, j = 0;
+    while(string[i] != '\0') 
+    {
+        if(string[i] != element) 
+        {
+            string[j++] = string[i];
+        }
+        i++;
+    }
+    
+    string[j] = '\0';
+}

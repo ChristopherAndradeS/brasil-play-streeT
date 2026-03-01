@@ -29,12 +29,6 @@ stock Veh::ShowTDForPlayer(playerid)
         TextDrawShowForPlayer(playerid, Veh::PublicTD[i]);
     for(new i = 0; i < 18; i++)
         PlayerTextDrawShow(playerid, Veh::PlayerTD[playerid][i]);  
-    
-    new vehicleid = GetPlayerVehicleID(playerid), vehname[64];
-    GetVehicleNameByModel(GetVehicleModel(vehicleid), vehname);
-    Veh::UpdateTDForPlayer(playerid, PTD_VEH_TXT_SPEED, "0");
-    Veh::UpdateTDForPlayer(playerid, PTD_VEH_TXT_NAME, "Veiculo: ~g~~h~~h~%s", vehname);
-	Veh::UpdatePTDBar(playerid, PTD_VEH_BAR_FUEL, 100.0, 100.0);
 }
 
 stock Veh::HideTDForPlayer(playerid)
@@ -233,7 +227,7 @@ stock Veh::CreatePlayerTD(playerid)
 	Veh::PlayerTD[playerid][0] = CreatePlayerTextDraw(playerid, 290.000000, 417.500000, "ld_dual:white");
 	PlayerTextDrawFont(playerid, Veh::PlayerTD[playerid][0], TEXT_DRAW_FONT:4);
 	PlayerTextDrawLetterSize(playerid, Veh::PlayerTD[playerid][0], 0.600000, 2.000000);
-	PlayerTextDrawTextSize(playerid, Veh::PlayerTD[playerid][0], 75.000000, 5.500000);
+	PlayerTextDrawTextSize(playerid, Veh::PlayerTD[playerid][0], 0.000000, 5.500000);
 	PlayerTextDrawSetOutline(playerid, Veh::PlayerTD[playerid][0], true);
 	PlayerTextDrawSetShadow(playerid, Veh::PlayerTD[playerid][0], false);
 	PlayerTextDrawAlignment(playerid, Veh::PlayerTD[playerid][0], TEXT_DRAW_ALIGN:1);
@@ -244,7 +238,7 @@ stock Veh::CreatePlayerTD(playerid)
 	PlayerTextDrawSetProportional(playerid, Veh::PlayerTD[playerid][0], true);
 	PlayerTextDrawSetSelectable(playerid, Veh::PlayerTD[playerid][0], false);
 
-	Veh::PlayerTD[playerid][1] = CreatePlayerTextDraw(playerid, 245.000000, 407.500000, "999");
+	Veh::PlayerTD[playerid][1] = CreatePlayerTextDraw(playerid, 245.000000, 407.500000, "0");
 	PlayerTextDrawFont(playerid, Veh::PlayerTD[playerid][1], TEXT_DRAW_FONT:2);
 	PlayerTextDrawLetterSize(playerid, Veh::PlayerTD[playerid][1], 0.250000, 1.500000);
 	PlayerTextDrawTextSize(playerid, Veh::PlayerTD[playerid][1], 400.000000, 17.000000);
@@ -261,7 +255,7 @@ stock Veh::CreatePlayerTD(playerid)
 	Veh::PlayerTD[playerid][2] = CreatePlayerTextDraw(playerid, 290.000000, 405.000000, "ld_dual:white");
 	PlayerTextDrawFont(playerid, Veh::PlayerTD[playerid][2], TEXT_DRAW_FONT:4);
 	PlayerTextDrawLetterSize(playerid, Veh::PlayerTD[playerid][2], 0.600000, 2.000000);
-	PlayerTextDrawTextSize(playerid, Veh::PlayerTD[playerid][2], 75.000000, 5.500000);
+	PlayerTextDrawTextSize(playerid, Veh::PlayerTD[playerid][2], 0.000000, 5.500000);
 	PlayerTextDrawSetOutline(playerid, Veh::PlayerTD[playerid][2], true);
 	PlayerTextDrawSetShadow(playerid, Veh::PlayerTD[playerid][2], false);
 	PlayerTextDrawAlignment(playerid, Veh::PlayerTD[playerid][2], TEXT_DRAW_ALIGN:1);
@@ -275,7 +269,7 @@ stock Veh::CreatePlayerTD(playerid)
 	Veh::PlayerTD[playerid][3] = CreatePlayerTextDraw(playerid, 290.000000, 430.000000, "ld_dual:white");
 	PlayerTextDrawFont(playerid, Veh::PlayerTD[playerid][3], TEXT_DRAW_FONT:4);
 	PlayerTextDrawLetterSize(playerid, Veh::PlayerTD[playerid][3], 0.600000, 2.000000);
-	PlayerTextDrawTextSize(playerid, Veh::PlayerTD[playerid][3], 61.500000, 5.500000);
+	PlayerTextDrawTextSize(playerid, Veh::PlayerTD[playerid][3], 0.000000, 5.500000);
 	PlayerTextDrawSetOutline(playerid, Veh::PlayerTD[playerid][3], true);
 	PlayerTextDrawSetShadow(playerid, Veh::PlayerTD[playerid][3], false);
 	PlayerTextDrawAlignment(playerid, Veh::PlayerTD[playerid][3], TEXT_DRAW_ALIGN:1);

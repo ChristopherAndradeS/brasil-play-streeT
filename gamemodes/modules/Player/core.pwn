@@ -93,27 +93,42 @@ stock Player::KillTimer(playerid, E_PLAYER_TIMERS:pyr::timerid)
     return 1;
 }
 
-stock Player::RemoveMoney(playerid, Float:price, bool:takeout = true)
+stock Player::RemoveMoney(playerid, Float:price, bool:verify = false)
 {
-    if(floatcmp(Player[playerid][pyr::money], price) >= 0)
+    if(verify)
     {
-        Player[playerid][pyr::money] = takeout ? Player[playerid][pyr::money] - price : Player[playerid][pyr::money];
-        
-        new name[MAX_PLAYER_NAME];
-        GetPlayerName(playerid, name);
-
-        DB::SetDataFloat(db_entity, "players", "money", Player[playerid][pyr::money], "name = '%q'", name);
-
-        Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_MONEY, "~g~~h~~h~R$: %2.f", Player[playerid][pyr::money]);
-
-        PlayerPlaySound(playerid, 1053, 0.0, 0.0, 0.0);
-
-        return 1;
+        if(floatcmp(Player[playerid][pyr::money], price) >= 0) return 1;
+        else return 0;
     }
 
-    PlayerPlaySound(playerid, 1085, 0.0, 0.0, 0.0);
+    else
+    {
+        if(floatcmp(Player[playerid][pyr::money], price) >= 0)
+        {
+            Player[playerid][pyr::money] -= price;
+            
+            new name[MAX_PLAYER_NAME];
+            GetPlayerName(playerid, name);
 
-    return 0;
+            DB::SetDataFloat(db_entity, "players", "money", Player[playerid][pyr::money], "name = '%q'", name);
+
+            Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_MONEY, "~g~~h~~h~R$: %2.f", Player[playerid][pyr::money]);
+
+            SendClientMessage(playerid, -1, " ");
+            SendClientMessage(playerid, -1, "{ff5555}[ R$ ] {ffffff}Voce pagou {ff5555}%.2f {ffffff}R$\n", price);
+            SendClientMessage(playerid, -1, " ");
+            
+            PlayerPlaySound(playerid, 1053, 0.0, 0.0, 0.0);
+
+            return 1;
+        }
+
+        else
+        {
+            SendClientMessage(playerid, -1, "{ff5555} [ R$ ] {ffffff}Não foi possível pagar. Faltam {ff5555}%.2f {ffffff}R$!\n", price - Player[playerid][pyr::money]);
+            return 0;
+        }
+    }
 }
 
 stock Player::GiveMoney(playerid, Float:price)
@@ -127,7 +142,7 @@ stock Player::GiveMoney(playerid, Float:price)
     
     Baseboard::UpdateTDForPlayer(playerid, PTD_BASEBOARD_MONEY, "~g~~h~~h~R$: %.2f", Player[playerid][pyr::money]);
     
-    SendClientMessage(playerid, -1, "{339933} [ R$ ] {ffffff}Voce recebeu {339933}%.2f {ffffff}R$\n", price);
+    SendClientMessage(playerid, -1, "{55ff55} [ R$ ] {ffffff}Voce recebeu {55ff55}%.2f {ffffff}R$\n", price);
     
     PlayerPlaySound(playerid, 1052, 0.0, 0.0, 0.0);
     

@@ -1,11 +1,13 @@
 
 
-stock bool:Race::IsRaceVehicle(vehicleid, &raceid = INVALID_GAME_ID, &playerid = INVALID_PLAYER_ID)
+stock bool:Race::IsRaceVehicle(vehicleid)
 {
     for(new gid = 0; gid < MAX_GAMES_INSTANCES; gid++)
     {
         if(!GetFlag(Game[gid][game::flags], FLAG_GAME_CREATED)) continue;
+
         if(Game[gid][game::type] != GAME_TYPE_RACE) continue;
+        
         if(!map_valid(Race[gid][race::participant])) continue;
 
         new len = Game::GetPlayersCount(gid);
@@ -19,8 +21,6 @@ stock bool:Race::IsRaceVehicle(vehicleid, &raceid = INVALID_GAME_ID, &playerid =
 
             if(data[race::vehicleid] != vehicleid) continue;
 
-            raceid = gid;
-            playerid = pid;
             return true;
         }
     }
@@ -160,10 +160,22 @@ stock Race::Ready(raceid)
 
         map_get_arr(Race[raceid][race::participant], playerid, data);
 
+        new veh_data[E_VEHICLES];
+
+        veh_data[veh::pX]           = Race::gVehicleSpawns[i][0];
+        veh_data[veh::pY]           = Race::gVehicleSpawns[i][1];
+        veh_data[veh::pZ]           = Race::gVehicleSpawns[i][2];
+        veh_data[veh::pA]           = Race::gVehicleSpawns[i][3];
+        veh_data[veh::fuel]         = 60.0;
+        veh_data[veh::health]       = 2000.0;
+        veh_data[veh::interiorid]   = Race::gInteriorID;
+        veh_data[veh::worldid]      = Game[raceid][game::vw];
+        veh_data[veh::params]       = FLAG_PARAM_ENGINE;
+        veh_data[veh::color1]       = RandomMinMax(0, 255);
+        veh_data[veh::color2]       = RandomMinMax(0, 255);
+
         /* SET VEHICLE */
-        data[race::vehicleid] = Veh::Create(Race[raceid][race::modelid],
-        Race::gVehicleSpawns[i][0], Race::gVehicleSpawns[i][1], Race::gVehicleSpawns[i][2], Race::gVehicleSpawns[i][3], 
-        RandomMinMax(3, 12), RandomMinMax(3, 12), Race::gInteriorID, Game[raceid][game::vw], FLAG_PARAM_ENGINE);
+        data[race::vehicleid] = Veh::Create(Race[raceid][race::modelid], veh_data);
         
         SetVehicleHealth(data[race::vehicleid], 1000.0 + 1000.0);
        
