@@ -28,7 +28,8 @@ hook OnGameModeInit()
     left_tstamp INTEGER");
 
     DB::CreateTable(db_entity, "vehicles", 
-    "ownerid      INTEGER,\
+    "owner        VARCHAR(32),\
+    slotid        INTEGER,\
     owner_type    INTEGER,\
     modelid       INTEGER,\
     flags         INTEGER,\
@@ -41,9 +42,7 @@ hook OnGameModeInit()
     pA            FLOAT,\
     color1        INTEGER,\
     color2        INTEGER,\
-    paintjobid    INTEGER,\
-    interiorid    INTEGER,\
-    worldid       INTEGER");
+    paintjobid    INTEGER");
 
     DB::CreateTable(db_entity, "acessorys", 
     "owner       VARCHAR(24),\

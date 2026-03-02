@@ -1,5 +1,6 @@
 #define MAX_ORGS            (8)
 #define MAX_ORGS_SKINS      (4)
+#define MAX_ORGS_VEHICLES   (5)
 
 #define INVALID_ORG_ID      (-1)
 
@@ -57,6 +58,7 @@ enum E_ORGS
     org::zoneid,
     ORG_TYPE:org::type,
     org::skins[MAX_ORGS_SKINS],
+    org::vehicleid[MAX_ORGS_VEHICLES],
     org::flags,
     org::leader[MAX_PLAYER_NAME],
     org::coleader[MAX_PLAYER_NAME],

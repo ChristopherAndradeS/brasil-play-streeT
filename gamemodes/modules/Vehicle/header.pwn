@@ -18,10 +18,10 @@ enum (<<= 1)
     FLAG_PARAM_OBJECTIVE,
 }
 
-enum _:OWNER_TYPES
+enum OWNER_TYPES
 {
-    OWNER_TYPE_PLAYER = 1,
     OWNER_TYPE_SERVER,
+    OWNER_TYPE_PLAYER,
     OWNER_TYPE_COMPANY,
     OWNER_TYPE_ORG,
     INVALID_OWNER_TYPE
@@ -35,8 +35,11 @@ enum E_PLAYER_VEHICLE
 enum E_VEHICLES
 {
     veh::dbid,
+    veh::owner_name[32], 
+    veh::slotid,
     veh::regionid,
-    veh::ownerid, veh::owner_type,
+    veh::ownerid, 
+    OWNER_TYPES:veh::owner_type,
     veh::modelid,
     veh::flags, veh::params,
     Float:veh::fuel, Float:veh::health,
@@ -48,7 +51,7 @@ enum E_VEHICLES
     veh::o_speed, Float:veh::o_accel, Float:veh::oX, Float:veh::oY, Float:veh::oZ,
     
     veh::tick,
-    STREAMER_TAG_3D_TEXT_LABEL:veh::tex3did
+    STREAMER_TAG_3D_TEXT_LABEL:veh::labelid
 }
 
 

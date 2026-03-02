@@ -158,10 +158,10 @@ YCMD:veh(playerid, params[], help)
     if(GetPlayerInterior(playerid) || GetPlayerVirtualWorld(playerid))
         return SendClientMessage(playerid, -1, "{ff3333}[ VEH ] {ffffff}Você não pode criar veículos aqui!");
 
-    new modelid, veh_name[32];
-    if(sscanf(params, "i", modelid)) 
+    new modelid, veh_name[32], color1, color2;
+    if(sscanf(params, "i", modelid, color1, color2)) 
     {
-        if(sscanf(params, "s[32]", veh_name)) 
+        if(sscanf(params, "s[32]ii", veh_name, color1, color2)) 
             return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /veh {ff3333}[ MODELID ou NOME]");
         
         modelid = GetVehicleModelByName(veh_name);
@@ -176,6 +176,9 @@ YCMD:veh(playerid, params[], help)
 
     new veh_data[E_VEHICLES];
 
+    veh_data[veh::owner_type]   = OWNER_TYPE_PLAYER; 
+    format(veh_data[veh::owner_name], 32, "%s", "Sever");
+    veh_data[veh::modelid]      = modelid;
     veh_data[veh::pX]           = pX;
     veh_data[veh::pY]           = pY;
     veh_data[veh::pZ]           = pZ;
@@ -185,10 +188,11 @@ YCMD:veh(playerid, params[], help)
     veh_data[veh::interiorid]   = 0;
     veh_data[veh::worldid]      = 0;
     veh_data[veh::params]       = 1;
-    veh_data[veh::color1]       = RandomMinMax(0, 255);
-    veh_data[veh::color2]       = RandomMinMax(0, 255);
+    veh_data[veh::color1]       = color1;
+    veh_data[veh::color2]       = color2;
+    veh_data[veh::paintjobid]   = -1;
 
-    Player[playerid][pyr::vehicleid] = Veh::Create(modelid, veh_data);
+    Player[playerid][pyr::vehicleid] = Veh::Create(veh_data);
 
     new Float:health;
     GetVehicleHealth(Player[playerid][pyr::vehicleid], health);

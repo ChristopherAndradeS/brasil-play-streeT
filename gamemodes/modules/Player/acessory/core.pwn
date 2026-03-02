@@ -221,7 +221,7 @@ stock Acessory::GivePlayerStock(playerid, slotid, stockid)
     
     DB::Insert(db_entity, "acessorys", "owner, slotid, owner_type, flags, price, \
     modelid, boneid, pX, pY, pZ, rX, rY, rZ, sX, sY, sZ, color1, color2", "'%q', %i, %i, 1, %f, \
-    %i, %i, %f, %f, %f, %f, %f, %f, %f, %f, %f, %i, %i", name, slotid, OWNER_TYPE_PLAYER, price,
+    %i, %i, %f, %f, %f, %f, %f, %f, %f, %f, %f, %i, %i", name, slotid, _:OWNER_TYPE_PLAYER, price,
     modelid, boneid, pX, pY, pZ, rX, rY, rZ, sX, sY, sZ, color1, color2);
     
     SendClientMessage(playerid, -1, "{33ff33}[ ACS LOJA ] {ffffff}Acessorio {33ff33}%s {ffffff}comprado com sucesso!", name);

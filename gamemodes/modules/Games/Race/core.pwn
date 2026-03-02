@@ -175,7 +175,7 @@ stock Race::Ready(raceid)
         veh_data[veh::color2]       = RandomMinMax(0, 255);
 
         /* SET VEHICLE */
-        data[race::vehicleid] = Veh::Create(Race[raceid][race::modelid], veh_data);
+        data[race::vehicleid] = Veh::Create(veh_data);
         
         SetVehicleHealth(data[race::vehicleid], 1000.0 + 1000.0);
        

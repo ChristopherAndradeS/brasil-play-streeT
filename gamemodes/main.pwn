@@ -349,3 +349,9 @@ stock SendMessageToNearPlayer(Float:pX, Float:pY, Float:pZ, const msg[], GLOBAL_
 
     return 1;
 }
+
+YCMD:teste(playerid, params[], help)
+{
+    ClearChat(playerid, 25);
+    return 1;
+}

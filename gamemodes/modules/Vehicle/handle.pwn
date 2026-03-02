@@ -55,7 +55,8 @@ hook OnPlayerEnterVehicle(playerid, vehicleid, ispassenger)
 
     if(!Veh::HasPermission(playerid, vehicleid))
     {
-        RemovePlayerFromVehicle(playerid);
+        SetVehicleParamsForPlayer(vehicleid, playerid, .doors = 1);
+        //RemovePlayerFromVehicle(playerid);
         return 1;
     }
 
@@ -64,14 +65,17 @@ hook OnPlayerEnterVehicle(playerid, vehicleid, ispassenger)
 
 hook OnPlayerStateChange(playerid, PLAYER_STATE:newstate, PLAYER_STATE:oldstate)
 {
+    if(IsPlayerNPC(playerid)) return -1;
+    
+    new vehicleid = GetPlayerVehicleID(playerid);  
+
     if(newstate == PLAYER_STATE_DRIVER)
     {
-        new vehicleid = GetPlayerVehicleID(playerid);  
-
         if(!IsValidVehicle(vehicleid)) return 1;    
 
         if(!Veh::HasPermission(playerid, vehicleid))
         {
+            SetVehicleParamsForPlayer(vehicleid, playerid, .doors = 1);
             RemovePlayerFromVehicle(playerid);
             return 1;
         }
@@ -111,6 +115,8 @@ hook OnPlayerStateChange(playerid, PLAYER_STATE:newstate, PLAYER_STATE:oldstate)
             Baseboard::ShowTDForPlayer(playerid);
         }
     }
+
+    printf("veículo %d", vehicleid);
 
     return 1;
 }

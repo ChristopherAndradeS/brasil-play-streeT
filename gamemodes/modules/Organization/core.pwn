@@ -39,7 +39,19 @@ stock Org::Load(orgid)
     Org[orgid][org::labelid] = CreateDynamic3DTextLabel(str, -1, Org[orgid][org::sX], Org[orgid][org::sY], Org[orgid][org::sZ], 60.0, .testlos = 1);
 
     Org[orgid][org::pickupid] = CreateDynamicPickup(1314, 0, Org[orgid][org::sX], Org[orgid][org::sY], Org[orgid][org::sZ]);
-    
+
+    for(new i = 0; i < MAX_ORGS_VEHICLES; i++)
+    {
+        if(!Veh::Exists(Org[orgid][org::name], i))continue;
+        
+        new vehicleid =  Veh::Load(Org[orgid][org::name], i, OWNER_TYPE_ORG, orgid);
+
+        format(str, 144, "[ VEH ][ %s ] [ {ffffff}SID: {%06x}%d{ffffff}]", 
+        Org[orgid][org::tag], Org[orgid][org::color] >>> 8, i);
+
+        Vehicle[vehicleid][veh::labelid] = CreateDynamic3DTextLabel(str, Org[orgid][org::color], 0.0, 0.0, -0.25, 60.0, .attachedvehicle = vehicleid, .testlos = 1);
+    }   
+
     return 1;
 }
 
