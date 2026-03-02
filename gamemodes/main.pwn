@@ -49,6 +49,7 @@
 //  ------------------------- PLAYERS --------------------------
 
 #include "./gamemodes/modules/Server/header.pwn" 
+#include "./gamemodes/modules/Shop/header.pwn" 
 #include "./gamemodes/modules/TextDraws/header.pwn"
 #include "./gamemodes/modules/Vehicle/header.pwn"
 
@@ -97,6 +98,7 @@
 //  ------------------------- PLAYERS --------------------------
 
 #include "./gamemodes/modules/Server/core.pwn" 
+#include "./gamemodes/modules/Shop/core.pwn" 
 
 //  ------------------------- TEXTDRAWS ---------------------------
 //                          [    GUI    ]
@@ -347,11 +349,5 @@ stock SendMessageToNearPlayer(Float:pX, Float:pY, Float:pZ, const msg[], GLOBAL_
         SendClientMessage(playerid, -1, formated_msg); 
     }
 
-    return 1;
-}
-
-YCMD:teste(playerid, params[], help)
-{
-    ClearChat(playerid, 25);
     return 1;
 }

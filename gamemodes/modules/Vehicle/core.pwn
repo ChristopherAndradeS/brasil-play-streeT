@@ -369,7 +369,6 @@ stock Veh::UpdateFuel(driverid, vehicleid, Float:fuel)
         Veh::UpdatePTDBar(driverid, PTD_VEH_BAR_FUEL, 100.0, floatclamp(Vehicle[vehicleid][veh::fuel], 0.0, 60.0) * 1.67);
 }
 
-
 stock Veh::Flip(vehicleid)
 {
     new Float:qw, Float:qx, Float:qy, Float:qz;

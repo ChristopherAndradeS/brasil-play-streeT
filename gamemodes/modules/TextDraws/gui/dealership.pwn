@@ -37,6 +37,8 @@ stock Dealership::HideTDForPlayer(playerid)
         PlayerTextDrawHide(playerid, Dealership::PlayerTD[playerid][i]); 
 
 	Dealership::DestroyPlayerTD(playerid);
+
+    CancelSelectTextDraw(playerid);   
 }
 
 stock Dealership::DestroyPublicTD()
