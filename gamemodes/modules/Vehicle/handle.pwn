@@ -80,6 +80,10 @@ hook OnPlayerStateChange(playerid, PLAYER_STATE:newstate, PLAYER_STATE:oldstate)
             return 1;
         }
 
+        SetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_OCCUPED);
+        Veh::KillTimer(vehicleid, veh::TIMER_STREAM_OUT);
+        Veh::KillTimer(vehicleid, veh::TIMER_EMPTY_RESPAWN);
+
         if(Model_IsManual(GetVehicleModel(vehicleid))) return 1;
 
         Baseboard::HideTDForPlayer(playerid);
@@ -102,6 +106,17 @@ hook OnPlayerStateChange(playerid, PLAYER_STATE:newstate, PLAYER_STATE:oldstate)
             SendClientMessage(playerid, -1, "{ffff99}[ VEH ] {ffffff}Aperte {ffff99}'Y' {ffffff}ou digite {ffff99}/motor {ffffff}para ligar o motor.");
         
         Player::CreateTimer(playerid, pyr::TIMER_SPEEDOMETER, "OnSpeedOMeterUpdate", 75, true, "i", playerid);
+    }
+
+    if(oldstate == PLAYER_STATE_DRIVER)
+    {
+        if(IsValidVehicle(vehicleid))
+        {
+            ResetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_OCCUPED);
+
+            if(Vehicle[vehicleid][veh::owner_type] == OWNER_TYPE_ORG)
+                Veh::CreateTimer(vehicleid, veh::TIMER_EMPTY_RESPAWN, "OnOrgVehicleEmptyTimeout", 300000, false, "i", vehicleid);
+        }
     }
 
     if(newstate != PLAYER_STATE_DRIVER)
@@ -146,6 +161,8 @@ hook OnVehicleHealthChange(vehicleid, driverid, Float:new_health, Float:old_heal
 
         foreach (new i : VehicleOccupant[vehicleid])
             SendClientMessage(i, -1, "{ff9933}[ VEH ] {ffffff}Este veículo está {ff9933}quebrado! {ffffff}Chame um mecânico");
+
+        CallLocalFunction("OnVehicleBroke", "ii", vehicleid, driverid);
         
         return 1;
     }
@@ -244,5 +261,90 @@ hook OnPlayerKeyStateChange(playerid, KEY:newkeys, KEY:oldkeys)
         return 1;
     }
 
+    return 1;
+}
+
+
+hook OnVehicleStreamOut(vehicleid, forplayerid)
+{
+    #pragma unused forplayerid
+
+    if(!IsValidVehicle(vehicleid)) return 1;
+
+    switch(Vehicle[vehicleid][veh::owner_type])
+    {
+        case OWNER_TYPE_PLAYER, OWNER_TYPE_ORG:
+        {
+            if(!GetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_OCCUPED))
+                return 1;
+
+            new ownerid = Vehicle[vehicleid][veh::ownerid];
+            if(IsValidPlayer(ownerid))
+                SendClientMessage(ownerid, -1, "{ff9933}[ VEH ] {ffffff}Você está se afastando do veículo, em 1:30 ele retornará para garagem.");
+
+            Veh::CreateTimer(vehicleid, veh::TIMER_STREAM_OUT, "OnVehicleStreamOutTimeout", 90000, false, "i", vehicleid);
+        }
+
+        default:
+        {
+            Veh::RespawnOwnedVehicle(vehicleid, true);
+        }
+    }
+
+    return 1;
+}
+
+public OnVehicleStreamOutTimeout(vehicleid)
+{
+    if(!IsValidVehicle(vehicleid)) return 1;
+
+    veh::Timer[vehicleid][veh::TIMER_STREAM_OUT] = INVALID_TIMER;
+
+    new owner_type = Vehicle[vehicleid][veh::owner_type];
+
+    if(owner_type == OWNER_TYPE_PLAYER)
+    {
+        new ownerid = Vehicle[vehicleid][veh::ownerid];
+
+        if(IsValidPlayer(ownerid))
+            SendClientMessage(ownerid, -1, "{ff9933}[ VEH ] {ffffff}Seu veículo retornou para garagem");
+
+        Veh::RespawnOwnedVehicle(vehicleid, true);
+        return 1;
+    }
+
+    if(owner_type == OWNER_TYPE_ORG)
+    {
+        foreach(new i : Player)
+        {
+            if(org::Player[i][pyr::orgid] == Vehicle[vehicleid][veh::ownerid])
+                SendClientMessage(i, -1, "{ff9933}[ VEH ] {ffffff}Seu veículo retornou para garagem");
+        }
+
+        Veh::RespawnOwnedVehicle(vehicleid, true);
+    }
+
+    return 1;
+}
+
+public OnOrgVehicleEmptyTimeout(vehicleid)
+{
+    if(!IsValidVehicle(vehicleid)) return 1;
+
+    veh::Timer[vehicleid][veh::TIMER_EMPTY_RESPAWN] = INVALID_TIMER;
+
+    if(Vehicle[vehicleid][veh::owner_type] != OWNER_TYPE_ORG)
+        return 1;
+
+    if(GetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_OCCUPED))
+        return 1;
+
+    foreach(new i : Player)
+    {
+        if(org::Player[i][pyr::orgid] == Vehicle[vehicleid][veh::ownerid])
+            SendClientMessage(i, -1, "{ff9933}[ VEH ] {ffffff}Seu veículo retornou para garagem");
+    }
+
+    Veh::RespawnOwnedVehicle(vehicleid, false);
     return 1;
 }
