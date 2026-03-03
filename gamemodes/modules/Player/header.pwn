@@ -33,6 +33,7 @@ enum E_PLAYER
     pyr::skinid,
     pyr::score,
     pyr::flags,
+    pyr::ocupped_vehicleid,
     Float:pyr::oX, Float:pyr::oY, Float:pyr::oZ, Float:pyr::oA,
     pyr::regionid,
     pyr::vehicleid,

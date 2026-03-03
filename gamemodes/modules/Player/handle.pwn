@@ -141,31 +141,22 @@ hook OnPlayerDisconnect(playerid, reason)
             GetVehicleZAngle(vehicleid, Vehicle[vehicleid][veh::pA]);
 
             Veh::Save(vehicleid);
-            SendClientMessage(playerid, -1, "{ff9933}[ VEH ] {ffffff}Seu veículo retornou para garagem");
-            CallLocalFunction("OnVehicleDespawn", "i", vehicleid);
-
-            if(Player[playerid][pyr::vehicleid] == vehicleid)
-                Veh::Destroy(Player[playerid][pyr::vehicleid]);
-            else
-                Veh::Destroy(vehicleid);
+    
+            Veh::Destroy(vehicleid);
         }
 
         else if(Vehicle[vehicleid][veh::owner_type] == OWNER_TYPE_ORG)
         {
             Vehicle[vehicleid][veh::params] = 0;
             Veh::Save(vehicleid);
-            Veh::ResetVehicleState(vehicleid);
+            
             CallLocalFunction("OnOrgVehicleRespawn", "i", vehicleid);
         }
-
-        else
-        {
-            Veh::RespawnOwnedVehicle(vehicleid, false);
-        }
+    
+        Veh::ResetVehicleState(vehicleid);
+        Veh::Respawn(vehicleid, Vehicle[vehicleid][veh::owner_type]);
     }
 
-    else if(IsValidVehicle(Player[playerid][pyr::vehicleid]))
-        Veh::Destroy(Player[playerid][pyr::vehicleid]);
 
     DB::SetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", GetPlayerNameStr(playerid));
 
@@ -254,13 +245,13 @@ hook OnPlayerSpawn(playerid)
         -1323.2695 + RandomFloatMinMax(-2.0, 2.0), 13.5798, 270.0);      
     }
 
-    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RETURN_TO_VEH))
-    {
-        if(IsValidVehicle(Player[playerid][pyr::vehicleid]))
-            PutPlayerInVehicle(playerid, Player[playerid][pyr::vehicleid], 0);
+    // if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RETURN_TO_VEH))
+    // {
+    //     if(IsValidVehicle(Player[playerid][pyr::vehicleid]))
+    //         PutPlayerInVehicle(playerid, Player[playerid][pyr::vehicleid], 0);
 
-        ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RETURN_TO_VEH);
-    }
+    //     ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RETURN_TO_VEH);
+    // }
 
     return 1;
 }

@@ -37,7 +37,6 @@ stock Player::LoadData(playerid)
     DB::GetDataFloat(db_entity, "players", "money", Player[playerid][pyr::money], "name = '%q'", name);
     DB::GetDataInt(db_entity, "players", "skinid", Player[playerid][pyr::skinid], "name = '%q'", name);
     DB::GetDataInt(db_entity, "players", "score", Player[playerid][pyr::score], "name = '%q'", name);
-    DB::GetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", name);
     
     return 1;
 }

@@ -70,12 +70,10 @@ forward OnSpeedOMeterUpdate(playerid);
 forward Float:Veh::GetVehicleFuelUsed(Float:speed, Float:accel, Float:dt);
 forward OnVehicleFuelChange(vehicleid, Float:new_fuel, Float:old_fuel);
 forward OnVehicleCreate(vehicleid, modelid, regionid, Float:x, Float:y, Float:z);
-forward OnVehicleDespawn(vehicleid);
-forward OnOrgVehicleRespawn(vehicleid);
-forward OnServerVehicleRespawn(vehicleid);
+forward OnVehicleRespawn(vehicleid);
 forward OnVehicleBroke(vehicleid, driverid);
-forward OnVehicleStreamOutTimeout(vehicleid);
-forward OnOrgVehicleEmptyTimeout(vehicleid);
+forward OnVehicleStreamOutTimeout(vehicleid, forplayerid);
+forward OnVehicleEmptyTimeout(vehicleid, forplayerid);
 
 #define FUEL_PRICE_PER_LITER (6.28)
 #define ARMOUR_PRICE_PER_HP  (6.0)
