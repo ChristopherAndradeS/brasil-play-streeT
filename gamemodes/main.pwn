@@ -49,7 +49,12 @@
 //  ------------------------- PLAYERS --------------------------
 
 #include "./gamemodes/modules/Server/header.pwn" 
-#include "./gamemodes/modules/Shop/header.pwn" 
+//#include "./gamemodes/modules/Shop/header.pwn" 
+
+//  -------------------------  SHOPS ---------------------------
+#include "./gamemodes/modules/Shop/dealership/header.pwn" 
+//  -------------------------  SHOPS ---------------------------
+
 #include "./gamemodes/modules/TextDraws/header.pwn"
 #include "./gamemodes/modules/Vehicle/header.pwn"
 
@@ -82,7 +87,8 @@
 #include "./gamemodes/modules/Maps/core/store.pwn"
 #include "./gamemodes/modules/Maps/core/prision.pwn"
 #include "./gamemodes/modules/Maps/core/arena.pwn"
-#include "./gamemodes/modules/Maps/core/ammu.pwn"
+#include "./gamemodes/mforward UpdateCarRotate(playerid, vehicleid);
+odules/Maps/core/ammu.pwn"
 #include "./gamemodes/modules/Maps/core/house.pwn"
 //  --------------------------- MAPAS -----------------------------
 
@@ -99,6 +105,10 @@
 
 #include "./gamemodes/modules/Server/core.pwn" 
 #include "./gamemodes/modules/Shop/core.pwn" 
+
+//  -------------------------  SHOPS ---------------------------
+#include "./gamemodes/modules/Shop/dealership/core.pwn" 
+//  -------------------------  SHOPS ---------------------------
 
 //  ------------------------- TEXTDRAWS ---------------------------
 //                          [    GUI    ]

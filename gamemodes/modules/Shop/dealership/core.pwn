@@ -1,9 +1,5 @@
 #include <YSI/YSI_Coding/y_hooks>
 
-forward UpdateCarRotate(playerid, vehicleid);
-
-new g_models[] = {411, 560, 433, 571, 522};
-
 public UpdateCarRotate(playerid, vehicleid)
 {
     new Float:angle;
