@@ -77,16 +77,30 @@ stock Veh::Load(const owner[], slotid, OWNER_TYPES:type, ownerid)
 
 stock Veh::Save(vehicleid)
 {
-    if(Vehicle[vehicleid][veh::dbid] != INVALID_RECORD_ID) 
+    if(Vehicle[vehicleid][veh::dbid] == INVALID_RECORD_ID) 
         return printf("[ VEH (DB)] Erro ao salvar veículo Model: %d / Owner: %s / Slot: %d", 
         Vehicle[vehicleid][veh::modelid], Vehicle[vehicleid][veh::owner_name], Vehicle[vehicleid][veh::slotid]);
 
-    return DB::Update(db_entity, "vehicles",
-    "flags = %d, params = %d, fuel = %f, health = %f, color1 = %d, color2 = %d, paintjobid = %d WHERE rowid = %d",
-    Vehicle[vehicleid][veh::flags], Vehicle[vehicleid][veh::params],
-    Vehicle[vehicleid][veh::fuel], Vehicle[vehicleid][veh::health],
-    Vehicle[vehicleid][veh::color1], Vehicle[vehicleid][veh::color2], 
-    Vehicle[vehicleid][veh::paintjobid], Vehicle[vehicleid][veh::dbid]);
+    if(Vehicle[vehicleid][veh::owner_type] == OWNER_TYPE_PLAYER)
+    {
+        return DB::Update(db_entity, "vehicles",
+        "flags = %d, params = %d, fuel = %f, health = %f, pX = %f, pY = %f, pZ = %f WHERE rowid = %d",
+        Vehicle[vehicleid][veh::flags], Vehicle[vehicleid][veh::params],
+        Vehicle[vehicleid][veh::fuel], Vehicle[vehicleid][veh::health],
+        Vehicle[vehicleid][veh::pX], Vehicle[vehicleid][veh::pY], Vehicle[vehicleid][veh::pZ],
+        Vehicle[vehicleid][veh::dbid]);
+    }
+
+    if(Vehicle[vehicleid][veh::owner_type] == OWNER_TYPE_ORG)
+    {
+        return DB::Update(db_entity, "vehicles",
+        "flags = %d, params = %d, fuel = %f, health = %f WHERE rowid = %d",
+        Vehicle[vehicleid][veh::flags], Vehicle[vehicleid][veh::params],
+        Vehicle[vehicleid][veh::fuel], Vehicle[vehicleid][veh::health],
+        Vehicle[vehicleid][veh::dbid]);
+    }
+
+    return 1;
 }
 
 stock Veh::Delete(const owner[], slotid)
@@ -184,6 +198,10 @@ stock Veh::Create(data[E_VEHICLES])
    
     ResetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_BROKED);
     ResetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_EMPTY);
+    ResetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_OCCUPED);
+
+    veh::Timer[vehicleid][veh::TIMER_STREAM_OUT] = INVALID_TIMER;
+    veh::Timer[vehicleid][veh::TIMER_EMPTY_RESPAWN] = INVALID_TIMER;
 
     if(data[veh::paintjobid] != INVALID_PAINTJOB_ID)
         ChangeVehiclePaintjob(vehicleid, data[veh::paintjobid]);
@@ -205,6 +223,94 @@ stock Veh::Destroy(&vehicleid)
     if(IsValidVehicle(vehicleid)) DestroyVehicle(vehicleid);
 
     vehicleid = INVALID_VEHICLE_ID;
+}
+
+
+stock Veh::ResetVehicleState(vehicleid)
+{
+    if(!IsValidVehicle(vehicleid)) return 0;
+
+    SetVehicleToRespawn(vehicleid);
+
+    Vehicle[vehicleid][veh::params] = 0;
+    Veh::UpdateParams(vehicleid, FLAG_PARAM_ENGINE, 0);
+    Veh::UpdateParams(vehicleid, FLAG_PARAM_LIGHTS, 0);
+    Veh::UpdateParams(vehicleid, FLAG_PARAM_ALARM, 0);
+    Veh::UpdateParams(vehicleid, FLAG_PARAM_DOORS, 0);
+    Veh::UpdateParams(vehicleid, FLAG_PARAM_BONNET, 0);
+    Veh::UpdateParams(vehicleid, FLAG_PARAM_BOOT, 0);
+    Veh::UpdateParams(vehicleid, FLAG_PARAM_OBJECTIVE, 0);
+
+    return 1;
+}
+
+stock Veh::RespawnOwnedVehicle(vehicleid, bool:from_stream = false)
+{
+    if(!IsValidVehicle(vehicleid)) return 0;
+
+    switch(Vehicle[vehicleid][veh::owner_type])
+    {
+        case OWNER_TYPE_PLAYER:
+        {
+            Vehicle[vehicleid][veh::params] = 0;
+            Veh::Save(vehicleid);
+            new ownerid = Vehicle[vehicleid][veh::ownerid];
+            if(IsValidPlayer(ownerid))
+                SendClientMessage(ownerid, -1, "{ff9933}[ VEH ] {ffffff}Seu veículo retornou para garagem");
+            CallLocalFunction("OnVehicleDespawn", "i", vehicleid);
+
+            if(ownerid != INVALID_PLAYER_ID)
+            {
+                if(Player[ownerid][pyr::vehicleid] == vehicleid)
+                    Veh::Destroy(Player[ownerid][pyr::vehicleid]);
+                else
+                    Veh::Destroy(vehicleid);
+            }
+            else
+                Veh::Destroy(vehicleid);
+        }
+
+        case OWNER_TYPE_ORG:
+        {
+            Vehicle[vehicleid][veh::params] = 0;
+            Veh::Save(vehicleid);
+            Veh::ResetVehicleState(vehicleid);
+
+            CallLocalFunction("OnOrgVehicleRespawn", "i", vehicleid);
+        }
+
+        default:
+        {
+            Veh::ResetVehicleState(vehicleid);
+            CallLocalFunction("OnServerVehicleRespawn", "i", vehicleid);
+        }
+    }
+
+    return 1;
+}
+
+stock Veh::CreateTimer(vehicleid, E_VEH_TIMERS:timerid, const callback[] = "", time, bool:repeate, const specifiers[] = "", OPEN_MP_TAGS:...)
+{
+    if(!IsValidVehicle(vehicleid)) return 0;
+
+    if(IsValidTimer(veh::Timer[vehicleid][veh::timerid]))
+    {
+        KillTimer(veh::Timer[vehicleid][veh::timerid]);
+        veh::Timer[vehicleid][veh::timerid] = INVALID_TIMER;
+    }
+
+    veh::Timer[vehicleid][veh::timerid] = SetTimerEx(callback, time, repeate, specifiers, ___(6));
+    return 1;
+}
+
+stock Veh::KillTimer(vehicleid, E_VEH_TIMERS:timerid)
+{
+    if(!IsValidVehicle(vehicleid)) return 0;
+    if(!IsValidTimer(veh::Timer[vehicleid][veh::timerid])) return 0;
+
+    KillTimer(veh::Timer[vehicleid][veh::timerid]);
+    veh::Timer[vehicleid][veh::timerid] = INVALID_TIMER;
+    return 1;
 }
 
 stock Veh::UpdateParams(vehicleid, params, status)
@@ -301,6 +407,8 @@ stock Veh::ToggleParams(playerid, vehicleid, params)
 
 stock Veh::Clear(vehicleid)
 {
+    Veh::KillTimer(vehicleid, veh::TIMER_STREAM_OUT);
+    Veh::KillTimer(vehicleid, veh::TIMER_EMPTY_RESPAWN);
     if(IsValidDynamic3DTextLabel(Vehicle[vehicleid][veh::labelid]))
         DestroyDynamic3DTextLabel(Vehicle[vehicleid][veh::labelid]);
 

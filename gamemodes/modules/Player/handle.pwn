@@ -129,12 +129,45 @@ hook OnPlayerDisconnect(playerid, reason)
     ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED);
     ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_CHECKPOINT);
     
-    DB::SetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", GetPlayerNameStr(playerid));
+    new vehicleid = GetPlayerVehicleID(playerid);
 
-    //Veh::Save(playerid);
+    if(GetPlayerState(playerid) == PLAYER_STATE_DRIVER && IsValidVehicle(vehicleid))
+    {
+        if(Vehicle[vehicleid][veh::owner_type] == OWNER_TYPE_PLAYER && Vehicle[vehicleid][veh::ownerid] == playerid)
+        {
+            SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RETURN_TO_VEH);
 
-    if(IsValidVehicle(Player[playerid][pyr::vehicleid]))
+            GetVehiclePos(vehicleid, Vehicle[vehicleid][veh::pX], Vehicle[vehicleid][veh::pY], Vehicle[vehicleid][veh::pZ]);
+            GetVehicleZAngle(vehicleid, Vehicle[vehicleid][veh::pA]);
+
+            Veh::Save(vehicleid);
+            SendClientMessage(playerid, -1, "{ff9933}[ VEH ] {ffffff}Seu veículo retornou para garagem");
+            CallLocalFunction("OnVehicleDespawn", "i", vehicleid);
+
+            if(Player[playerid][pyr::vehicleid] == vehicleid)
+                Veh::Destroy(Player[playerid][pyr::vehicleid]);
+            else
+                Veh::Destroy(vehicleid);
+        }
+
+        else if(Vehicle[vehicleid][veh::owner_type] == OWNER_TYPE_ORG)
+        {
+            Vehicle[vehicleid][veh::params] = 0;
+            Veh::Save(vehicleid);
+            Veh::ResetVehicleState(vehicleid);
+            CallLocalFunction("OnOrgVehicleRespawn", "i", vehicleid);
+        }
+
+        else
+        {
+            Veh::RespawnOwnedVehicle(vehicleid, false);
+        }
+    }
+
+    else if(IsValidVehicle(Player[playerid][pyr::vehicleid]))
         Veh::Destroy(Player[playerid][pyr::vehicleid]);
+
+    DB::SetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", GetPlayerNameStr(playerid));
 
     Player::ClearData(playerid);
 
@@ -219,6 +252,14 @@ hook OnPlayerSpawn(playerid)
         "A emergencia chegou e~n~Voce foi para o hospital...",
         1182.2079 + RandomFloatMinMax(-2.0, 2.0), 
         -1323.2695 + RandomFloatMinMax(-2.0, 2.0), 13.5798, 270.0);      
+    }
+
+    if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RETURN_TO_VEH))
+    {
+        if(IsValidVehicle(Player[playerid][pyr::vehicleid]))
+            PutPlayerInVehicle(playerid, Player[playerid][pyr::vehicleid], 0);
+
+        ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RETURN_TO_VEH);
     }
 
     return 1;

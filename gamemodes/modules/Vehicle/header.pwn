@@ -4,7 +4,8 @@
 enum (<<= 1)
 {
     FLAG_VEH_BROKED = 1,
-    FLAG_VEH_EMPTY
+    FLAG_VEH_EMPTY,
+    FLAG_VEH_OCCUPED
 }
 
 enum (<<= 1)
@@ -32,6 +33,12 @@ enum E_PLAYER_VEHICLE
     pyr::tick_gas_notify,
 }
 
+enum E_VEH_TIMERS
+{
+    veh::TIMER_STREAM_OUT,
+    veh::TIMER_EMPTY_RESPAWN
+}
+
 enum E_VEHICLES
 {
     veh::dbid,
@@ -57,11 +64,18 @@ enum E_VEHICLES
 
 new veh::Player[MAX_PLAYERS][E_PLAYER_VEHICLE];
 new Vehicle[MAX_VEHICLES][E_VEHICLES];
+new veh::Timer[MAX_VEHICLES][E_VEH_TIMERS];
 
 forward OnSpeedOMeterUpdate(playerid);
 forward Float:Veh::GetVehicleFuelUsed(Float:speed, Float:accel, Float:dt);
 forward OnVehicleFuelChange(vehicleid, Float:new_fuel, Float:old_fuel);
 forward OnVehicleCreate(vehicleid, modelid, regionid, Float:x, Float:y, Float:z);
+forward OnVehicleDespawn(vehicleid);
+forward OnOrgVehicleRespawn(vehicleid);
+forward OnServerVehicleRespawn(vehicleid);
+forward OnVehicleBroke(vehicleid, driverid);
+forward OnVehicleStreamOutTimeout(vehicleid);
+forward OnOrgVehicleEmptyTimeout(vehicleid);
 
 #define FUEL_PRICE_PER_LITER (6.28)
 #define ARMOUR_PRICE_PER_HP  (6.0)
