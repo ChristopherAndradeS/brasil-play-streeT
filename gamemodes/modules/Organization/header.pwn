@@ -64,6 +64,7 @@ enum E_ORGS
     org::coleader[MAX_PLAYER_NAME],
     Float:org::funds,
     Float:org::sX, Float:org::sY, Float:org::sZ, Float:org::sA,
+    STREAMER_TAG_OBJECT:org::gate_objectid,
     STREAMER_TAG_PICKUP:org::pickupid,
     STREAMER_TAG_3D_TEXT_LABEL:org::labelid,
     STREAMER_TAG_MAP_ICON:org::iconid,

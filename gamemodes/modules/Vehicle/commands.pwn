@@ -39,6 +39,8 @@ YCMD:motor(playerid, params[], help)
 
         if(!Veh::HasPermission(playerid, vehicleid)) return 1;
 
+        Player[playerid][pyr::ocupped_vehicleid] = vehicleid;
+        SetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_OCCUPED);        
         Veh::ToggleParams(playerid, vehicleid, FLAG_PARAM_ENGINE);
     }  
 

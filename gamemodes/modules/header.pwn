@@ -50,6 +50,7 @@
 #define npc::               npc_
 #define Travel::            TRV_
 #define gas::               gas_
+#define Groove::            grv_
 
 /*          DEFINES          */
 #define DISCORD_LINK        "https://discord.gg/Czq6DWDvcB"

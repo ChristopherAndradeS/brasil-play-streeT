@@ -76,3 +76,30 @@ hook OnPlayerDisconnect(playerid, reason)
 
     return 1;
 }
+
+hook OnPlayerKeyStateChange(playerid, KEY:newkeys, KEY:oldkeys)
+{
+    if(org::Player[playerid][pyr::orgid] != 0) return 1;
+    
+    if(!IsPlayerInRangeOfPoint(playerid, 15.0, 2463.862597, -1658.594145, 14.169431)) return 1;
+
+    new Float:pX, Float:pY, Float:pZ;
+
+    GetDynamicObjectPos(Org[0][org::gate_objectid], pX, pY, pZ);
+
+    if((_:newkeys & 0x2) && !(_:oldkeys & 0x2))
+    {
+        //14.169431
+        if(pZ <= 15.0)
+        {
+            MoveDynamicObject(Org[0][org::gate_objectid], 2463.862597, -1658.594145, 17.819431, 2.5);
+        }
+        //17.819431
+        else if(pZ >= 17.0)
+        {
+            MoveDynamicObject(Org[0][org::gate_objectid], 2463.862597, -1658.594145, 14.169431, 2.5);
+        }
+    }
+
+    return 1;
+}

@@ -133,13 +133,14 @@ hook OnPlayerDisconnect(playerid, reason)
 
     if(GetPlayerState(playerid) == PLAYER_STATE_DRIVER && IsValidVehicle(vehicleid))
     {
+        Player[playerid][pyr::ocupped_vehicleid] = INVALID_VEHICLE_ID;
+
         if(Vehicle[vehicleid][veh::owner_type] == OWNER_TYPE_PLAYER && Vehicle[vehicleid][veh::ownerid] == playerid)
         {
             SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RETURN_TO_VEH);
 
             GetVehiclePos(vehicleid, Vehicle[vehicleid][veh::pX], Vehicle[vehicleid][veh::pY], Vehicle[vehicleid][veh::pZ]);
             GetVehicleZAngle(vehicleid, Vehicle[vehicleid][veh::pA]);
-
             Veh::Save(vehicleid);
     
             Veh::Destroy(vehicleid);
@@ -147,14 +148,16 @@ hook OnPlayerDisconnect(playerid, reason)
 
         else if(Vehicle[vehicleid][veh::owner_type] == OWNER_TYPE_ORG)
         {
-            Vehicle[vehicleid][veh::params] = 0;
+            Veh::ResetVehicleState(vehicleid);
             Veh::Save(vehicleid);
-            
-            CallLocalFunction("OnOrgVehicleRespawn", "i", vehicleid);
+            Veh::Respawn(vehicleid, OWNER_TYPE_ORG);
         }
-    
-        Veh::ResetVehicleState(vehicleid);
-        Veh::Respawn(vehicleid, Vehicle[vehicleid][veh::owner_type]);
+        
+        else if(Vehicle[vehicleid][veh::owner_type] == OWNER_TYPE_SERVER)
+        {
+            Veh::ResetVehicleState(vehicleid);
+            Veh::Respawn(vehicleid, OWNER_TYPE_SERVER);
+        }
     }
 
 

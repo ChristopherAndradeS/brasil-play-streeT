@@ -177,6 +177,7 @@ YCMD:veh(playerid, params[], help)
     new veh_data[E_VEHICLES];
 
     veh_data[veh::owner_type]   = OWNER_TYPE_PLAYER; 
+    veh_data[veh::ownerid]      = playerid;
     format(veh_data[veh::owner_name], 32, "%s", "Sever");
     veh_data[veh::modelid]      = modelid;
     veh_data[veh::pX]           = pX;

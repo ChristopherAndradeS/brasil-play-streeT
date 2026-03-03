@@ -49,9 +49,7 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
     {
         if(IsValidTimer(pyr::Shop[playerid][dsp::timerid]))
         {
-            printf("TIMER MORTO");
             KillTimer(pyr::Shop[playerid][dsp::timerid]);
-            printf("TIMER MORTO");
         }
         
         if(IsValidVehicle(pyr::Shop[playerid][dsp::vehicleid]))

@@ -35,7 +35,6 @@ enum E_PLAYER_VEHICLE
 
 enum E_VEH_TIMERS
 {
-    veh::TIMER_STREAM_OUT,
     veh::TIMER_EMPTY_RESPAWN
 }
 
@@ -72,7 +71,6 @@ forward OnVehicleFuelChange(vehicleid, Float:new_fuel, Float:old_fuel);
 forward OnVehicleCreate(vehicleid, modelid, regionid, Float:x, Float:y, Float:z);
 forward OnVehicleRespawn(vehicleid);
 forward OnVehicleBroke(vehicleid, driverid);
-forward OnVehicleStreamOutTimeout(vehicleid, forplayerid);
 forward OnVehicleEmptyTimeout(vehicleid, forplayerid);
 
 #define FUEL_PRICE_PER_LITER (6.28)

@@ -33,7 +33,9 @@ hook OnGameModeInit()
     Ammu::LoadMap();
     print("[ MAPA ] Mapa da Arena PvP carregado com sucesso\n");
     House::LoadMap();
-    print("[ MAPA ] Mapa do Predio carregado com sucesso\n");
+    print("[ MAPA ] Mapa do Predio carregado com sucesso\n");   
+    Groove::LoadMap();
+    print("[ MAPA ] Mapa da Groove carregado com sucesso\n"); 
     return 1;
 }
 
@@ -49,6 +51,6 @@ hook OnPlayerConnect(playerid)
     Ammu::RemoveGTAObjects(playerid);
     Bank::RemoveGTAObjects(playerid, MAP_BANK_LOTTERY);
     House::RemoveGTAObjects(playerid);
-    
+    Groove::RemoveGTAObjects(playerid);
     return 1;
 }

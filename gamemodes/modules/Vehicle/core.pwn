@@ -200,7 +200,6 @@ stock Veh::Create(data[E_VEHICLES])
     ResetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_EMPTY);
     ResetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_OCCUPED);
 
-    veh::Timer[vehicleid][veh::TIMER_STREAM_OUT] = INVALID_TIMER;
     veh::Timer[vehicleid][veh::TIMER_EMPTY_RESPAWN] = INVALID_TIMER;
 
     if(data[veh::paintjobid] != INVALID_PAINTJOB_ID)
@@ -292,8 +291,6 @@ stock Veh::CreateTimer(vehicleid, E_VEH_TIMERS:veh::timerid, const callback[] = 
         veh::Timer[vehicleid][veh::timerid] = INVALID_TIMER;
     }
 
-    printf("TIMER VEH %d criado [ TID: %s (%d) ]", vehicleid, callback, _:veh::timerid);
-
     veh::Timer[vehicleid][veh::timerid] = SetTimerEx(callback, time, repeate, specifiers, ___(6));
     return 1;
 }
@@ -304,7 +301,7 @@ stock Veh::KillTimer(vehicleid, E_VEH_TIMERS:veh::timerid)
     if(!IsValidTimer(veh::Timer[vehicleid][veh::timerid])) return 0;
 
     KillTimer(veh::Timer[vehicleid][veh::timerid]);
-    printf("TIMER VEH %d morto [ TID: (%d) ]", vehicleid, _:veh::timerid);
+
     veh::Timer[vehicleid][veh::timerid] = INVALID_TIMER;
     return 1;
 }
@@ -403,8 +400,8 @@ stock Veh::ToggleParams(playerid, vehicleid, params)
 
 stock Veh::Clear(vehicleid)
 {
-    Veh::KillTimer(vehicleid, veh::TIMER_STREAM_OUT);
     Veh::KillTimer(vehicleid, veh::TIMER_EMPTY_RESPAWN);
+    
     if(IsValidDynamic3DTextLabel(Vehicle[vehicleid][veh::labelid]))
         DestroyDynamic3DTextLabel(Vehicle[vehicleid][veh::labelid]);
 
