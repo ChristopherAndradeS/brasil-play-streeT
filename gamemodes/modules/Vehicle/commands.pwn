@@ -503,15 +503,6 @@ YCMD:garagem(playerid, params[], help)
             Veh::Respawn(vehicleid);
         }
 
-        foreach(new i : Player)
-        {
-            if(i == playerid) continue;
-
-            if(IsValidVehicle(Player[i][pyr::vehicleid]) && Vehicle[Player[i][pyr::vehicleid]][veh::slotid] == listitem &&
-            !strcmp(Vehicle[Player[i][pyr::vehicleid]][veh::owner_name], owner, true))
-                return SendClientMessage(playerid, -1, "{ff3333}[ GARAGEM ] {ffffff}Este veículo já está em uso no momento.");
-        }
-
         Player[playerid][pyr::vehicleid] = Veh::Load(owner, listitem, OWNER_TYPE_PLAYER, playerid);
 
         if(Player[playerid][pyr::vehicleid] == INVALID_VEHICLE_ID)
