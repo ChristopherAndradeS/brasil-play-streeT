@@ -7,57 +7,27 @@
 
 new MySQL:Conexao;
 
-#define MAX_GARAGES         30
 #define MAX_PLAYER_VEHICLES 10
 #define MAX_DESMANCHES      50
 #define MAX_MECANICAS       50
 #define MAX_OFICINAS        20
 #define MAX_INV_SLOTS       16
 #define MAX_VEHICLE_SLOTS   3
-#define MAX_CARROS_CONCE    50
 
-#define DIALOG_CMDS 3
-#define DIALOG_PIX_ID 10
-#define DIALOG_PIX_VALOR 11
 #define DIALOG_TUNING 60
 #define DIALOG_RODAS 61
 #define DIALOG_NEON 62
 #define DIALOG_MALAS 1500
 #define DIALOG_MALAS_ACAO 1501
-#define DIALOG_CRIAR_MEC 2000
 #define DIALOG_MENU_MECANICO 2010
-#define DIALOG_GPS_CAT 7701
-#define DIALOG_GPS_LOC 7702
 #define ITEM_DINHEIRO_SUJO 4
 
-#define PASTA_GARAGENS    "Garagens/Gar_%d.ini"
-#define PASTA_VEICULOS    "Veiculos/%s.ini"
-#define ARQUIVO_CATS      "GPS/Categorias.txt"
-#define PASTA_ORGS        "Orgs/%d.ini"
-#define PASTA_OFICINAS    "Oficinas/Ofi_%d.ini"
 #define ARQUIVO_DESMANCHE "Desmanches/Desmanche_%d.ini"
-#define ARQUIVO_CONCE_STOCK "Conce/Estoque.ini"
-#define ARQUIVO_CONCE_LOC   "Conce/Local.ini"
 
-enum pInfo 
-{
-    pSenha[129], pID, pDinheiro, pAdmin, pLevel, pVip, pSkin, pScore,
-    pCpf, pBitcoin, pMatou, pMorreu, pTempo,
-    bool:pLogado
-};
-
-new Player[MAX_PLAYERS][pInfo];
-
-// VARIÁVEIS DE SISTEMA
-new bool:Trabalhando[MAX_PLAYERS];
-new TempGPS_Categoria[MAX_PLAYERS][64];
-new CheckpointAtivo[MAX_PLAYERS];
-new PixDestino[MAX_PLAYERS];
 new bool:InvAberto[MAX_PLAYERS];
 new InvItem[MAX_PLAYERS][MAX_INV_SLOTS];
 new InvQtd[MAX_PLAYERS][MAX_INV_SLOTS];
 new SlotSelecionado[MAX_PLAYERS] = {-1, ...};
-new bool:CelularAberto[MAX_PLAYERS];
 new bool:BancoAberto[MAX_PLAYERS];
 new SequestradoPor[MAX_PLAYERS];
 new TimerLockPick[MAX_PLAYERS];
@@ -66,33 +36,6 @@ new LockPickCarro[MAX_PLAYERS];
 new Float:LockCursorX[MAX_PLAYERS];
 new Float:LockAlvoX[MAX_PLAYERS];
 new bool:LockDir[MAX_PLAYERS];
-new VeiculoAtualGaragem[MAX_PLAYERS];
-new bool:GaragemAberta[MAX_PLAYERS];
-new ConceCarroAtual[MAX_PLAYERS];
-new bool:ConceAberta[MAX_PLAYERS];
-new PlayerSpectating[MAX_PLAYERS];
-
-// ARRAYS E ENUMS (DOF2)
-enum gInfo { Float:gX, Float:gY, Float:gZ, gCriada }
-new GarageInfo[MAX_GARAGES][gInfo];
-new Text3D:GarageLabel[MAX_GARAGES];
-new GaragePickup[MAX_GARAGES];
-
-enum pVehInfo { pvModelo, pvPreco, pvCor1, pvCor2, pvSpawnadoID, pvNome[32] }
-new PlayerVehicles[MAX_PLAYERS][MAX_PLAYER_VEHICLES][pVehInfo];
-
-enum oInfo { oTipo, Float:oX, Float:oY, Float:oZ, oCriada }
-new OficinaInfo[MAX_OFICINAS][oInfo];
-new Text3D:OficinaLabel[MAX_OFICINAS];
-new OficinaPickup[MAX_OFICINAS];
-
-enum eConce { cModel, cPreco, cNome[32], cExiste }
-new ConceStock[MAX_CARROS_CONCE][eConce];
-new TotalCarrosConce = 0;
-new Float:ConceX, Float:ConceY, Float:ConceZ;
-new ConceCriada = 0;
-new ConcePickup;
-new Text3D:ConceLabel;
 
 enum dsInfo { Float:dsX, Float:dsY, Float:dsZ, dsCriado }
 new DesmancheInfo[MAX_DESMANCHES][dsInfo];
@@ -308,45 +251,6 @@ CMD:lockpick(playerid)
     return 1;
 }
 
-// --- COMANDO REPARAR (Exclusivo Org Mecânico) ---
-CMD:reparar(playerid, params[])
-{
-    // 1. Verifica se é Mecânico
-    if(Player[playerid][pOrg] != ORG_MECANICA_ID) return SendClientMessage(playerid, COR_ERRO, "Voce nao e da Organizacao de Mecanicos!");
-    
-    // 2. Verifica se está em um carro
-    if(!IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, COR_ERRO, "Entre no veiculo que deseja reparar.");
-    
-    // 3. Verifica se está no local certo (Tipo 1)
-    new id = -1;
-    for(new i=0; i < MAX_OFICINAS; i++)
-    {
-        if(OficinaInfo[i][oCriada] == 1 && OficinaInfo[i][oTipo] == 1)
-        {
-            if(IsPlayerInRangeOfPoint(playerid, 5.0, OficinaInfo[i][oX], OficinaInfo[i][oY], OficinaInfo[i][oZ]))
-            {
-                id = i;
-                break;
-            }
-        }
-    }
-    if(id == -1) return SendClientMessage(playerid, COR_ERRO, "Voce nao esta em uma Area de Reparo da oficina!");
-
-    // AÇÃO
-    new veiculo = GetPlayerVehicleID(playerid);
-    RepairVehicle(veiculo);
-    SetVehicleHealth(veiculo, 1000.0);
-    
-    // Animação e Som
-    PlayerPlaySound(playerid, 1133, 0.0, 0.0, 0.0);
-    SendClientMessage(playerid, COR_VERDE_NEON, "[SERVICO] Veiculo reparado com sucesso!");
-    
-    // Opcional: Ganhar dinheiro pelo serviço
-    GivePlayerMoney(playerid, 100); 
-    SendClientMessage(playerid, COR_V_CLARO, "Voce ganhou R$ 100 pelo servico.");
-    return 1;
-}
-
 // --- COMANDO TUNAR (Exclusivo Org Mecânico) ---
 CMD:tunar(playerid, params[])
 {
@@ -498,303 +402,8 @@ CMD:malas(playerid)
     return 1;
 }
 
-// --- ADMIN: CRIAR LOCAL ---
-CMD:criarconce(playerid)
-{
-    if(Player[playerid][pAdmin] < 4) return SendClientMessage(playerid, COR_ERRO, "Apenas Dono.");
-    
-    new Float:x, Float:y, Float:z;
-    GetPlayerPos(playerid, x, y, z);
-    
-    ConceX = x; ConceY = y; ConceZ = z;
-    ConceCriada = 1;
-    
-    // Salva Local
-    if(!DOF2_FileExists(ARQUIVO_CONCE_LOC)) DOF2_CreateFile(ARQUIVO_CONCE_LOC);
-    DOF2_SetFloat(ARQUIVO_CONCE_LOC, "X", x);
-    DOF2_SetFloat(ARQUIVO_CONCE_LOC, "Y", y);
-    DOF2_SetFloat(ARQUIVO_CONCE_LOC, "Z", z);
-    DOF2_SaveFile();
-    
-    // Cria visual
-    if(ConcePickup) DestroyPickup(ConcePickup);
-    if(IsValidDynamic3DTextLabel(ConceLabel)) DestroyDynamic3DTextLabel(ConceLabel); // Ou Delete3DTextLabel se for nativo
-    
-    ConcePickup = CreatePickup(1274, 1, x, y, z, -1);
-    ConceLabel = Create3DTextLabel("{00FF00}[ CONCESSIONARIA ]\n{FFFFFF}Digite /comprarcarro", 0xFFFFFFFF, x, y, z, 20.0, 0, 0);
-    
-    SendClientMessage(playerid, COR_VERDE_NEON, "Concessionaria criada neste local!");
-    return 1;
-}
-
-// --- ADMIN: COLOCAR CARRO ---
-CMD:colocacar(playerid, params[])
-{
-    if(Player[playerid][pAdmin] < 4) return SendClientMessage(playerid, COR_ERRO, "Apenas Dono.");
-    if(TotalCarrosConce >= MAX_CARROS_CONCE) return SendClientMessage(playerid, COR_ERRO, "Estoque lotado! Max 50.");
-    
-    new modelo, preco, nome[32];
-    if(sscanf(params, "iis[32]", modelo, preco, nome)) return SendClientMessage(playerid, COR_V_ESCURO, "USE: /colocacar [ID Modelo] [Preco] [Nome do Carro]");
-    
-    if(modelo < 400 || modelo > 611) return SendClientMessage(playerid, COR_ERRO, "ID de Veiculo invalido (400-611).");
-    
-    // Adiciona na memória
-    new idx = TotalCarrosConce;
-    ConceStock[idx][cModel] = modelo;
-    ConceStock[idx][cPreco] = preco;
-    format(ConceStock[idx][cNome], 32, nome);
-    ConceStock[idx][cExiste] = 1;
-    TotalCarrosConce++;
-    
-    // Salva no Arquivo
-    if(!DOF2_FileExists(ARQUIVO_CONCE_STOCK)) DOF2_CreateFile(ARQUIVO_CONCE_STOCK);
-    
-    DOF2_SetInt(ARQUIVO_CONCE_STOCK, "Total", TotalCarrosConce);
-    
-    new key[32];
-    format(key, 32, "Model_%d", idx);
-    DOF2_SetInt(ARQUIVO_CONCE_STOCK, key, modelo);
-    
-    format(key, 32, "Preco_%d", idx);
-    DOF2_SetInt(ARQUIVO_CONCE_STOCK, key, preco);
-    
-    format(key, 32, "Nome_%d", idx);
-    DOF2_SetString(ARQUIVO_CONCE_STOCK, key, nome);
-    
-    DOF2_SaveFile();
-    
-    new msg[144];
-    format(msg, sizeof(msg), "Veiculo %s adicionado a venda por R$ %d.", nome, preco);
-    SendClientMessage(playerid, COR_VERDE_NEON, msg);
-    return 1;
-}
-
-// --- PLAYER: ABRIR MENU ---
-CMD:comprarcarro(playerid)
-{
-    if(ConceCriada == 0) return SendClientMessage(playerid, COR_ERRO, "A Concessionaria ainda nao foi criada.");
-    if(!IsPlayerInRangeOfPoint(playerid, 5.0, ConceX, ConceY, ConceZ)) return SendClientMessage(playerid, COR_ERRO, "Va ate a Concessionaria (Icone $ no mapa).");
-    if(TotalCarrosConce == 0) return SendClientMessage(playerid, COR_ERRO, "Nenhum carro a venda no momento.");
-    
-    if(ConceAberta[playerid] == false)
-    {
-        ConceAberta[playerid] = true;
-        ConceCarroAtual[playerid] = 0; // Começa no primeiro
-        
-        // --- AQUI ESTAVA O ERRO: USAR OS NOMES NOVOS ---
-        CriarConcePremium(playerid);       // Nome novo
-        AtualizarConcePremium(playerid);   // Nome novo
-        // -----------------------------------------------
-        
-        SelectTextDraw(playerid, COR_VERDE_NEON);
-    }
-    return 1;
-}
-
-// CRIAR GARAGEM (Admin)
-CMD:criargaragem(playerid)
-{
-    if(Player[playerid][pAdmin] < 4) return SendClientMessage(playerid, COR_ERRO, "Apenas Dono.");
-    
-    // Procura slot
-    new id = -1;
-    for(new i=0; i < MAX_GARAGES; i++) { if(GarageInfo[i][gCriada] == 0) { id = i; break; } }
-    if(id == -1) return SendClientMessage(playerid, COR_ERRO, "Limite atingido.");
-
-    new Float:x, Float:y, Float:z;
-    GetPlayerPos(playerid, x, y, z);
-    
-    GarageInfo[id][gCriada] = 1;
-    GarageInfo[id][gX] = x; GarageInfo[id][gY] = y; GarageInfo[id][gZ] = z;
-    
-    // Salva
-    new strArq[64];
-    format(strArq, sizeof(strArq), PASTA_GARAGENS, id);
-    DOF2_CreateFile(strArq);
-    DOF2_SetFloat(strArq, "X", x);
-    DOF2_SetFloat(strArq, "Y", y);
-    DOF2_SetFloat(strArq, "Z", z);
-    DOF2_SaveFile();
-    
-    // Cria visual
-    GaragePickup[id] = CreatePickup(19134, 1, x, y, z, -1);
-    GarageLabel[id] = Create3DTextLabel("{00BFFF}[ GARAGEM PUBLIC ]\n{FFFFFF}Aperte 'H' ou /garagem", 0xFFFFFFFF, x, y, z, 20.0, 0, 0);
-    
-    SendClientMessage(playerid, COR_VERDE_NEON, "Garagem criada com sucesso!");
-    return 1;
-}
-
-// ABRIR GARAGEM (Player)
-CMD:garagem(playerid, params[])
-{
-    // Verifica se está perto de alguma garagem
-    new id = -1;
-    for(new i=0; i < MAX_GARAGES; i++)
-    {
-        if(GarageInfo[i][gCriada] == 1)
-        {
-            if(IsPlayerInRangeOfPoint(playerid, 3.0, GarageInfo[i][gX], GarageInfo[i][gY], GarageInfo[i][gZ]))
-            {
-                id = i;
-                break;
-            }
-        }
-    }
-    if(id == -1) return SendClientMessage(playerid, COR_ERRO, "Voce nao esta em uma garagem!");
-    
-    if(GaragemAberta[playerid] == false)
-    {
-        VeiculoAtualGaragem[playerid] = 0;
-        CriarGarageUI(playerid);
-        AtualizarGarageUI(playerid);
-        SelectTextDraw(playerid, 0x00BFFFFF); // Mouse Azul Ciano
-    }
-    return 1;
-}
-
 public OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid)
 {
-    // ============================================================
-    // 1. SISTEMA DE GARAGEM
-    // ============================================================
-    if(GaragemAberta[playerid])
-    {
-        if(playertextid == TD_Gar_BtnSair) { FecharGarageUI(playerid); return 1; }
-        
-        if(playertextid == TD_Gar_BtnAnt) 
-        {
-            VeiculoAtualGaragem[playerid]--;
-            if(VeiculoAtualGaragem[playerid] < 0) VeiculoAtualGaragem[playerid] = MAX_PLAYER_VEHICLES-1;
-            AtualizarGarageUI(playerid);
-            return 1;
-        }
-        if(playertextid == TD_Gar_BtnProx) 
-        {
-            VeiculoAtualGaragem[playerid]++;
-            if(VeiculoAtualGaragem[playerid] >= MAX_PLAYER_VEHICLES) VeiculoAtualGaragem[playerid] = 0;
-            AtualizarGarageUI(playerid);
-            return 1;
-        }
-
-        // --- RETIRAR VEÍCULO ---
-        if(playertextid == TD_Gar_BtnSpawn)
-        {
-            new idx = VeiculoAtualGaragem[playerid];
-            if(PlayerVehicles[playerid][idx][pvModelo] == 0) return SendClientMessage(playerid, COR_ERRO, "Espaco vazio!");
-            if(PlayerVehicles[playerid][idx][pvSpawnadoID] > 0) return SendClientMessage(playerid, COR_ERRO, "Este veiculo ja esta na rua! Use Guardar primeiro.");
-            
-            new Float:x, Float:y, Float:z, Float:a;
-            GetPlayerPos(playerid, x, y, z);
-            GetPlayerFacingAngle(playerid, a);
-            
-            new vid = CreateVehicle(PlayerVehicles[playerid][idx][pvModelo], x, y, z, a, PlayerVehicles[playerid][idx][pvCor1], PlayerVehicles[playerid][idx][pvCor2], -1);
-            PutPlayerInVehicle(playerid, vid, 0);
-            
-            PlayerVehicles[playerid][idx][pvSpawnadoID] = vid; 
-            
-            SendClientMessage(playerid, COR_VERDE_NEON, "Veiculo retirado da garagem!");
-            FecharGarageUI(playerid);
-            return 1;
-        }
-
-        // --- GUARDAR VEÍCULO ---
-        if(playertextid == TD_Gar_BtnStore)
-        {
-            new idx = VeiculoAtualGaragem[playerid];
-            if(PlayerVehicles[playerid][idx][pvModelo] == 0) return SendClientMessage(playerid, COR_ERRO, "Espaco vazio!");
-            
-            new vid = PlayerVehicles[playerid][idx][pvSpawnadoID];
-            if(vid == 0) return SendClientMessage(playerid, COR_ERRO, "Este veiculo ja esta guardado!");
-            
-            new Float:vx, Float:vy, Float:vz;
-            GetVehiclePos(vid, vx, vy, vz);
-            if(!IsPlayerInRangeOfPoint(playerid, 10.0, vx, vy, vz)) return SendClientMessage(playerid, COR_ERRO, "O veiculo esta muito longe para guardar!");
-
-            DestroyVehicle(vid);
-            PlayerVehicles[playerid][idx][pvSpawnadoID] = 0; 
-            
-            SendClientMessage(playerid, 0xFFFF00FF, "Veiculo guardado com sucesso.");
-            AtualizarGarageUI(playerid); 
-            return 1;
-        }
-    }
-
-    #pragma tabsize 0 
-    // ============================================================
-    // 2. SISTEMA DE CONCESSIONÁRIA PREMIUM
-    // ============================================================
-    if(ConceAberta[playerid])
-    {
-        if(playertextid == TD_Shop_BtnSair) { FecharMenuConce(playerid); return 1; }
-
-        if(playertextid == TD_Shop_BtnEsq)
-        {
-            ConceCarroAtual[playerid]--;
-            if(ConceCarroAtual[playerid] < 0) ConceCarroAtual[playerid] = TotalCarrosConce - 1;
-            AtualizarConcePremium(playerid);
-            PlayerPlaySound(playerid, 1054, 0.0, 0.0, 0.0);
-            return 1;
-        }
-
-        if(playertextid == TD_Shop_BtnDir)
-        {
-            ConceCarroAtual[playerid]++;
-            if(ConceCarroAtual[playerid] >= TotalCarrosConce) ConceCarroAtual[playerid] = 0;
-            AtualizarConcePremium(playerid);
-            PlayerPlaySound(playerid, 1054, 0.0, 0.0, 0.0);
-            return 1;
-        }
-
-        // BOTÃO COMPRAR
-        if(playertextid == TD_Shop_BtnComp)
-        {
-            new idx = ConceCarroAtual[playerid];
-            new preco = ConceStock[idx][cPreco];
-            
-            if(GetPlayerMoney(playerid) < preco) return SendClientMessage(playerid, COR_ERRO, "Voce nao tem dinheiro suficiente!");
-            
-            new slot = -1;
-            for(new i=0; i < MAX_PLAYER_VEHICLES; i++)
-            {
-                if(PlayerVehicles[playerid][i][pvModelo] == 0) { slot = i; break; }
-            }
-
-            if(slot == -1) return SendClientMessage(playerid, COR_ERRO, "Sua garagem esta cheia! (Max 10 veiculos)");
-
-            GivePlayerMoney(playerid, -preco);
-            Player[playerid][pDinheiro] -= preco;
-
-            PlayerVehicles[playerid][slot][pvModelo] = ConceStock[idx][cModel];
-            PlayerVehicles[playerid][slot][pvPreco] = ConceStock[idx][cPreco];
-            format(PlayerVehicles[playerid][slot][pvNome], 32, ConceStock[idx][cNome]);
-            PlayerVehicles[playerid][slot][pvCor1] = 1; 
-            PlayerVehicles[playerid][slot][pvCor2] = 1;
-            PlayerVehicles[playerid][slot][pvSpawnadoID] = 0; 
-
-            // Salva no Arquivo (DOF2)
-            new nomePlayer[MAX_PLAYER_NAME], arquivoCarro[64];
-            GetPlayerName(playerid, nomePlayer, sizeof(nomePlayer));
-            format(arquivoCarro, sizeof(arquivoCarro), PASTA_VEICULOS, nomePlayer);
-            if(!DOF2_FileExists(arquivoCarro)) DOF2_CreateFile(arquivoCarro);
-            
-            new key[32];
-            format(key, 32, "Modelo_%d", slot); DOF2_SetInt(arquivoCarro, key, PlayerVehicles[playerid][slot][pvModelo]);
-            format(key, 32, "Nome_%d", slot);   DOF2_SetString(arquivoCarro, key, PlayerVehicles[playerid][slot][pvNome]);
-            format(key, 32, "Cor1_%d", slot);   DOF2_SetInt(arquivoCarro, key, 1);
-            format(key, 32, "Cor2_%d", slot);   DOF2_SetInt(arquivoCarro, key, 1);
-            DOF2_SetInt(arquivoCarro, "Total", MAX_PLAYER_VEHICLES);
-            DOF2_SaveFile();
-
-            new msg[144];
-            format(msg, sizeof(msg), "Sucesso! Voce comprou %s por R$ %d. Ele esta na sua GARAGEM (/garagem).", ConceStock[idx][cNome], preco);
-            SendClientMessage(playerid, COR_VERDE_NEON, msg);
-            PlayerPlaySound(playerid, 1133, 0.0, 0.0, 0.0);
-            
-            FecharMenuConce(playerid);
-            return 1;
-        }
-    }
-
     // ============================================================
     // 3. SISTEMA DE LOCK PICK
     // ============================================================
@@ -958,96 +567,5 @@ stock FecharLockPick(playerid)
     KillTimer(TimerLockPick[playerid]);
     CancelSelectTextDraw(playerid);
     for(new i=0; i < 5; i++) PlayerTextDrawDestroy(playerid, TD_LockGame[playerid][i]);
-    return 1;
-}
-
-stock AtualizarConcePremium(playerid)
-{
-    new idx = ConceCarroAtual[playerid];
-    
-    // Atualiza Modelo 3D
-    PlayerTextDrawSetPreviewModel(playerid, TD_Shop_Preview, ConceStock[idx][cModel]);
-    PlayerTextDrawSetPreviewRot(playerid, TD_Shop_Preview, -15.0, 0.0, -25.0, 1.0);
-    PlayerTextDrawSetPreviewVehCol(playerid, TD_Shop_Preview, 1, 1); // Branco padrão
-
-    // Atualiza Textos
-    PlayerTextDrawSetString(playerid, TD_Shop_Nome, ConceStock[idx][cNome]);
-    
-    new str[32];
-    format(str, sizeof(str), "R$ %d", ConceStock[idx][cPreco]);
-    PlayerTextDrawSetString(playerid, TD_Shop_Preco, str);
-
-    // Mostra Tudo
-    PlayerTextDrawShow(playerid, TD_Shop_Fundo);
-    PlayerTextDrawShow(playerid, TD_Shop_Header);
-    PlayerTextDrawShow(playerid, TD_Shop_Preview);
-    PlayerTextDrawShow(playerid, TD_Shop_Nome);
-    PlayerTextDrawShow(playerid, TD_Shop_Preco);
-    PlayerTextDrawShow(playerid, TD_Shop_BtnEsq);
-    PlayerTextDrawShow(playerid, TD_Shop_BtnDir);
-    PlayerTextDrawShow(playerid, TD_Shop_BtnComp);
-    PlayerTextDrawShow(playerid, TD_Shop_BtnSair);
-    return 1;
-}
-
-stock FecharMenuConce(playerid)
-{
-    // Mesmo que a variável diga false, tentamos destruir para garantir
-    ConceAberta[playerid] = false;
-    CancelSelectTextDraw(playerid);
-    
-    PlayerTextDrawDestroy(playerid, TD_Shop_Fundo);
-    PlayerTextDrawDestroy(playerid, TD_Shop_Header);
-    PlayerTextDrawDestroy(playerid, TD_Shop_Preview);
-    PlayerTextDrawDestroy(playerid, TD_Shop_Nome);
-    PlayerTextDrawDestroy(playerid, TD_Shop_Preco);
-    PlayerTextDrawDestroy(playerid, TD_Shop_BtnEsq);
-    PlayerTextDrawDestroy(playerid, TD_Shop_BtnDir);
-    PlayerTextDrawDestroy(playerid, TD_Shop_BtnComp);
-    PlayerTextDrawDestroy(playerid, TD_Shop_BtnSair);
-    return 1;
-}
-
-stock AtualizarGarageUI(playerid)
-{
-    new idx = VeiculoAtualGaragem[playerid];
-    new modelo = PlayerVehicles[playerid][idx][pvModelo];
-
-    if(modelo == 0) // Slot vazio
-    {
-        PlayerTextDrawSetPreviewModel(playerid, TD_Gar_Preview, 0); // Nada
-        PlayerTextDrawSetString(playerid, TD_Gar_Nome, "Vazio");
-        PlayerTextDrawSetString(playerid, TD_Gar_Status, " ");
-    }
-    else
-    {
-        // Tem Carro
-        PlayerTextDrawSetPreviewModel(playerid, TD_Gar_Preview, modelo);
-        PlayerTextDrawSetPreviewRot(playerid, TD_Gar_Preview, -15.0, 0.0, -25.0, 1.0);
-        PlayerTextDrawSetPreviewVehCol(playerid, TD_Gar_Preview, PlayerVehicles[playerid][idx][pvCor1], PlayerVehicles[playerid][idx][pvCor2]);
-
-        PlayerTextDrawSetString(playerid, TD_Gar_Nome, PlayerVehicles[playerid][idx][pvNome]);
-        
-        if(PlayerVehicles[playerid][idx][pvSpawnadoID] > 0)
-        {
-             PlayerTextDrawSetString(playerid, TD_Gar_Status, "~r~NA RUA (USE GUARDAR)");
-        }
-        else
-        {
-             PlayerTextDrawSetString(playerid, TD_Gar_Status, "~g~GUARDADO (USE RETIRAR)");
-        }
-    }
-
-    // Mostra Tudo
-    PlayerTextDrawShow(playerid, TD_Gar_Fundo);
-    PlayerTextDrawShow(playerid, TD_Gar_Header);
-    PlayerTextDrawShow(playerid, TD_Gar_Preview);
-    PlayerTextDrawShow(playerid, TD_Gar_Nome);
-    PlayerTextDrawShow(playerid, TD_Gar_Status);
-    PlayerTextDrawShow(playerid, TD_Gar_BtnAnt);
-    PlayerTextDrawShow(playerid, TD_Gar_BtnProx);
-    PlayerTextDrawShow(playerid, TD_Gar_BtnSpawn);
-    PlayerTextDrawShow(playerid, TD_Gar_BtnStore);
-    PlayerTextDrawShow(playerid, TD_Gar_BtnSair);
     return 1;
 }

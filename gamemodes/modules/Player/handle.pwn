@@ -203,6 +203,9 @@ hook OnPlayerLogin(playerid)
 
     Player::Spawn(playerid);
 
+    
+    SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_CLOCK);
+
     return 1;
 }
 

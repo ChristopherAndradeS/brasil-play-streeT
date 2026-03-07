@@ -459,9 +459,9 @@ YCMD:garagem(playerid, params[], help)
     if(!count)    
         return SendClientMessage(playerid, -1, "{ff3333}[ GARAGEM ] {ffffff}Você não possui veículos na sua garagem");
     
-    new msg[512];
+    new msg[1024];
 
-    format(msg, 512, "{ff9911}Veiculo\t{ffffff}Estado\t{ff9911}Combustivel\t{ffffff}Cores\n");
+    format(msg, 1024, "{ff9911}Veiculo\t{ffffff}Estado\t{ff9911}Combustivel\t{ffffff}Cores\n");
     
     new veh_name[32], modelid, Float:health, Float:fuel, color1, color2;
     
@@ -475,7 +475,7 @@ YCMD:garagem(playerid, params[], help)
 
         GetVehicleNameByModel(modelid, veh_name);
 
-        format(msg, 256, "{ff9911}%s{ffffff}%s\t%s\t%s\t{%06x}### {%06x}###\n", 
+        format(msg, 1024, "{ff9911}%s{ffffff}%s\t%s\t%s\t{%06x}### {%06x}###\n", 
         msg,
         veh_name, 
         health > 390.0 ? "{55ff55}Funcionando" : "{ff5555}Destruido", 
@@ -510,13 +510,6 @@ YCMD:garagem(playerid, params[], help)
             SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Um erro fatal aconteceu, avise um moderador!");
             return 1;
         }
-
-        new Float:pX, Float:pY, Float:pZ, Float:pA;
-        GetPlayerPos(playerid, pX, pY, pZ);
-        GetPlayerFacingAngle(playerid, pA);
-
-        SetVehiclePos(Player[playerid][pyr::vehicleid], pX, pY, pZ);
-        SetVehicleZAngle(Player[playerid][pyr::vehicleid], pA);
 
         PutPlayerInVehicle(playerid, Player[playerid][pyr::vehicleid], 0);
 

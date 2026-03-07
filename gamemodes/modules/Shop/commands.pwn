@@ -8,6 +8,15 @@ YCMD:loja(playerid, params[], help)
 
 stock Dealership::ShopOpen(playerid)
 {
+    new slotid, owner[MAX_PLAYER_NAME];
+            
+    GetPlayerName(playerid, owner);
+
+    DB::GetDataInt(db_entity, "players", "veh_count", slotid, "name = '%q'", owner);
+    
+    if(slotid >= MAX_PLAYER_VEHICLES)
+        return SendClientMessage(playerid, -1, "{ff3333}[ VEH ] {ffffff}Você já possui o número máximo de veículos por jogador!");
+
     inline dsp_dialog(targetid, dialogid, response, listitem, string:inputtext[])
     {
         #pragma unused targetid, dialogid, inputtext 

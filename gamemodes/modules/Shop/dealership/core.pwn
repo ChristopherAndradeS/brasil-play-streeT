@@ -31,11 +31,15 @@ stock Dealership::UnSetPlayerInShop(playerid)
     SetPlayerPos(playerid, Player[playerid][pyr::oX], Player[playerid][pyr::oY], Player[playerid][pyr::oZ]);
     SetPlayerFacingAngle(playerid, Player[playerid][pyr::oA]);
     SetCameraBehindPlayer(playerid);
+    SetPlayerVirtualWorld(playerid, 0);
     TogglePlayerControllable(playerid, true);
 
     Dealership::HideTDForPlayer(playerid);
     Baseboard::ShowTDForPlayer(playerid); 
-    
+
+    SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_CLOCK);
+    SetPlayerWeather(playerid, Server[srv::g_weatherid]);
+
     return 1;
 }
 
@@ -45,7 +49,7 @@ stock Dealership::UpdatePlayerShop(playerid, modelid, color1, color2, Float:pric
         DestroyVehicle(dsp::Player[playerid][dsp::vehicleid]);
 
     dsp::Player[playerid][dsp::vehicleid] = CreateVehicle(modelid, -1660.7682, 1211.1519, 20.8884 + 0.5, 271.3025, color1, color2, -1);
-    SetVehicleVirtualWorld(dsp::Player[playerid][dsp::vehicleid], 1);
+    SetVehicleVirtualWorld(dsp::Player[playerid][dsp::vehicleid], 60);
 
     new 
         veh_name[32]
@@ -65,7 +69,7 @@ stock Dealership::SetPlayerInShop(playerid, modelid, color1, color2, Float:price
         DestroyVehicle(dsp::Player[playerid][dsp::vehicleid]);
     
     dsp::Player[playerid][dsp::vehicleid] = CreateVehicle(modelid, -1660.7682, 1211.1519 + 0.5, 20.8884 + 0.5, 271.3025, color1, color2, -1);
-    SetVehicleVirtualWorld(dsp::Player[playerid][dsp::vehicleid], 1);
+    SetVehicleVirtualWorld(dsp::Player[playerid][dsp::vehicleid], 60);
        
     new 
         veh_name[32]
@@ -76,10 +80,10 @@ stock Dealership::SetPlayerInShop(playerid, modelid, color1, color2, Float:price
     Baseboard::HideTDForPlayer(playerid);
     Dealership::ShowTDForPlayer(playerid);
 
-    SetPlayerPos(playerid, -1660.7682,1211.1519,15.8884);
+    SetPlayerPos(playerid, -1660.7682,1211.1519,15.8884 + 0.2);
     SetPlayerCameraPos(playerid,-1653.031372,1211.236450,21.756246);
     SetPlayerCameraLookAt(playerid,-1659.092773,1211.074340,20.876249);
-    SetPlayerVirtualWorld(playerid, 1);
+    SetPlayerVirtualWorld(playerid, 60);
     TogglePlayerControllable(playerid, false);
   
     Player::CreateTimer(playerid, pyr::TIMER_DSP, "DSP_UpdateCarRotate", 33, true, "ii", playerid, dsp::Player[playerid][dsp::vehicleid]);
@@ -88,6 +92,9 @@ stock Dealership::SetPlayerInShop(playerid, modelid, color1, color2, Float:price
     Dealership::UpdateTDForPlayer(playerid, PTD_DSP_TXT_PRICE, "PRECO: ~g~~h~%.2f R$", price);
     Dealership::UpdateTextDrawColor(playerid, PTD_DSP_SPR_COLOR1, VehicleColoursTableRGBA[color1]);
     Dealership::UpdateTextDrawColor(playerid, PTD_DSP_SPR_COLOR2, VehicleColoursTableRGBA[color2]);
+
+    ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_CLOCK);
+    SetPlayerWeather(playerid, 1);
 
     return 1;
 }

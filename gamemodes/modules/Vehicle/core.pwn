@@ -54,9 +54,11 @@ stock Veh::Load(const owner[], slotid, OWNER_TYPES:type, ownerid)
     {
         case OWNER_TYPE_PLAYER:
         {
-            new vehicleid = Player[ownerid][pyr::vehicleid];
-            if(!IsValidVehicle(vehicleid))
-                Player[ownerid][pyr::vehicleid] = Veh::Create(vehicle_data);
+            GetPlayerPos(ownerid, vehicle_data[veh::pX], vehicle_data[veh::pY], vehicle_data[veh::pZ]);
+            GetPlayerFacingAngle(ownerid, vehicle_data[veh::pA]);
+
+            Player[ownerid][pyr::vehicleid] = Veh::Create(vehicle_data);
+ 
             return Player[ownerid][pyr::vehicleid];
         }
 
