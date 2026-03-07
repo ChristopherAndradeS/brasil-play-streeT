@@ -38,9 +38,10 @@ YCMD:motor(playerid, params[], help)
         }
 
         if(!Veh::HasPermission(playerid, vehicleid)) return 1;
-
+ 
         Player[playerid][pyr::ocupped_vehicleid] = vehicleid;
-        SetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_OCCUPED);        
+        SetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_OCCUPED);
+
         Veh::ToggleParams(playerid, vehicleid, FLAG_PARAM_ENGINE);
     }  
 
@@ -443,4 +444,91 @@ stock Officine::GetRepairPrice(Float:health, &Float:price)
         case 391..650: price = 350.0;
         case 651..999: price = 150.0;
     }
+}
+
+YCMD:garagem(playerid, params[], help)
+{
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) return 1;
+
+    new count, owner[MAX_PLAYER_NAME];
+            
+    GetPlayerName(playerid, owner);
+
+    DB::GetDataInt(db_entity, "players", "veh_count", count, "name = '%q'", owner);
+        
+    if(!count)    
+        return SendClientMessage(playerid, -1, "{ff3333}[ GARAGEM ] {ffffff}Você não possui veiculos na sua garagem");
+    
+    new msg[512];
+
+    format(msg, 512, "{ff9911}Veiculo\t{ffffff}Estado\t{ff9911}Combustivel\t{ffffff}Cores\n");
+    
+    new veh_name[32], modelid, Float:health, Float:fuel, color1, color2;
+    
+    for(new i = 0; i < count; i++)
+    {
+        DB::GetDataInt(db_entity, "vehicles", "modelid", modelid, "owner = '%q' AND slotid = %d", owner, i);
+        DB::GetDataFloat(db_entity, "vehicles", "health", health, "owner = '%q' AND slotid = %d", owner, i);
+        DB::GetDataFloat(db_entity, "vehicles", "fuel", fuel, "owner = '%q' AND slotid = %d", owner, i);
+        DB::GetDataInt(db_entity, "vehicles", "color1", color1, "owner = '%q' AND slotid = %d", owner, i);
+        DB::GetDataInt(db_entity, "vehicles", "color2", color2, "owner = '%q' AND slotid = %d", owner, i);
+
+        GetVehicleNameByModel(modelid, veh_name);
+
+        format(msg, 256, "{ff9911}%s{ffffff}%s\t%s\t%s\t{%06x}### {%06x}###\n", 
+        msg,
+        veh_name, 
+        health > 390.0 ? "{55ff55}Funcionando" : "{ff5555}Destruido", 
+        fuel > 0.0 ? "{55ff55}Cheio" : "{ff9911}Sem Combustível",
+        VehicleColoursTableRGBA[color1] >>> 8, VehicleColoursTableRGBA[color2] >>> 8);
+    }
+
+    inline garage_dialog(playerid1, dialogid, response, listitem, string:inputtext[])
+    {
+        #pragma unused playerid1, dialogid, inputtext
+
+        if(!response) return 1;
+
+        if(IsValidVehicle(Player[playerid][pyr::vehicleid]))
+        {
+            new vehicleid = Player[playerid][pyr::vehicleid];
+
+            if(listitem == Vehicle[vehicleid][veh::slotid])
+                return SendClientMessage(playerid, -1, "{ff3333}[ GARAGEM ] {ffffff}Você já está utilizando esse veículo");
+            
+            Player[playerid][pyr::ocupped_vehicleid] = INVALID_VEHICLE_ID;
+            ResetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_OCCUPED);  
+
+            Veh::Save(vehicleid);
+            Veh::Respawn(vehicleid);
+        }
+
+        Player[playerid][pyr::vehicleid] = Veh::Load(owner, listitem, OWNER_TYPE_PLAYER, playerid);
+        
+        if(Player[playerid][pyr::vehicleid] == INVALID_VEHICLE_ID)
+        {
+            SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Um erro fatal aconteceu, avise um moderador!");
+            return 1;
+        }
+
+        new Float:pX, Float:pY, Float:pZ, Float:pA;
+        GetPlayerPos(playerid, pX, pY, pZ);
+        GetPlayerFacingAngle(playerid, pA);
+
+        SetVehiclePos(Player[playerid][pyr::vehicleid], pX, pY, pZ);
+        SetVehicleZAngle(Player[playerid][pyr::vehicleid], pA);
+
+        PutPlayerInVehicle(playerid, Player[playerid][pyr::vehicleid], 0);
+
+        SendClientMessage(playerid, -1, "{33ff33}[ GARAGEM ] {ffffff}Veículo selecionado da garagem com sucesso!"); 
+      
+        return 1;
+    }
+
+    Dialog_ShowCallback(playerid, using inline garage_dialog, DIALOG_STYLE_TABLIST_HEADERS, 
+    "Garagem", 
+    msg,
+    "Escolher", "Fechar");
+    
+    return 1;
 }

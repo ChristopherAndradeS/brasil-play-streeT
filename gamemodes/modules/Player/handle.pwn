@@ -103,6 +103,7 @@ hook OnPlayerDisconnect(playerid, reason)
     if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION))
     {
         Player::KillTimer(playerid, pyr::TIMER_RESUSCITATION);
+        
         ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RESUSCITATION);
         ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_INVUNERABLE);
 
@@ -129,38 +130,17 @@ hook OnPlayerDisconnect(playerid, reason)
     ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED);
     ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_CHECKPOINT);
     
-    new vehicleid = GetPlayerVehicleID(playerid);
+    new vehicleid = Player[playerid][pyr::ocupped_vehicleid];
 
-    if(GetPlayerState(playerid) == PLAYER_STATE_DRIVER && IsValidVehicle(vehicleid))
+    if(IsValidVehicle(vehicleid))
     {
         Player[playerid][pyr::ocupped_vehicleid] = INVALID_VEHICLE_ID;
+        ResetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_OCCUPED);    
 
-        if(Vehicle[vehicleid][veh::owner_type] == OWNER_TYPE_PLAYER && Vehicle[vehicleid][veh::ownerid] == playerid)
-        {
-            SetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RETURN_TO_VEH);
-
-            GetVehiclePos(vehicleid, Vehicle[vehicleid][veh::pX], Vehicle[vehicleid][veh::pY], Vehicle[vehicleid][veh::pZ]);
-            GetVehicleZAngle(vehicleid, Vehicle[vehicleid][veh::pA]);
-            Veh::Save(vehicleid);
-    
-            Veh::Destroy(vehicleid);
-        }
-
-        else if(Vehicle[vehicleid][veh::owner_type] == OWNER_TYPE_ORG)
-        {
-            Veh::ResetVehicleState(vehicleid);
-            Veh::Save(vehicleid);
-            Veh::Respawn(vehicleid, OWNER_TYPE_ORG);
-        }
-        
-        else if(Vehicle[vehicleid][veh::owner_type] == OWNER_TYPE_SERVER)
-        {
-            Veh::ResetVehicleState(vehicleid);
-            Veh::Respawn(vehicleid, OWNER_TYPE_SERVER);
-        }
+        Veh::Save(vehicleid);
+        Veh::Respawn(vehicleid);
     }
-
-
+    
     DB::SetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", GetPlayerNameStr(playerid));
 
     Player::ClearData(playerid);
@@ -248,14 +228,6 @@ hook OnPlayerSpawn(playerid)
         -1323.2695 + RandomFloatMinMax(-2.0, 2.0), 13.5798, 270.0);      
     }
 
-    // if(GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RETURN_TO_VEH))
-    // {
-    //     if(IsValidVehicle(Player[playerid][pyr::vehicleid]))
-    //         PutPlayerInVehicle(playerid, Player[playerid][pyr::vehicleid], 0);
-
-    //     ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_RETURN_TO_VEH);
-    // }
-
     return 1;
 }
 
@@ -324,10 +296,9 @@ stock Player::HandleKeySelector(playerid, KEY:newkeys, KEY:oldkeys)
 {
     if((newkeys & KEY_SECONDARY_ATTACK) && !(oldkeys & KEY_SECONDARY_ATTACK))
     {
-        Player::HandleResuscitationAction(playerid);
-
-        if(IsPlayerInRangeOfPoint(playerid, 1.5, -18.1846, -1619.5968, 3.6084))
-            return SendClientMessage(playerid, -1, "TESTANDO, ABRINDO CONCE");
+        if(Player::HandleResuscitationAction(playerid)) return 1;
+        
+        if(Shop::HandleCommands(playerid)) return 1;
     }
 
     return 1;

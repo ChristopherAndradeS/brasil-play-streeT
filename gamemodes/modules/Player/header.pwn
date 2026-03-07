@@ -56,6 +56,8 @@ enum E_PLAYER_TIMERS
     pyr::TIMER_INJURY,
     pyr::TIMER_RESUSCITATION,
     pyr::TIMER_TRAVEL,
+    pyr::TIMER_DSP,
+    
 }
 
 new pyr::Timer[MAX_PLAYERS][E_PLAYER_TIMERS];

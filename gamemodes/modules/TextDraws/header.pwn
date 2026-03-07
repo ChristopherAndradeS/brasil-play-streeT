@@ -129,10 +129,10 @@ enum _:E_TD_DSP
 {
     Text:TD_DSP_BTN_PREV = 3,
     Text:TD_DSP_BTN_NEXT = 4,
-    Text:TD_DSP_BTN_BUY = 6,
-    Text:TD_DSP_BTN_QUIT = 7,
-    Text:TD_DSP_BTN_HIDE = 8,
-    Text:TD_DSP_BTN_CAT = 9,
+    Text:TD_DSP_BTN_BUY = 7,
+    Text:TD_DSP_BTN_QUIT = 6,
+    Text:TD_DSP_BTN_HIDE = 9,
+    Text:TD_DSP_BTN_CAT = 8,
 }
 
 enum _:E_PTD_DSP

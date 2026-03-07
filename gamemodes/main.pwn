@@ -6,12 +6,12 @@
 #include <streamer>
 #include <samp_bcrypt>
 #include <PawnPlus>
-#include <sampvoice>
+//#include <sampvoice>
 //#include <colandreas>
 
 #define CGEN_MEMORY 20000
 
-//#define ON_DEBUG_MODE
+#define ON_DEBUG_MODE
 
 #include <YSI/YSI_Data/y_iterate>
 #include <YSI/YSI_Coding/y_va>
@@ -49,7 +49,6 @@
 //  ------------------------- PLAYERS --------------------------
 
 #include "./gamemodes/modules/Server/header.pwn" 
-//#include "./gamemodes/modules/Shop/header.pwn" 
 
 //  -------------------------  SHOPS ---------------------------
 #include "./gamemodes/modules/Shop/dealership/header.pwn" 
@@ -104,7 +103,6 @@
 //  ------------------------- PLAYERS --------------------------
 
 #include "./gamemodes/modules/Server/core.pwn" 
-//#include "./gamemodes/modules/Shop/core.pwn" 
 
 //  -------------------------  SHOPS ---------------------------
 #include "./gamemodes/modules/Shop/dealership/core.pwn" 
@@ -151,7 +149,7 @@
 #include "./gamemodes/modules/Player/login/handle.pwn"
 #include "./gamemodes/modules/Player/payday/handle.pwn"
 #include "./gamemodes/modules/Player/acessory/handle.pwn"
-#include "./gamemodes/modules/Player/voice/handle.pwn"
+//#include "./gamemodes/modules/Player/voice/handle.pwn"
 //  ------------------------- PLAYERS --------------------------
 
 #include "./gamemodes/modules/Organization/handle.pwn"
@@ -163,7 +161,11 @@
 #include "./gamemodes/modules/Games/Race/handle.pwn"
 #include "./gamemodes/modules/Games/Arena/handle.pwn"
 //  -------------------------- GAMES --------------------------
-             
+
+//  -------------------------  SHOPS ---------------------------
+#include "./gamemodes/modules/Shop/dealership/handle.pwn" 
+//  -------------------------  SHOPS ---------------------------
+
 //  -------------------------- ADMS ----------------------------
 //#include "./gamemodes/modules/Admin/panel.pwn"
 //  -------------------------- ADMS ----------------------------
@@ -181,6 +183,7 @@
 #include "./gamemodes/modules/Admin/commands.pwn"
 #include "./gamemodes/modules/Vehicle/commands.pwn"
 #include "./gamemodes/modules/Games/commands.pwn"
+#include "./gamemodes/modules/Shop/commands.pwn" 
 
 main()
 {

@@ -1,3 +1,4 @@
+
 stock Veh::Insert(const owner[], slotid, data[E_VEHICLES])
 {
     new sucess =  DB::Insert(db_entity, "vehicles",
@@ -21,7 +22,8 @@ stock Veh::Load(const owner[], slotid, OWNER_TYPES:type, ownerid)
 {
     new vehicle_data[E_VEHICLES];
 
-    if(!DB::Exists(db_entity, "vehicles", "owner = '%q' AND slotid = %d", owner, slotid)) return 0;
+    if(!DB::Exists(db_entity, "vehicles", "owner = '%q' AND slotid = %d", owner, slotid)) 
+        return INVALID_VEHICLE_ID;
 
     DB::GetDataInt(db_entity, "vehicles", "rowid", vehicle_data[veh::dbid], "owner = '%q' AND slotid = %d", owner, slotid);
     
@@ -63,14 +65,6 @@ stock Veh::Load(const owner[], slotid, OWNER_TYPES:type, ownerid)
                 Org[ownerid][org::vehicleid][slotid] = Veh::Create(vehicle_data);
             return Org[ownerid][org::vehicleid][slotid];
         }
-
-        // case OWNER_TYPE_SERVER:
-        // {
-        //     new vehicleid = Server[srv::vehicleid][slotid];
-        //     if(!IsValidVehicle(vehicleid))
-        //         Server[srv::vehicleid][slotid] = Veh::Create(vehicle_data);
-        // }
-
         default: return INVALID_VEHICLE_ID;
     }
 }
@@ -84,10 +78,9 @@ stock Veh::Save(vehicleid)
     if(Vehicle[vehicleid][veh::owner_type] == OWNER_TYPE_PLAYER)
     {
         return DB::Update(db_entity, "vehicles",
-        "flags = %d, params = %d, fuel = %f, health = %f, pX = %f, pY = %f, pZ = %f WHERE rowid = %d",
+        "flags = %d, params = %d, fuel = %f, health = %f WHERE rowid = %d",
         Vehicle[vehicleid][veh::flags], Vehicle[vehicleid][veh::params],
         Vehicle[vehicleid][veh::fuel], Vehicle[vehicleid][veh::health],
-        Vehicle[vehicleid][veh::pX], Vehicle[vehicleid][veh::pY], Vehicle[vehicleid][veh::pZ],
         Vehicle[vehicleid][veh::dbid]);
     }
 
@@ -208,7 +201,7 @@ stock Veh::Create(data[E_VEHICLES])
     LinkVehicleToInterior(vehicleid, data[veh::interiorid]);
     SetVehicleVirtualWorld(vehicleid, data[veh::worldid]);
     
-    printf("[ VEH ] Veiculo %d de %s [ SID: %d ]", data[veh::modelid], data[veh::owner_name], data[veh::slotid]);
+    printf("[ VEH ] Veiculo %d de %s [ SID: %d ] criado", data[veh::modelid], data[veh::owner_name], data[veh::slotid]);
     
     return vehicleid;
 }
@@ -216,14 +209,15 @@ stock Veh::Create(data[E_VEHICLES])
 stock Veh::Destroy(&vehicleid)
 {
     Veh::RemoveFromRegion(vehicleid);
-
-    Veh::Clear(vehicleid);
     
     if(IsValidVehicle(vehicleid)) DestroyVehicle(vehicleid);
 
-    vehicleid = INVALID_VEHICLE_ID;
-}
+    printf("[ VEH ] Veiculo %d de %s [ SID: %d ] destruido", Vehicle[vehicleid][veh::modelid], Vehicle[vehicleid][veh::owner_name], Vehicle[vehicleid][veh::slotid]);
+    
+    Veh::Clear(vehicleid);
 
+    vehicleid = INVALID_VEHICLE_ID;    
+}
 
 stock Veh::ResetVehicleState(vehicleid)
 {
@@ -247,10 +241,14 @@ stock Veh::ResetVehicleState(vehicleid)
     return 1;
 }
 
-stock Veh::Respawn(vehicleid, OWNER_TYPES:type)
+stock Veh::Respawn(vehicleid)
 {
     if(!IsValidVehicle(vehicleid)) return 0;
 
+    new OWNER_TYPES:type = Vehicle[vehicleid][veh::owner_type];
+
+    Veh::KillTimer(vehicleid, veh::TIMER_EMPTY_RESPAWN);
+    
     switch(type)
     {
         case OWNER_TYPE_PLAYER:
@@ -260,20 +258,14 @@ stock Veh::Respawn(vehicleid, OWNER_TYPES:type)
 
             new ownerid = Vehicle[vehicleid][veh::ownerid];
             
-            Veh::Destroy(vehicleid);
+            Veh::Destroy(Player[ownerid][pyr::vehicleid]);
 
             if(IsValidPlayer(ownerid))
                 SendClientMessage(ownerid, -1, "{ff9933}[ VEH ] {ffffff}Seu veículo retornou para garagem");
         }
 
-        case OWNER_TYPE_ORG:
-        {
-            Vehicle[vehicleid][veh::params] = 0;
-            Veh::Save(vehicleid);
-
-            Veh::ResetVehicleState(vehicleid);
-        }
-
+        case OWNER_TYPE_ORG: Veh::ResetVehicleState(vehicleid);
+        
         default: Veh::ResetVehicleState(vehicleid);
         
     }
@@ -292,6 +284,11 @@ stock Veh::CreateTimer(vehicleid, E_VEH_TIMERS:veh::timerid, const callback[] = 
     }
 
     veh::Timer[vehicleid][veh::timerid] = SetTimerEx(callback, time, repeate, specifiers, ___(6));
+    
+    //new timerid = veh::Timer[vehicleid][veh::timerid];
+
+    //printf("[ TIMER (Vehicle) ] ( Timer ID: %d ) [ VEH_TIMER #%d ] (%s [VID : %d]) %d ms (%s) foi criado\n", timerid, _:veh::timerid, callback, vehicleid, time, repeate ? "repeating" : "one shoot");
+
     return 1;
 }
 
@@ -302,7 +299,12 @@ stock Veh::KillTimer(vehicleid, E_VEH_TIMERS:veh::timerid)
 
     KillTimer(veh::Timer[vehicleid][veh::timerid]);
 
+    //new timerid = veh::Timer[vehicleid][veh::timerid];
+
     veh::Timer[vehicleid][veh::timerid] = INVALID_TIMER;
+    
+    //printf("[ TIMER (Vehicle) ] ( Timer ID: %d ) [ VEH_TIMER #%d ] [VID : %d]) foi morto\n", timerid, _:veh::timerid, vehicleid);
+    
     return 1;
 }
 

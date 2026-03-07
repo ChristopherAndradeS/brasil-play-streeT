@@ -80,7 +80,7 @@ stock Player::KillTimer(playerid, E_PLAYER_TIMERS:pyr::timerid)
         }
     }
 
-    //new timerid = pyr::Timer[playerid][pyr::timerid];
+    ///new timerid = pyr::Timer[playerid][pyr::timerid];
 
     KillTimer(pyr::Timer[playerid][pyr::timerid]);
 
