@@ -457,7 +457,7 @@ YCMD:garagem(playerid, params[], help)
     DB::GetDataInt(db_entity, "players", "veh_count", count, "name = '%q'", owner);
         
     if(!count)    
-        return SendClientMessage(playerid, -1, "{ff3333}[ GARAGEM ] {ffffff}Você não possui veiculos na sua garagem");
+        return SendClientMessage(playerid, -1, "{ff3333}[ GARAGEM ] {ffffff}Você não possui veículos na sua garagem");
     
     new msg[512];
 
@@ -503,8 +503,17 @@ YCMD:garagem(playerid, params[], help)
             Veh::Respawn(vehicleid);
         }
 
+        foreach(new i : Player)
+        {
+            if(i == playerid) continue;
+
+            if(IsValidVehicle(Player[i][pyr::vehicleid]) && Vehicle[Player[i][pyr::vehicleid]][veh::slotid] == listitem &&
+            !strcmp(Vehicle[Player[i][pyr::vehicleid]][veh::owner_name], owner, true))
+                return SendClientMessage(playerid, -1, "{ff3333}[ GARAGEM ] {ffffff}Este veículo já está em uso no momento.");
+        }
+
         Player[playerid][pyr::vehicleid] = Veh::Load(owner, listitem, OWNER_TYPE_PLAYER, playerid);
-        
+
         if(Player[playerid][pyr::vehicleid] == INVALID_VEHICLE_ID)
         {
             SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Um erro fatal aconteceu, avise um moderador!");

@@ -11,7 +11,7 @@ new dsp::Player[MAX_PLAYERS][E_SHOP];
 
 new Dealership::gCategoryCount[7] =
 {
-    10, 12, 18, 3, 7, 9, 5
+    10, 13, 18, 3, 7, 9, 5
 };
 
 new Dealership::gCategoryName[7][32] = 

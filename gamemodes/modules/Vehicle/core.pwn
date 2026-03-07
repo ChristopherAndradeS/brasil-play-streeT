@@ -1,6 +1,8 @@
 
 stock Veh::Insert(const owner[], slotid, data[E_VEHICLES])
 {
+    #pragma unused owner, slotid
+
     new sucess =  DB::Insert(db_entity, "vehicles",
     "owner, slotid, owner_type, modelid, flags, params, fuel, health, pX, pY, pZ, pA, color1, color2, paintjobid",
     "'%q', %d, %d, %d, %d, %d, %f, %f, %f, %f, %f, %f, %d, %d, %d",
@@ -142,8 +144,8 @@ stock Veh::Create(data[E_VEHICLES])
     data[veh::pX], data[veh::pY], data[veh::pZ], 
     data[veh::pA], data[veh::color1], data[veh::color2], -1);
 
-    data[veh::params] = Model_IsManual(GetVehicleModel(vehicleid)) ? 1 : data[veh::params];
-    Vehicle[vehicleid][veh::fuel] = Model_IsManual(GetVehicleModel(vehicleid)) ? 0.0 : data[veh::fuel];
+    data[veh::params] = Model_IsManual(GetVehicleModel(vehicleid)) ? FLAG_PARAM_ENGINE : data[veh::params];
+    data[veh::fuel] = Model_IsManual(GetVehicleModel(vehicleid)) ? 0.0 : data[veh::fuel];
    
     Vehicle[vehicleid][veh::dbid]           = data[veh::dbid];
     format(Vehicle[vehicleid][veh::owner_name], 32, "%s", data[veh::owner_name]);
