@@ -119,6 +119,9 @@ hook OnPlayerStateChange(playerid, PLAYER_STATE:newstate, PLAYER_STATE:oldstate)
     {
         new vehicleid = Player[playerid][pyr::ocupped_vehicleid];
 
+        if(!IsValidVehicle(vehicleid))
+            vehicleid = GetPlayerVehicleID(playerid);
+
         if(IsValidVehicle(vehicleid))
         {
             Veh::CreateTimer(vehicleid, veh::TIMER_EMPTY_RESPAWN, "OnVehicleEmptyTimeout", 180000, false, "ii", vehicleid, playerid);
@@ -295,11 +298,18 @@ public OnVehicleEmptyTimeout(vehicleid, forplayerid)
 
         case OWNER_TYPE_ORG:
         {
-            SendClientMessage(forplayerid, -1, "{ff9933}[ VEH ] {ffffff}O veículo {ff9933}[ {ffffff}SID %d {ff9933}] {ffffff}retornou para garagem da organização por {ff9933}desocupação",
-            Vehicle[vehicleid][veh::slotid]);
+            if(IsValidPlayer(forplayerid))
+            {
+                SendClientMessage(forplayerid, -1, "{ff9933}[ VEH ] {ffffff}O veículo {ff9933}[ {ffffff}SID %d {ff9933}] {ffffff}retornou para garagem da organização por {ff9933}desocupação",
+                Vehicle[vehicleid][veh::slotid]);
+            }
         }
 
-        default: SendClientMessage(forplayerid, -1, "{ff9933}[ VEH ] {ffffff}O veículo que você estava voltou para {ff9933}seu local.");
+        default:
+        {
+            if(IsValidPlayer(forplayerid))
+                SendClientMessage(forplayerid, -1, "{ff9933}[ VEH ] {ffffff}O veículo que você estava voltou para {ff9933}seu local.");
+        }
     }
 
     return 1;

@@ -130,15 +130,30 @@ hook OnPlayerDisconnect(playerid, reason)
     ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED);
     ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_CHECKPOINT);
     
-    new vehicleid = Player[playerid][pyr::ocupped_vehicleid];
+    new vehicleid = Player[playerid][pyr::vehicleid];
 
     if(IsValidVehicle(vehicleid))
     {
-        Player[playerid][pyr::ocupped_vehicleid] = INVALID_VEHICLE_ID;
-        ResetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_OCCUPED);    
+        if(Player[playerid][pyr::ocupped_vehicleid] == vehicleid)
+            Player[playerid][pyr::ocupped_vehicleid] = INVALID_VEHICLE_ID;
+
+        ResetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_OCCUPED);
 
         Veh::Save(vehicleid);
         Veh::Respawn(vehicleid);
+    }
+    else
+    {
+        vehicleid = Player[playerid][pyr::ocupped_vehicleid];
+
+        if(IsValidVehicle(vehicleid))
+        {
+            Player[playerid][pyr::ocupped_vehicleid] = INVALID_VEHICLE_ID;
+            ResetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_OCCUPED);
+
+            Veh::Save(vehicleid);
+            Veh::Respawn(vehicleid);
+        }
     }
     
     DB::SetDataInt(db_entity, "players", "flags", Player[playerid][pyr::flags], "name = '%q'", GetPlayerNameStr(playerid));

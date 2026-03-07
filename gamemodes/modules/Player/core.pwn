@@ -16,6 +16,7 @@ stock Player::ClearData(playerid)
     Player[playerid][pyr::flags]         = 0;
     Player[playerid][pyr::score]         = 0;
     Player[playerid][pyr::regionid]      = INVALID_RECORD_ID;
+    Player[playerid][pyr::ocupped_vehicleid] = INVALID_VEHICLE_ID;
     Player[playerid][pyr::vehicleid]     = INVALID_VEHICLE_ID;
     Player[playerid][pyr::resuscitation_targetid] = INVALID_PLAYER_ID;
 

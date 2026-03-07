@@ -190,7 +190,7 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
             DB::GetDataInt(db_entity, "players", "veh_count", slotid, "name = '%q'", owner);
             
             if(slotid >= MAX_PLAYER_VEHICLES)
-                return SendClientMessage(playerid, -1, "{33ff33}[ VEH ] {ffffff}Você já possui o número máximo de veículos por jogador!");
+                return SendClientMessage(playerid, -1, "{ff3333}[ VEH ] {ffffff}Você já possui o número máximo de veículos por jogador!");
 
             new data[E_VEHICLES];
 
@@ -200,8 +200,8 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
             data[veh::modelid] = modelid;
             data[veh::fuel] = 60.0; 
             data[veh::health] = 1250.0;
-            data[veh::color1] = color2;
             data[veh::color1] = color1;
+            data[veh::color2] = color2;
             data[veh::paintjobid] = -1;
 
             if(Veh::Insert(owner, slotid, data))
