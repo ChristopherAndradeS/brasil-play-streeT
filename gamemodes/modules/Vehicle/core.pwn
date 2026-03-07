@@ -468,7 +468,12 @@ stock Veh::UpdateHealth(driverid, vehicleid, Float:health)
 
 stock Veh::UpdateFuel(driverid, vehicleid, Float:fuel)
 {
-    Vehicle[vehicleid][veh::fuel] = fuel; 
+    Vehicle[vehicleid][veh::fuel] = floatclamp(fuel, 0.0, 60.0);
+
+    if(Vehicle[vehicleid][veh::fuel] <= 0.0)
+        SetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_EMPTY);
+    else
+        ResetFlag(Vehicle[vehicleid][veh::flags], FLAG_VEH_EMPTY);
     
     if(Veh::IsVisibleTDForPlayer(driverid))
         Veh::UpdatePTDBar(driverid, PTD_VEH_BAR_FUEL, 100.0, floatclamp(Vehicle[vehicleid][veh::fuel], 0.0, 60.0) * 1.67);
