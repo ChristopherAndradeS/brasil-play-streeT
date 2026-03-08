@@ -10,4 +10,6 @@ log.txt
 scriptfiles/bps_Server.db
 npcmodes/
 models/
-*.json
+
+#JSON
+config.json
