@@ -6,7 +6,8 @@
 #include <streamer>
 #include <samp_bcrypt>
 #include <PawnPlus>
-//#include <sampvoice>
+#include <sampvoice>
+#include <discord-connector>
 //#include <colandreas>
 
 #define CGEN_MEMORY 20000

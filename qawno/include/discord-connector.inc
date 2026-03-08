@@ -1,5 +1,5 @@
 /* Discord Connector
- * Version afb7e3b
+ * Version 0.3.6
  * made by maddinat0r
  */
 
