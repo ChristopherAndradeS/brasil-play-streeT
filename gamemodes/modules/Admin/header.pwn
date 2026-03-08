@@ -52,6 +52,7 @@ enum E_ADMIN
 {
     adm::flags,
     E_ROLES_ADMIN:adm::lvl,
+    adm::vehicleid,
     adm::spectateid,
 }
 

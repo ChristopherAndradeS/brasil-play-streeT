@@ -2,6 +2,7 @@ forward OnServerUpdate();
 
 #define g_WEATHER_CHANGE    (0.0656)
 #define j_WEATHER_CHANGE    (0.0108)
+#define MAX_SERVER_VEHICLES (6)
 
 enum E_WEATHERS_INFO
 {
@@ -20,6 +21,7 @@ enum E_SERVER
 
     srv::is_count_down,
     srv::last_rand_msgid,
+    srv::vehicleid[MAX_SERVER_VEHICLES]
 }
 
 new Server[E_SERVER];

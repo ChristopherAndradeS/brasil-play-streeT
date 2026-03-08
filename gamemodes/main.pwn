@@ -137,8 +137,8 @@
 //                                         
 //                                         
 #include "./gamemodes/modules/DB/handle.pwn"
-#include "./gamemodes/modules/Server/handle.pwn"
 #include "./gamemodes/modules/LinkedLists/handle.pwn"
+#include "./gamemodes/modules/Server/handle.pwn"
 #include "./gamemodes/modules/Maps/handle.pwn"
 #include "./gamemodes/modules/TextDraws/handle.pwn"
 #include "./gamemodes/modules/NPC/handle.pwn"
@@ -360,6 +360,38 @@ stock SendMessageToNearPlayer(Float:pX, Float:pY, Float:pZ, const msg[], GLOBAL_
         if(playerid == INVALID_PLAYER_ID) continue;
         
         SendClientMessage(playerid, -1, formated_msg); 
+    }
+
+    return 1;
+}
+
+YCMD:savepos(playerid, params[], help)
+{
+    new Float:x, Float:y, Float:z;
+    new linha[128];
+    new File:arquivo;
+
+    // 1. Obtém a posição atual do jogador
+    GetPlayerPos(playerid, x, y, z);
+
+    // 2. Formata a string que será salva no arquivo
+    // Usamos \r\n para pular linha no Windows (padrão do bloco de notas)
+    format(linha, sizeof(linha), "%f, %f, %f\r\n", x, y, z);
+
+    // 3. Abre o arquivo "positions.txt" no modo "append" (adicionar ao final)
+    arquivo = fopen("positions.txt", io_append);
+
+    if(arquivo)
+    {
+        // 4. Escreve a linha e fecha o arquivo
+        fwrite(arquivo, linha);
+        fclose(arquivo);
+
+        SendClientMessage(playerid, -1, "{00FF00}Sucesso: {FFFFFF}Sua posicao foi salva");
+    }
+    else
+    {
+        SendClientMessage(playerid, -1, "{FF0000}Erro: {FFFFFF}Não foi possivel abrir o arquivo.");
     }
 
     return 1;

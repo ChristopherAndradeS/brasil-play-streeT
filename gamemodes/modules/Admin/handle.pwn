@@ -23,6 +23,8 @@ hook OnPlayerDisconnect(playerid, reason)
 {
     Adm::UnSet(playerid);
 
+    Veh::Respawn(Admin[playerid][adm::vehicleid]);
+    
     return 1;
 }
 

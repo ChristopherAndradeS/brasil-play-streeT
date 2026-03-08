@@ -273,14 +273,7 @@ hook OnVehicleStreamOut(vehicleid, forplayerid)
     if(!IsValidVehicle(vehicleid)) return 1;
 
     if(Player[forplayerid][pyr::ocupped_vehicleid] != vehicleid) return 1;
-
-    switch(Vehicle[vehicleid][veh::owner_type])
-    {
-        case OWNER_TYPE_SERVER: Veh::Destroy(vehicleid);
     
-        default: return 1;
-    }
-
     return 1;
 }
 

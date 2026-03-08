@@ -36,6 +36,15 @@ hook OnGameModeInit()
     SetWorldTime(Server[srv::hour]);
     SetWeather(Server[srv::g_weatherid]);
     
+    for(new i = 0; i < MAX_SERVER_VEHICLES; i++)
+    {
+        new vehicleid =  Veh::Load("Server", i, OWNER_TYPE_SERVER, 1001);
+
+        new str[144];
+        format(str, 144, "{99ff99}[ VEH ][ BPS ]");
+
+        Vehicle[vehicleid][veh::labelid] = CreateDynamic3DTextLabel(str, -1, 0.0, 0.0, -0.25, 60.0, .attachedvehicle = vehicleid, .testlos = 1);
+    }   
     return 1;
 }
 

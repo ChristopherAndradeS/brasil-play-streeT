@@ -893,12 +893,12 @@ YCMD:veh(playerid, params[], help)
     veh_data[veh::color2]       = color2;
     veh_data[veh::paintjobid]   = -1;
 
-    Player[playerid][pyr::vehicleid] = Veh::Create(veh_data);
+    Admin[playerid][adm::vehicleid] = Veh::Create(veh_data);
 
     new Float:health;
-    GetVehicleHealth(Player[playerid][pyr::vehicleid], health);
+    GetVehicleHealth(Admin[playerid][adm::vehicleid], health);
 
-    PutPlayerInVehicle(playerid, Player[playerid][pyr::vehicleid], 0);
+    PutPlayerInVehicle(playerid, Admin[playerid][adm::vehicleid], 0);
 
     SendClientMessage(playerid, -1, "{33ff33}[ VEH ] {ffffff}Veículo criado com sucesso!");
 
@@ -921,6 +921,54 @@ YCMD:dveh(playerid, params[], help)
     DestroyVehicle(Admin[playerid][adm::vehicleid]);
 
     SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Veículo destruído com sucesso!");
+
+    return 1;
+}
+
+YCMD:saveveh(playerid, params[], help)
+{
+    if(help)
+    {
+        SendClientMessage(playerid, -1, "{ffff33}[ AJUDA ADM ] {ffffff}Salva um veículo em uma posição no banco de dados.");
+        return 1;
+    }
+
+    if(!Adm::HasPermission(playerid, ROLE_ADM_MANAGER, false)) return 1;
+
+    if(!IsPlayerInAnyVehicle(playerid))
+        return SendClientMessage(playerid, -1, "{ffff33}[ ADM ] {ffffff}Você precisa estar dentro de um veículo para isso!");
+
+    new owner[32], slotid, OWNER_TYPES:type;
+    if(sscanf(params, "iis[32]", slotid, _:type, owner)) 
+        return SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}Use: /saveveh {ff3333}[ DONO (NOME) ] [ DONO (TIPO) ] [ SLOT ]");
+    
+    new vehicleid = GetPlayerVehicleID(playerid);
+
+    new color1, color2;
+
+    GetVehicleColours(vehicleid, color1, color2);
+
+    new data[E_VEHICLES];
+
+    format(data[veh::owner_name], 24, "%s", owner);
+    data[veh::slotid] = slotid;
+    data[veh::owner_type] = type;
+    data[veh::modelid] = GetVehicleModel(vehicleid);
+    data[veh::fuel] = 60.0; 
+    data[veh::health] = 1250.0;
+    data[veh::color1] = color1;
+    data[veh::color2] = color2;
+    data[veh::paintjobid] = GetVehiclePaintjob(vehicleid);
+
+    if(Veh::Insert(owner, slotid, data))
+    {
+        SendClientMessage(playerid, -1, "{55ff55}[ VEH ] {ffffff}Veículo salvo com sucesso");
+    }
+
+    else
+    {
+        SendClientMessage(playerid, -1, "{33ff33}[ ERRO ] {ffffff}Um erro fatal aconteceu. Avise um programador!");        
+    }
 
     return 1;
 }

@@ -69,6 +69,14 @@ stock Veh::Load(const owner[], slotid, OWNER_TYPES:type, ownerid)
                 Org[ownerid][org::vehicleid][slotid] = Veh::Create(vehicle_data);
             return Org[ownerid][org::vehicleid][slotid];
         }
+
+        case OWNER_TYPE_SERVER:
+        {
+            new vehicleid = Server[srv::vehicleid][slotid];
+            if(!IsValidVehicle(vehicleid))
+                Server[srv::vehicleid][slotid] = Veh::Create(vehicle_data);
+            return Server[srv::vehicleid][slotid];
+        }
         default: return INVALID_VEHICLE_ID;
     }
 }
@@ -269,6 +277,16 @@ stock Veh::Respawn(vehicleid)
         }
 
         case OWNER_TYPE_ORG: Veh::ResetVehicleState(vehicleid);
+
+        case OWNER_TYPE_ADMIN:
+        {
+            new ownerid = Vehicle[vehicleid][veh::ownerid];
+
+            Veh::Destroy(Admin[ownerid][adm::vehicleid]);
+
+            if(IsValidPlayer(ownerid))
+                SendClientMessage(ownerid, -1, "{ff9933}[ ADM ] {ffffff}Seu veículo de admin foi destruido");
+        }
         
         default: Veh::ResetVehicleState(vehicleid);
         
