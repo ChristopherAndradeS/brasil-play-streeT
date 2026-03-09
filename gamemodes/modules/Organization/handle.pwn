@@ -12,10 +12,15 @@ hook OnGameModeInit()
         if(result == -1) continue;
         
         else if(result == 0)
-            printf("[ DB (ORG) ] Erro ao carregar organizacao orgid: %d!\n", i);
+            DC::Log(LOG_TYPE_ERR, "[ DB (ORG) ] Erro ao carregar organizacao orgid: %d!", i);
         else
+        {
             printf("[ DB (ORG) ] Organizacao %s carregada com sucesso!\n", Org[i][org::name]);
+            DC::LoadCountOrgs++;
+        }
     }
+
+    DC::SendLoadInitEmbed();
 
     return 1;
 }

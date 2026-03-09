@@ -91,13 +91,13 @@ stock Org::Create(const name[], ORG_TYPE:type, const creator[], const tag[], con
 
     if(orgid == INVALID_ORG_ID)
     {
-        printf("[ ORGS (DB) ] Nao foi possivel criar a organizacao %s! Aumente o valor de MAX_ORGS\n", name);
+        DC::Log(LOG_TYPE_ERR, "[ ORGS (DB) ] Nao foi possivel criar a organizacao %s! Aumente o valor de MAX_ORGS", name);
         return 0;
     }
 
     if(DB::Exists(db_stock, "organizations", "name = '%q'", name))
     {
-        printf("[ ORGS (DB) ] Nao foi possivel criar a organizacao %s, pois ja existia!\n", name);
+        DC::Log(LOG_TYPE_WARN, "[ ORGS (DB) ] Nao foi possivel criar a organizacao %s, pois ja existia!", name);
         return 0;
     }
 
@@ -111,7 +111,7 @@ stock Org::Create(const name[], ORG_TYPE:type, const creator[], const tag[], con
         printf("[ ORGS (DB) ] Organizacao %s | Lider: %s | Colider: %s criada com sucesso\n", name, leader, coleader);
     else
     {
-        printf("[ ORGS (DB) ] Erro ao criar organizacao\n");
+        DC::Log(LOG_TYPE_ERR, "[ ORGS (DB) ] Erro ao criar organizacao");
         return 0;
     }
 
@@ -160,7 +160,7 @@ stock Org::SetMember(playerid, targetid, orgid, ORG_ROLES:role)
 
         if(!success)
         {
-            printf("[ ORG MEMBER (DB) ] Erro ao criar membro da organização %s\n", Org[orgid][org::name]);
+            DC::Log(LOG_TYPE_ERR, "[ ORG MEMBER (DB) ] Erro ao criar membro da organização %s", Org[orgid][org::name]);
             return 0;
         }
 
@@ -182,7 +182,7 @@ stock Org::SetMember(playerid, targetid, orgid, ORG_ROLES:role)
 
             Org::UpdateLabel(orgid);
 
-            printf("[ ORG (DB) ] O admin %s, setou %s como lider da organizacao %s\n", GetPlayerNameStr(playerid), name, Org[orgid][org::name]);
+            DC::Log(LOG_TYPE_WARN, "[ ORG (DB) ] O admin %s, setou %s como lider da organizacao %s", GetPlayerNameStr(playerid), name, Org[orgid][org::name]);
         }
 
         case ORG_ROLE_COLEADER:
@@ -196,7 +196,7 @@ stock Org::SetMember(playerid, targetid, orgid, ORG_ROLES:role)
 
             Org::UpdateLabel(orgid);
 
-            printf("[ ORG (DB) ] O admin/líder %s, setou %s como colider da organizacao %s\n", GetPlayerNameStr(playerid), name, Org[orgid][org::name]);
+            DC::Log(LOG_TYPE_WARN, "[ ORG (DB) ] O admin/lider %s, setou %s como colider da organizacao %s", GetPlayerNameStr(playerid), name, Org[orgid][org::name]);
         }
     }
 

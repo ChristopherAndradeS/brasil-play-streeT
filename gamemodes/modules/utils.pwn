@@ -236,12 +236,14 @@ stock RemoverChar(string[], element)
 
 stock DC::Log(LOG_TYPES:type, const msg[], GLOBAL_TAG_TYPES:...)
 {
-    new str[128];
-    va_format(str, 128, msg, ___(2));
+    new str[256];
+    va_format(str, 256, msg, ___(2));
 
     switch(type)
     {
-        case LOG_TYPE_ERR:  DC::SendWarnMessage(str);
-        case LOG_TYPE_WARN: DC::SendErrMessage(str);
+        case LOG_TYPE_ERR:  DC::SendErrMessage(str);
+        case LOG_TYPE_WARN: DC::SendWarnMessage(str);
     }
+
+    return 1;
 }

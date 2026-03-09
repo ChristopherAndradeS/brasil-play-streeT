@@ -505,7 +505,7 @@ YCMD:soltaroff(playerid, params[], help)
     if(!DB::Delete(db_entity, "punishments", "name = '%q' AND level = 1", name))
     {
         SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Não foi possível soltar o jogador {ff3333}%s{ffffff}, pois ele não está preso!", name);
-        printf("[ DB (ERRO) ] Erro ao remover cadeia de %s", name);
+        DC::Log(LOG_TYPE_ERR, "[ DB (ERRO) ] Erro ao remover cadeia de %s", name);
         return -1;
     }
 
@@ -678,7 +678,7 @@ YCMD:desban(playerid, params[], help)
     DB::SetDataInt(db_entity, "punishments", "left_tstamp", 0, "name = '%q' AND level = 2", name);
 
     SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce desbaniu {33ff33}%s {ffffff}com sucesso.", name);
-    printf("[ PUNICOES ] O admin %s desbaniu %s.", admin_name, name);
+    DC::Log(LOG_TYPE_WARN, "[ PUNICOES ] O admin %s desbaniu %s.", admin_name, name);
 
     return 1;
 }
@@ -999,7 +999,7 @@ YCMD:gmx(playerid, params[], help)
         {
             new str[64];
             GetISODate(str, 64, Server[srv::gmt]);
-            printf("[ GMX ] Gmx realizada em %s. Motivo: %s", str, reason);
+            DC::Log(LOG_TYPE_WARN, "[ GMX ] Gmx realizada em %s. Motivo: %s", str, reason);
             Server[srv::is_count_down] = 0;
             Timer_KillCallback(srv::Timer[srv::TIMER_COUNT_DOWN]);
 

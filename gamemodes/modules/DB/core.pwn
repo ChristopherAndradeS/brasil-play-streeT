@@ -8,7 +8,7 @@ stock DB::CreateTable(DB:db, const table[], const definition[])
 
     if(!result)
     {
-        printf("[ DB ] Erro: Ao criar tabela %s > %s\n", name, table);
+        DC::Log(LOG_TYPE_ERR, "[ DB ] Erro: Ao criar tabela %s > %s", name, table);
         return 0;
     }
 
@@ -37,7 +37,7 @@ stock DB::GetCount(DB:db, const table[], const where[], OPEN_MP_TAGS:...)
     {
         new wher_str[128];
         va_format(wher_str, 128, where, ___(3));
-        printf("[ ERRO ] DB::GetCount: SELECT COUNT(*) FROM %q WHERE %s;", table, wher_str);
+        DC::Log(LOG_TYPE_ERR, "[ ERRO ] DB::GetCount: SELECT COUNT(*) FROM %q WHERE %s;", table, wher_str);
         return 0;
     }
 
@@ -62,7 +62,7 @@ stock DB::Insert(DB:db, const table[], const fields[], const values[], OPEN_MP_T
 
     if(!result)
     {
-        printf("[ DB ] Erro: Ao inserir dados query: INSERT INTO %q (%q) VALUES(%s);\n", table, fields, str);
+        DC::Log(LOG_TYPE_ERR, "[ DB ] Erro: Ao inserir dados query: INSERT INTO %q (%q) VALUES(%s);", table, fields, str);
         return 0;
     }
 
@@ -84,7 +84,7 @@ stock DB::Update(DB:db, const table[], const clause[], OPEN_MP_TAGS:...)
 
     if(!result)
     {
-        printf("[ DB ] Erro: Ao atualizar dados. query: %q > %q\n", "UPDATE %q SET %s;", name, table, table, str);
+        DC::Log(LOG_TYPE_ERR, "[ DB ] Erro: Ao atualizar dados. query: %q > %q", "UPDATE %q SET %s;", name, table, table, str);
         return 0;
     }
 
@@ -110,7 +110,7 @@ stock DB::Delete(DB:db, const table[], const where[], OPEN_MP_TAGS:...)
 
     if(!result)
     {
-        printf("[ DB ] Erro: Ao deletar %q > %q ONDE %s\n", name, table, str);
+        DC::Log(LOG_TYPE_ERR, "[ DB ] Erro: Ao deletar %q > %q ONDE %s", name, table, str);
         return 0;
     }
 
@@ -134,7 +134,7 @@ stock DB::GetDataInt(DB:db, const table[], const field[], &output, const where[]
         new name[16];
         DB::GetNameByID(db, name);
 
-        printf("[ DB ] Erro: Ao carregar dado 'int' %q > %q > %q\n", name, table, field);
+        DC::Log(LOG_TYPE_ERR, "[ DB ] Erro: Ao carregar dado 'int' %q > %q > %q", name, table, field);
         return 0;
     }
 
@@ -158,7 +158,7 @@ stock DB::GetDataFloat(DB:db, const table[], const field[], &Float:output, const
         new name[16];
         DB::GetNameByID(db, name);
 
-        printf("[ DB ] Erro: Ao carregar dado 'float' %q > %q > %q\n", name, table, field);
+        DC::Log(LOG_TYPE_ERR, "[ DB ] Erro: Ao carregar dado 'float' %q > %q > %q", name, table, field);
         return 0;
     }
 
@@ -182,7 +182,7 @@ stock DB::GetDataString(DB:db, const table[], const field[], output[], len, cons
         new name[16];
         DB::GetNameByID(db, name);
 
-        printf("[ DB ] Erro: Ao carregar dado 'string' %q > %q > %q\n", name, table, field);
+        DC::Log(LOG_TYPE_ERR, "[ DB ] Erro: Ao carregar dado 'string' %q > %q > %q", name, table, field);
         return 0;
     }
 
@@ -205,7 +205,7 @@ stock DB::SetDataInt(DB:db, const table[], const field[], data, const where[], G
         new name[16];
         DB::GetNameByID(db, name);
 
-        printf("[ DB ] Erro: Ao setar valor 'int' %q > %q ONDE %s\n", name, table, str);
+        DC::Log(LOG_TYPE_ERR, "[ DB ] Erro: Ao setar valor 'int' %q > %q ONDE %s", name, table, str);
         return 0;
     }
     
@@ -226,7 +226,7 @@ stock DB::SetDataFloat(DB:db, const table[], const field[], Float:data, const wh
         new name[16];
         DB::GetNameByID(db, name);
 
-        printf("[ DB ] Erro: Ao setar valor 'float' %q > %q ONDE %s\n", name, table, str);
+        DC::Log(LOG_TYPE_ERR, "[ DB ] Erro: Ao setar valor 'float' %q > %q ONDE %s", name, table, str);
         return 0;
     }
 
@@ -247,7 +247,7 @@ stock DB::SetDataString(DB:db, const table[], const field[], const data[], const
         new name[16];
         DB::GetNameByID(db, name);
 
-        printf("[ DB ] Erro: Ao setar valor 'string' %q > %q ONDE %s\n", name, table, str);
+        DC::Log(LOG_TYPE_ERR, "[ DB ] Erro: Ao setar valor 'string' %q > %q ONDE %s", name, table, str);
         return 0;
     }
 

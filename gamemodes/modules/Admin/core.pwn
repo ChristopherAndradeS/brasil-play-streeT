@@ -46,7 +46,7 @@ stock Adm::Set(const name[], const promoter[], E_ROLES_ADMIN:level)
         {
             DB::Delete(db_entity, "admins", "name = '%q'", name);
             
-            printf("[ ADMIN ] O jogador %s foi expulso da equipe por %s\n", name, promoter);
+            DC::Log(LOG_TYPE_WARN, "[ ADMIN ] O jogador %s foi expulso da equipe por %s", name, promoter);
 
             if(targetid != INVALID_PLAYER_ID)
             {
@@ -68,7 +68,7 @@ stock Adm::Set(const name[], const promoter[], E_ROLES_ADMIN:level)
                 _:level, promoter, timestr, name);
             }
 
-            printf("[ ADMIN ] O jogador %s foi provido por %s. Nível: %d\n", name, promoter, _:level);
+            DC::Log(LOG_TYPE_WARN, "[ ADMIN ] O jogador %s foi provido por %s. Nivel: %d", name, promoter, _:level);
         }
         
         else if(old_level > level)
@@ -81,7 +81,7 @@ stock Adm::Set(const name[], const promoter[], E_ROLES_ADMIN:level)
                 DB::Update(db_entity, "admins", "level = %i, promoter = '%q', promote_date = '%q' WHERE name = '%q'", 
                 _:level, promoter, timestr, name);
             }
-            printf("[ ADMIN ] O jogador %s foi rebaixado por %s. Nível: %d\n", name, promoter, _:level);
+            DC::Log(LOG_TYPE_WARN, "[ ADMIN ] O jogador %s foi rebaixado por %s. Nivel: %d", name, promoter, _:level);
         }
     }
 
@@ -104,12 +104,12 @@ stock Adm::Set(const name[], const promoter[], E_ROLES_ADMIN:level)
                 Adm::Load(targetid);
             }
 
-            printf("[ ADMIN ] O jogador %s tornou-se admin. Nível: %d. Promotor: %s\n", name, _:level, promoter);
+            DC::Log(LOG_TYPE_WARN, "[ ADMIN ] O jogador %s tornou-se admin. Nivel: %d. Promotor: %s", name, _:level, promoter);
         }
 
         else
         {
-            printf("[ DB (ADMIN) ] Erro fatal ao setar admin lvl: %d em %s por %s", _:level, name, promoter);
+            DC::Log(LOG_TYPE_ERR, "[ DB (ADMIN) ] Erro fatal ao setar admin lvl: %d em %s por %s", _:level, name, promoter);
             return 0;
         }
     }
@@ -370,7 +370,7 @@ stock Adm::CreateLocation(playerid, const name[], const category[], const admin[
     DB::Insert(db_stock, "locations", "name, category, creator, pX, pY, pZ", "'%q', '%q', '%q', %f, %f, %f", 
     name, category, admin, pX, pY, pZ);
 
-    printf("[ GPS ] O Admin %s criou uma nova localização: name: %s categoria: %s", admin, name, category);
+    DC::Log(LOG_TYPE_WARN, "[ GPS ] O Admin %s criou uma nova localização: name: %s categoria: %s", admin, name, category);
 
     return 1;
 }
