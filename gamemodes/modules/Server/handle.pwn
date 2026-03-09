@@ -140,28 +140,49 @@ hook OnServerUpdateMinutes()
                 "%i, '%s', 'SERVER', %.2f, %i, %i, %f, %f, %f, %f, %f, %f, %f, %f, %f, %i, %i", 
                 i, name, Float:RandomFloatMinMax(100.0, 500.0), modelid, 2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, -1, -1);
             }        
-
+            
             SendClientMessageToAll(-1, "{ff9933}[ LOJA ACS ] {ffffff}Novos itens no estoque da loja de acessórios! Use {ff9933}/acessorios {ffffff}para conferir!");
         }
     }
 
 
-    if(!(Server[srv::minute] % 30))
+    if(!(Server[srv::minute] % 2))
     {
         if(TryPercentage(40))
         {
             Server[srv::g_weatherid] = RandomMinMaxExcept(0, sizeof(gWeathers) - 1, Server[srv::g_weatherid]);
             
             new weatherid = Server[srv::g_weatherid];
+
+            new str[144], desc[144];
+
+            format(str, 144, "{99ff33}[ CLIMA ] {ffffff}O clima parece estar mudando para {99ff33}%s!", 
+            gWeathers[weatherid][WEATHER_NAME]);
+
+            format(desc, 144, "O clima em *StreeT City* parece estar mudando para:\n%s!", 
+            gWeathers[weatherid][WEATHER_NAME]);
+
+            new const field_name[1][1];
+            new field_value[1][1];
+            new bool:finline[1];
+
+            DC::SendCustomEmbedMsg
+            (
+                DC_CHANNEL_ID_SERVER_WARN,
+                ":white_sun_rain_cloud: CLIMA\n",
+                DC_THUMBNAIL_ICON, 0x99FF33, desc,
+                field_name, field_value, finline,
+                "Sistema de Informação • Brasil Play StreeT",
+                DC_FOOTER_ICON,
+                0
+            );
             
             foreach (new i : Player)
             {
                 if(!GetFlag(Player[i][pyr::flags], FLAG_PLAYER_IN_JAIL))
                 {
                     SetPlayerWeather(i, weatherid);
-                    SendClientMessage(i, -1, 
-                    "{99ff33}[ CLIMA ] {ffffff}O clima parece estar mudando para {99ff33}%s!", 
-                    gWeathers[weatherid][WEATHER_NAME]);
+                    SendClientMessage(i, -1, str);
                 }
             }
         }

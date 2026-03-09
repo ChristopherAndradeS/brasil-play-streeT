@@ -12,7 +12,7 @@
 
 #define CGEN_MEMORY 20000
 
-//#define ON_DEBUG_MODE
+#define ON_DEBUG_MODE
 
 #include <YSI/YSI_Data/y_iterate>
 #include <YSI/YSI_Coding/y_va>
@@ -38,6 +38,7 @@
 
 #include "./gamemodes/modules/Admin/header.pwn"                                      
 #include "./gamemodes/modules/DB/header.pwn"
+#include "./gamemodes/modules/Discord/header.pwn"
 #include "./gamemodes/modules/Games/header.pwn"
 #include "./gamemodes/modules/LinkedLists/header.pwn"
 #include "./gamemodes/modules/Maps/header.pwn"
@@ -73,6 +74,7 @@
 //  
 #include "./gamemodes/modules/Admin/core.pwn"                                      
 #include "./gamemodes/modules/DB/core.pwn"
+#include "./gamemodes/modules/Discord/core.pwn"
 #include "./gamemodes/modules/Games/core.pwn"
 #include "./gamemodes/modules/LinkedLists/core.pwn"
 
@@ -137,9 +139,11 @@
 //    \_| |_/\__,_|_| |_|\__,_|_|\___||___/
 //                                         
 //                                         
+
 #include "./gamemodes/modules/DB/handle.pwn"
 #include "./gamemodes/modules/LinkedLists/handle.pwn"
 #include "./gamemodes/modules/Server/handle.pwn"
+#include "./gamemodes/modules/Discord/handle.pwn"
 #include "./gamemodes/modules/Maps/handle.pwn"
 #include "./gamemodes/modules/TextDraws/handle.pwn"
 #include "./gamemodes/modules/NPC/handle.pwn"
@@ -394,6 +398,13 @@ YCMD:savepos(playerid, params[], help)
     {
         SendClientMessage(playerid, -1, "{FF0000}Erro: {FFFFFF}Não foi possivel abrir o arquivo.");
     }
+
+    return 1;
+}
+
+YCMD:teste(playerid, params[], help)
+{
+    DC::Log(LOG_TYPE_ERR, "[ DB ] Erro ao tentar carregar posições de spawn do jogador %s!", GetPlayerNameStr(playerid));
 
     return 1;
 }

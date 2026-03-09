@@ -52,12 +52,19 @@
 #define gas::               gas_
 #define Groove::            GRV_
 #define Shop::              SHP_
+#define DC::                DCC_
 
 /*          DEFINES          */
 #define DISCORD_LINK        "https://discord.gg/Czq6DWDvcB"
 #define LOGIN_MUSIC_URL     "https://files.catbox.moe/gqya30.mp3"
 #define LOGIN_MUSIC_MS      (203000)
  
+enum LOG_TYPES
+{
+    LOG_TYPE_ERR,
+    LOG_TYPE_WARN
+}
+
 /*          FOWARDS          */
 forward Float:floatclamp(Float:value, Float:min, Float:max);
 
