@@ -45,7 +45,7 @@ stock Player::LoadData(playerid)
 stock Player::CreateTimer(playerid, E_PLAYER_TIMERS:pyr::timerid, const callback[] = "", time, bool:repeate, const specifiers[] = "", OPEN_MP_TAGS:...)
 {
     if(IsValidTimer(KillTimer(pyr::Timer[playerid][pyr::timerid])))
-        return printf("[ TIMER (Player) ] Erro ao tentar criar Timer #%d (%s [PID : %d]) %d pois já existia", _:pyr::timerid, callback, playerid, time);
+        return DC::Log(LOG_TYPE_ERR, "[ TIMER (Player) ] Erro ao tentar criar Timer #%d (%s [PID : %d]) %d pois já existia", _:pyr::timerid, callback, playerid, time);
     
     new timerid = SetTimerEx(callback, time, repeate, specifiers, ___(6));
     pyr::Timer[playerid][pyr::timerid] = timerid;
@@ -176,7 +176,7 @@ stock Player::Spawn(playerid)
     {
         SendClientMessage(playerid, -1, "{ff3333}[ ERRO FATAL ] {ffffff}Sua conta {ff3333}nao esta registrada {ffffff}houve um erro grave ao spawnar, avise um {ff3333}moderador!");
         Kick(playerid);
-        printf("[ DB (ERRO) ] Erro ao tentar carregar posições de spawn do jogador!");
+        DC::Log(LOG_TYPE_ERR, "[ DB (ERRO) ] Erro ao tentar carregar posições de spawn do jogador!");
         return 0;
     }
 

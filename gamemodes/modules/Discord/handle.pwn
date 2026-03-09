@@ -6,6 +6,14 @@
 
 hook OnGameModeInit()
 {
+    DC::LoadCountMaps = 0;
+    DC::LoadCountVehicles = 0;
+    DC::LoadCountRegions = 0;
+    DC::LoadCountTextDraws = 0;
+    DC::LoadCountNpcs = 0;
+    DC::LoadCountOrgs = 0;
+    DC::LoadEmbedSent = false;
+
     new 
         date[128]
     ;
@@ -85,3 +93,42 @@ hook OnGameModeExit()
 }
 
 #endif
+stock DC::SendLoadInitEmbed()
+{
+    if(DC::LoadEmbedSent) return 1;
+
+    new const field_name[][64] =
+    {
+        ":map: Mapas",
+        ":blue_car: Veiculos",
+        ":world_map: Regioes",
+        ":art: TextDraws",
+        ":bust_in_silhouette: NPCs",
+        ":shield: Organizacoes"
+    };
+
+    new field_value[6][128];
+    format(field_value[0], 128, "%d mapas foram carregados", DC::LoadCountMaps);
+    format(field_value[1], 128, "%d veiculos foram carregados", DC::LoadCountVehicles);
+    format(field_value[2], 128, "%d regioes foram carregadas", DC::LoadCountRegions);
+    format(field_value[3], 128, "%d textdraws foram carregadas", DC::LoadCountTextDraws);
+    format(field_value[4], 128, "%d npcs foram carregados", DC::LoadCountNpcs);
+    format(field_value[5], 128, "%d organizacoes foram carregadas", DC::LoadCountOrgs);
+
+    new bool:finline[6] = {true, true, true, true, true, true};
+
+    DC::SendCustomEmbedMsg
+    (
+        DC_CHANNEL_ID_CHAT_ADM,
+        ":bar_chart: Carregamento de Entidades",
+        DC_THUMBNAIL_ICON, 0x33AAFF,
+        "Resumo do carregamento realizado na inicializacao do servidor.",
+        field_name, field_value, finline,
+        "Sistema de Informação • Brasil Play StreeT",
+        DC_FOOTER_ICON,
+        6
+    );
+
+    DC::LoadEmbedSent = true;
+    return 1;
+}

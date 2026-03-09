@@ -14,7 +14,7 @@ stock Game::Create(const name[], const creator[], GAME_TYPES:type, minparts, max
 
     if(gameid == INVALID_GAME_ID) 
     {
-        printf("[ EVENTOS ] Não foi possível criar o evento %s, pois não existia slot livre!");
+        DC::Log(LOG_TYPE_ERR, "[ EVENTOS ] Não foi possível criar o evento %s, pois não existia slot livre!", name);
         return 0;
     }
     

@@ -22,6 +22,7 @@ hook OnGameModeInit()
                 SetFlag(NPC[i][npc::flags], FLAG_NPC_EXIST);
 
                 printf("[ NPC ] NPC_Leticia criada com sucesso!\n");
+                DC::LoadCountNpcs++;
 
             }
 
@@ -41,6 +42,7 @@ hook OnGameModeInit()
                 SetFlag(NPC[i][npc::flags], FLAG_NPC_EXIST);
 
                 printf("[ NPC ] NPC_Rogerio criado com sucesso!\n");
+                DC::LoadCountNpcs++;
 
             }
 

@@ -12,7 +12,7 @@ stock Veh::Insert(const owner[], slotid, data[E_VEHICLES])
     data[veh::color1], data[veh::color2], data[veh::paintjobid]);
 
     if(!sucess)
-        printf("[ VEH (DB)] Erro ao inserir veículo Model: %d / Owner: %s / Slot: %d", data[veh::modelid], owner, slotid);
+        DC::Log(LOG_TYPE_ERR, "[ VEH (DB)] Erro ao inserir veículo Model: %d / Owner: %s / Slot: %d", data[veh::modelid], owner, slotid);
 
     return sucess;
 }
@@ -84,7 +84,7 @@ stock Veh::Load(const owner[], slotid, OWNER_TYPES:type, ownerid)
 stock Veh::Save(vehicleid)
 {
     if(Vehicle[vehicleid][veh::dbid] == INVALID_RECORD_ID) 
-        return printf("[ VEH (DB)] Erro ao salvar veículo Model: %d / Owner: %s / Slot: %d", 
+        return DC::Log(LOG_TYPE_ERR, "[ VEH (DB)] Erro ao salvar veículo Model: %d / Owner: %s / Slot: %d",
         Vehicle[vehicleid][veh::modelid], Vehicle[vehicleid][veh::owner_name], Vehicle[vehicleid][veh::slotid]);
 
     if(Vehicle[vehicleid][veh::owner_type] == OWNER_TYPE_PLAYER)
@@ -185,7 +185,7 @@ stock Veh::Create(data[E_VEHICLES])
         Veh::AddToRegion(vehicleid, regionid);
     }
     else
-        printf("[ ERRO (VEH) ] Veiculo %d criado numa região inválida", vehicleid);
+        DC::Log(LOG_TYPE_ERR, "[ ERRO (VEH) ] Veiculo %d criado numa região inválida", vehicleid);
     
     Veh::UpdateParams(vehicleid, FLAG_PARAM_ENGINE,     data[veh::params] & FLAG_PARAM_ENGINE);
     Veh::UpdateParams(vehicleid, FLAG_PARAM_LIGHTS,     data[veh::params] & FLAG_PARAM_LIGHTS);
@@ -214,6 +214,7 @@ stock Veh::Create(data[E_VEHICLES])
     SetVehicleVirtualWorld(vehicleid, data[veh::worldid]);
     
     printf("[ VEH ] Veiculo %d de %s [ SID: %d ] criado", data[veh::modelid], data[veh::owner_name], data[veh::slotid]);
+    DC::LoadCountVehicles++;
     
     return vehicleid;
 }

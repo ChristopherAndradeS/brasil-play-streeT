@@ -258,7 +258,7 @@ public OnGameModeExit()
 
 public pp_on_error(source[], message[], error_level:level, &retval)
 {
-    printf("[ PawnPlus ] %s | nivel: %d | %s", source, _:level, message);
+    DC::Log(LOG_TYPE_ERR, "[ PawnPlus ] %s | nivel: %d | %s", source, _:level, message);
     return 0;
 }
 
