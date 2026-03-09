@@ -146,7 +146,7 @@ hook OnServerUpdateMinutes()
     }
 
 
-    if(!(Server[srv::minute] % 2))
+    if(!(Server[srv::minute] % 30))
     {
         if(TryPercentage(40))
         {
