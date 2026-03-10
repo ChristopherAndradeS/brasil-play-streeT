@@ -29,7 +29,7 @@ hook OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid)
 
                 for(new i = 128; i < 256; i++)
                 {
-                    format(msg, sizeof(msg), "%s{%06x}###\n", msg, VehicleColoursTableRGBA[i] >>> 8);
+                    format(msg, sizeof(msg), "%s{%06x}###\n", msg, gVehicleColoursTableRGBA[i] >>> 8);
                 }  
 
                 page = 1;
@@ -58,7 +58,7 @@ hook OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid)
 
         for(new i = 0; i < 128; i++)
         {
-            format(msg, sizeof(msg), "%s{%06x}###\n", msg, VehicleColoursTableRGBA[i] >>> 8);
+            format(msg, sizeof(msg), "%s{%06x}###\n", msg, gVehicleColoursTableRGBA[i] >>> 8);
         }  
 
         format(msg, sizeof(msg), "%s{ff3333}Mais Cores >>>\n", msg);

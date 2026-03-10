@@ -59,8 +59,8 @@ stock Dealership::UpdatePlayerShop(playerid, modelid, color1, color2, Float:pric
 
     Dealership::UpdateTDForPlayer(playerid, PTD_DSP_TXT_NAME, "NOME: ~p~~h~%s", veh_name);
     Dealership::UpdateTDForPlayer(playerid, PTD_DSP_TXT_PRICE, "PRECO: ~g~~h~%.2f R$", price);
-    Dealership::UpdateTextDrawColor(playerid, PTD_DSP_SPR_COLOR1, VehicleColoursTableRGBA[color1]);
-    Dealership::UpdateTextDrawColor(playerid, PTD_DSP_SPR_COLOR2, VehicleColoursTableRGBA[color2]);
+    Dealership::UpdateTextDrawColor(playerid, PTD_DSP_SPR_COLOR1, gVehicleColoursTableRGBA[color1]);
+    Dealership::UpdateTextDrawColor(playerid, PTD_DSP_SPR_COLOR2, gVehicleColoursTableRGBA[color2]);
 }
 
 stock Dealership::SetPlayerInShop(playerid, modelid, color1, color2, Float:price)
@@ -90,8 +90,8 @@ stock Dealership::SetPlayerInShop(playerid, modelid, color1, color2, Float:price
 
     Dealership::UpdateTDForPlayer(playerid, PTD_DSP_TXT_NAME, "NOME: ~p~~h~%s", veh_name);
     Dealership::UpdateTDForPlayer(playerid, PTD_DSP_TXT_PRICE, "PRECO: ~g~~h~%.2f R$", price);
-    Dealership::UpdateTextDrawColor(playerid, PTD_DSP_SPR_COLOR1, VehicleColoursTableRGBA[color1]);
-    Dealership::UpdateTextDrawColor(playerid, PTD_DSP_SPR_COLOR2, VehicleColoursTableRGBA[color2]);
+    Dealership::UpdateTextDrawColor(playerid, PTD_DSP_SPR_COLOR1, gVehicleColoursTableRGBA[color1]);
+    Dealership::UpdateTextDrawColor(playerid, PTD_DSP_SPR_COLOR2, gVehicleColoursTableRGBA[color2]);
 
     ResetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_CLOCK);
     SetPlayerWeather(playerid, 1);

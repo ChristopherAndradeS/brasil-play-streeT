@@ -78,6 +78,11 @@
 #include "./gamemodes/modules/Games/core.pwn"
 #include "./gamemodes/modules/LinkedLists/core.pwn"
 
+//  ------------------------- PLAYERS --------------------------
+#include "./gamemodes/modules/LinkedLists/players/core.pwn"
+#include "./gamemodes/modules/LinkedLists/vehicles/core.pwn"
+//  ------------------------- PLAYERS --------------------------
+
 //  --------------------------- MAPAS -----------------------------
 #include "./gamemodes/modules/Maps/core/banks.pwn"
 #include "./gamemodes/modules/Maps/core/dealership.pwn"
@@ -142,6 +147,7 @@
 
 #include "./gamemodes/modules/DB/handle.pwn"
 #include "./gamemodes/modules/LinkedLists/handle.pwn"
+
 #include "./gamemodes/modules/Server/handle.pwn"
 #include "./gamemodes/modules/Discord/handle.pwn"
 #include "./gamemodes/modules/Maps/handle.pwn"
@@ -195,34 +201,10 @@ main()
     pp_use_funcidx(true);
 }
 
-public OnGameModeInit()
+public pp_on_error(source[], message[], error_level:level, &retval)
 {
-    /* GAS STATION */
-    Gas[0][gas::pX] = 1944.5725;
-    Gas[1][gas::pX] = 1938.5725;
-    Gas[0][gas::pY] = Gas[1][gas::pY] = -1772.6949;
-    Gas[0][gas::pZ] = Gas[1][gas::pZ] = 13.55;
-
-    Gas[0][gas::pickup] = CreateDynamicPickup(19621, 0, 1944.5725, -1772.6949, 13.55);
-    Gas[1][gas::pickup] = CreateDynamicPickup(19621, 0, 1938.5725, -1772.6949, 13.55);
-    
-    new str[144];
-    format(str, 144, "[ {ff9933}POSTO DE GASOLINA {ffffff}]\nDigite {ff9933}/abastecer");
-
-    Gas[0][gas::label] = CreateDynamic3DTextLabel(str, -1, 1944.5725, -1772.6949, 13.55, 60.0);
-    Gas[1][gas::label] = CreateDynamic3DTextLabel(str, -1, 1938.5725, -1772.6949, 13.55, 60.0);
-
-    Mec[ofc::pX] = 1943.4880;
-    Mec[ofc::pY] = -1810.5806;
-    Mec[ofc::pZ] = 13.5663;
-
-    Mec[ofc::pickup] = CreateDynamicPickup(19627, 0, 1943.4880, -1810.5806, 13.5663);
-
-    format(str, 144, "[ {ff5599}OFICINA MECANICA{ffffff}]\nDigite {ff5599}/oficina");
-
-    Mec[ofc::label] = CreateDynamic3DTextLabel(str, -1, 1943.4880, -1810.5806, 13.5663, 60.0);
-
-    return 1;
+    printf("[ PawnPlus ] %s | nivel: %d | %s", source, _:level, message);
+    return 0;
 }
 
 public OnGameModeExit()
@@ -241,8 +223,7 @@ public OnGameModeExit()
     {
         if(linked_list_valid(veh::Region[regionid])) linked_list_delete(veh::Region[regionid]);
         if(linked_list_valid(pyr::Region[regionid])) linked_list_delete(pyr::Region[regionid]);
-        if(IsValidDynamicArea(Areas[regionid]))      DestroyDynamicArea(Areas[regionid]);
-        
+
         count++;
     }
 
@@ -252,70 +233,8 @@ public OnGameModeExit()
 
     DestroyAllDynamic3DTextLabels();
     DestroyAllDynamicPickups();
-
-    return 1;
-}
-
-public pp_on_error(source[], message[], error_level:level, &retval)
-{
-    DC::Log(LOG_TYPE_ERR, "[ PawnPlus ] %s | nivel: %d | %s", source, _:level, message);
-    return 0;
-}
-
-public e_COMMAND_ERRORS:OnPlayerCommandReceived(playerid, cmdtext[], e_COMMAND_ERRORS:success)
-{
-    switch(success)
-    {
-        case COMMAND_UNDEFINED:
-        {
-            SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}O comando \'%s\' nao existe", cmdtext); 
-            return COMMAND_SILENT;            
-        }    
-    }
-
-    return success;
-}
-
-public OnPlayerText(playerid, text[])
-{
-    if(isnull(text)) return 0;
-
-    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED))
-    {
-        SendClientMessage(playerid, -1, "{ff3333}[ SEGURANCA ] {ffffff}Chat bloqueado durante login/registro. Use apenas o dialog para senha.");
-        return 0;
-    }
-
-    if(!strcmp(lgn::Player[playerid][lgn::input], text))
-    {
-        SendClientMessage(playerid, -1, "{ff3333}[ OPA! ] {ffffff}Nao compartilhe {ff3333}sua senha {ffffff}com ninguem, {ff3333}nem mesmo com admins!");
-        return 0;
-    }
-
-    if(GetFlag(Admin[playerid][adm::flags], FLAG_ADM_WORKING))
-    {      
-        Adm::SendMsgToAllTagged(FLAG_ADM_WORKING | FLAG_IS_ADMIN, 0xFFFF33AA, 
-        "[ ADM CHAT ] %s%s {ffffff}: {ffff33}%s", 
-        Adm::GetColorString(Admin[playerid][adm::lvl]), GetPlayerNameStr(playerid), text);  
-        return 0;      
-    }   
-
-    new Float:pX, Float:pY, Float:pZ;
-    GetPlayerPos(playerid, pX, pY, pZ);
-
-    SendMessageToNearPlayer(pX, pY, pZ, "{FFFF99}[ L ] {ffffff}%s {FFFF99}[ %d ] diz: {ffffff}%s", GetPlayerNameStr(playerid), playerid, text);
-    
-    if(IsPlayerControllable(playerid))
-        ApplyAnimation(playerid, "GANGS", "prtial_gngtlkA", 4.1, false, false, false, false, 1500);
-
-    return 0;
-}
-
-public OnPlayerClickMap(playerid, Float:fX, Float:fY, Float:fZ)
-{
-    if(Admin[playerid][adm::lvl] < ROLE_ADM_MANAGER) return 1;
-    
-    SetPlayerPos(playerid, fX, fY, fZ);
+    DestroyAllDynamicObjects();
+    DestroyAllDynamicAreas();
 
     return 1;
 }
@@ -349,6 +268,70 @@ hook function SendClientMessageToAll(colour, const msg[], GLOBAL_TAG_TYPES:...)
     return continue(colour, fixed_msg);
 }
 
+public e_COMMAND_ERRORS:OnPlayerCommandReceived(playerid, cmdtext[], e_COMMAND_ERRORS:success)
+{
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED)) 
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ ERRO ] {ffffff}Você precisa logar para usar comandos");
+        return COMMAND_SILENT;
+    }
+
+    switch(success)
+    {
+        case COMMAND_UNDEFINED:
+        {
+            SendClientMessage(playerid, -1, "{ff3333}[ CMD ] {ffffff}O comando \'%s\' nao existe", cmdtext); 
+            return COMMAND_SILENT;            
+        }    
+    }
+
+    return success;
+}
+
+public OnPlayerText(playerid, text[])
+{
+    if(isnull(text)) return 0;
+
+    if(!GetFlag(Player[playerid][pyr::flags], FLAG_PLAYER_LOGGED))
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ SEGURANCA ] {ffffff}Chat bloqueado durante login/registro. Use apenas o dialog para senha.");
+        return 0;
+    }
+
+    if(!strcmp(lgn::Player[playerid][lgn::input], text))
+    {
+        SendClientMessage(playerid, -1, "{ff3333}[ OPA! ] {ffffff}Nao compartilhe {ff3333}sua senha {ffffff}com ninguem, {ff3333}nem mesmo com admins!");
+        return 0;
+    }
+
+    if(GetFlag(Admin[playerid][adm::flags], FLAG_ADM_WORKING))
+    {      
+        Adm::SendMsgToAllTagged(FLAG_ADM_WORKING | FLAG_IS_ADMIN, 0xFFFF33AA, 
+        "[ ADM CHAT ] {%06x}%s {ffffff}: {ffff33}%s", 
+        Adm::gColors[Admin[playerid][adm::lvl]], GetPlayerNameStr(playerid), text);  
+        return 0;      
+    }   
+
+    new Float:pX, Float:pY, Float:pZ;
+    GetPlayerPos(playerid, pX, pY, pZ);
+
+    SendMessageToNearPlayer(pX, pY, pZ, "{FFFF99}[ L ] {ffffff}%s {FFFF99}[ %d ] diz: {ffffff}%s", GetPlayerNameStr(playerid), playerid, text);
+    
+    if(IsPlayerControllable(playerid))
+        ApplyAnimation(playerid, "GANGS", "prtial_gngtlkA", 4.1, false, false, false, false, 1500);
+
+    return 0;
+}
+
+public OnPlayerClickMap(playerid, Float:fX, Float:fY, Float:fZ)
+{
+    if(Admin[playerid][adm::lvl] < ROLE_ADM_MANAGER) return 1;
+    
+    SetPlayerPos(playerid, fX, fY, fZ);
+
+    return 1;
+}
+
 stock SendMessageToNearPlayer(Float:pX, Float:pY, Float:pZ, const msg[], GLOBAL_TAG_TYPES:...)
 {
     new count, near_players[MAX_PLAYERS];
@@ -366,45 +349,6 @@ stock SendMessageToNearPlayer(Float:pX, Float:pY, Float:pZ, const msg[], GLOBAL_
         
         SendClientMessage(playerid, -1, formated_msg); 
     }
-
-    return 1;
-}
-
-YCMD:savepos(playerid, params[], help)
-{
-    new Float:x, Float:y, Float:z;
-    new linha[128];
-    new File:arquivo;
-
-    // 1. Obtém a posição atual do jogador
-    GetPlayerPos(playerid, x, y, z);
-
-    // 2. Formata a string que será salva no arquivo
-    // Usamos \r\n para pular linha no Windows (padrão do bloco de notas)
-    format(linha, sizeof(linha), "%f, %f, %f\r\n", x, y, z);
-
-    // 3. Abre o arquivo "positions.txt" no modo "append" (adicionar ao final)
-    arquivo = fopen("positions.txt", io_append);
-
-    if(arquivo)
-    {
-        // 4. Escreve a linha e fecha o arquivo
-        fwrite(arquivo, linha);
-        fclose(arquivo);
-
-        SendClientMessage(playerid, -1, "{00FF00}Sucesso: {FFFFFF}Sua posicao foi salva");
-    }
-    else
-    {
-        SendClientMessage(playerid, -1, "{FF0000}Erro: {FFFFFF}Não foi possivel abrir o arquivo.");
-    }
-
-    return 1;
-}
-
-YCMD:teste(playerid, params[], help)
-{
-    DC::Log(LOG_TYPE_ERR, "[ DB ] Erro ao tentar carregar posições de spawn do jogador %s!", GetPlayerNameStr(playerid));
 
     return 1;
 }

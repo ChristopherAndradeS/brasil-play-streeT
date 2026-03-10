@@ -706,7 +706,7 @@ YCMD:setadm(playerid, params[], help)
         return SendClientMessage(playerid, -1, "{ff3333}[ ADM ] {ffffff}Erro ao setar admin, provavelmente não existe no banco de dados!");
 
     SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Voce promoveu {33ff33}%s {ffffff}com sucesso.", name);
-    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Cargo de promoção: %s%s", Adm::GetColorString(level), Adm::gRoleNames[_:level]);
+    SendClientMessage(playerid, -1, "{33ff33}[ ADM ] {ffffff}Cargo de promoção: {%06x}%s", Adm::gColors[level], Adm::gRoleNames[level]);
     return 1;
 }
 

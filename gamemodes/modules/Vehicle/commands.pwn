@@ -480,7 +480,7 @@ YCMD:garagem(playerid, params[], help)
         veh_name, 
         health > 390.0 ? "{55ff55}Funcionando" : "{ff5555}Destruido", 
         fuel > 0.0 ? "{55ff55}Cheio" : "{ff9911}Sem Combustível",
-        VehicleColoursTableRGBA[color1] >>> 8, VehicleColoursTableRGBA[color2] >>> 8);
+        gVehicleColoursTableRGBA[color1] >>> 8, gVehicleColoursTableRGBA[color2] >>> 8);
     }
 
     inline garage_dialog(playerid1, dialogid, response, listitem, string:inputtext[])

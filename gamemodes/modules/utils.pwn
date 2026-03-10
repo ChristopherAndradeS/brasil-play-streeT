@@ -130,16 +130,16 @@ stock GetVehicleNameByModel(modelid, vehname[], len = sizeof(vehname))
     if(modelid < 400 || modelid > 611)
         format(vehname, len, "Modelo Invalido");
     else 
-        format(vehname, len, "%s", g_arrVehicleNames[modelid - 400]);
+        format(vehname, len, "%s", gVehicleNames[modelid - 400]);
 }
 
 stock GetVehicleModelByName(const name[]) 
 {
     if (isnull(name)) return -1;
 
-    for (new i = 0; i < sizeof(g_arrVehicleNames); i++) 
+    for (new i = 0; i < sizeof(gVehicleNames); i++) 
     {
-        if (strfind(g_arrVehicleNames[i], name, true) != -1) {
+        if (strfind(gVehicleNames[i], name, true) != -1) {
             return i + 400;
         }
     }

@@ -1,25 +1,3 @@
-
-stock Adm::GetColorString(E_ROLES_ADMIN:level)
-{
-    new string[16];
-
-    switch(_:level)
-    {
-        case 1:  format(string, 16, FCOLOR_ADM_APP_HELPER);
-        case 2:  format(string, 16, FCOLOR_ADM_HELPER);
-        case 3:  format(string, 16, FCOLOR_ADM_APP_STAFF);
-        case 4:  format(string, 16, FCOLOR_ADM_STAFF);
-        case 5:  format(string, 16, FCOLOR_ADM_FOREMAN);
-        case 6:  format(string, 16, FCOLOR_ADM_MASTER);
-        case 7:  format(string, 16, FCOLOR_ADM_MANAGER);
-        case 8:  format(string, 16, FCOLOR_ADM_CEO);
-        case 9:  format(string, 16, FCOLOR_ADM_FOUNDER);
-        default: format(string, 16, "{ffffff}");
-    }
-
-    return string;
-}
-
 stock Adm::Exists(const name[], &E_ROLES_ADMIN:level = INVALID_ADM_ROLE_ID)
 {
     if(DB::Exists(db_entity, "admins", "name = '%q'", name))
@@ -61,8 +39,8 @@ stock Adm::Set(const name[], const promoter[], E_ROLES_ADMIN:level)
         {
             if(targetid != INVALID_PLAYER_ID)
             {
-                SendClientMessage(targetid, -1, "{33ff33}[ ADM ] {ffffff}Voce foi {33ff33}provido {ffffff}para %s%s",
-                Adm::GetColorString(level), Adm::gRoleNames[_:level]);
+                SendClientMessage(targetid, -1, "{33ff33}[ ADM ] {ffffff}Voce foi {33ff33}provido {ffffff}para {%06x}%s",
+                Adm::gColors[level], Adm::gRoleNames[level]);
                 Adm::UpdateLevel(targetid, level);
                 DB::Update(db_entity, "admins", "level = %i, promoter = '%q', promote_date = '%q' WHERE name = '%q'", 
                 _:level, promoter, timestr, name);
@@ -75,8 +53,8 @@ stock Adm::Set(const name[], const promoter[], E_ROLES_ADMIN:level)
         {
             if(targetid != INVALID_PLAYER_ID)
             {
-                SendClientMessage(targetid, -1, "{ff3333}[ ADM ] {ffffff}Voce foi {ff3333}rebaixado {ffffff}para %s%s",
-                Adm::GetColorString(level), Adm::gRoleNames[_:level]);
+                SendClientMessage(targetid, -1, "{ff3333}[ ADM ] {ffffff}Voce foi {ff3333}rebaixado {ffffff}para {%06x}%s",
+                Adm::gColors[level], Adm::gRoleNames[level]);
                 Adm::UpdateLevel(targetid, level);
                 DB::Update(db_entity, "admins", "level = %i, promoter = '%q', promote_date = '%q' WHERE name = '%q'", 
                 _:level, promoter, timestr, name);
@@ -99,7 +77,7 @@ stock Adm::Set(const name[], const promoter[], E_ROLES_ADMIN:level)
             {
                 SendClientMessage(targetid, -1,  "{33ff33}[ ADM ] {ffffff}Parabens! Voce faz parte da {33ff33}STAFF BPS");
                 SendClientMessage(targetid, -1, "{ff9933}[ ADM ] {ffffff}Voce se tornou um {ff9933}admin! \
-                Cargo: %s%s",  Adm::GetColorString(level), Adm::gRoleNames[_:level]);
+                Cargo: {%06x}%s",  Adm::gColors[level], Adm::gRoleNames[level]);
 
                 Adm::Load(targetid);
             }
@@ -166,7 +144,7 @@ stock Adm::SetWork(playerid)
     Adm::SpectatePlayer(playerid, Admin[playerid][adm::spectateid]);
 
     Adm::SendMsgToAllTagged(FLAG_IS_ADMIN, -1, 
-    "{ffff33}[ ADM AVISO ] %s%s {ffff33}entrou {ffffff}no modo de trabalho", Adm::GetColorString(level), name);
+    "{ffff33}[ ADM AVISO ] {%06x}%s {ffff33}entrou {ffffff}no modo de trabalho", Adm::gColors[level], name);
 
     Iter_Add(Adm_Iter, playerid);
 
@@ -189,7 +167,7 @@ stock Adm::UnSetWork(playerid)
     Baseboard::ShowTDForPlayer(playerid);
 
     Adm::SendMsgToAllTagged(FLAG_IS_ADMIN, -1, 
-    "{ffff33}[ ADM AVISO ] %s%s {ffff33}saiu {ffffff}no modo de trabalho", Adm::GetColorString(level), name);  
+    "{ffff33}[ ADM AVISO ] {%06x}%s {ffff33}saiu {ffffff}no modo de trabalho", Adm::gColors[level], name);  
 
     Iter_Remove(Adm_Iter, playerid);
 
